@@ -16,7 +16,8 @@ export function createApp() {
       !env.clientOrigin ||
       env.clientOrigin === '*' ||
       origin === env.clientOrigin ||
-      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.workers.dev') ||
+      origin.endsWith('.pages.dev') ||
       origin.includes('localhost')
     ) {
       return callback(null, true);

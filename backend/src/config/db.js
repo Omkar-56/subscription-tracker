@@ -2,7 +2,7 @@ import pg from 'pg';
 import { env } from './env.js';
 
 const isProduction = env.nodeEnv === 'production';
-const isSupabase = env.databaseUrl.includes('supabase.co');
+const isSupabase = (env.databaseUrl || '').includes('supabase.co');
 
 export const pool = new pg.Pool({
   connectionString: env.databaseUrl,
@@ -12,6 +12,11 @@ export const pool = new pg.Pool({
 let schemaPromise = null;
 
 export async function ensureSchema() {
+  if (!env.databaseUrl) {
+    console.warn('[ensureSchema] DATABASE_URL is not set. Skipping schema initialization.');
+    return;
+  }
+
   if (!schemaPromise) {
     schemaPromise = (async () => {
       try {
@@ -27,8 +32,7 @@ export async function ensureSchema() {
           END
           $$;
 
-          CREATE TABLE IF NOT EXISTS users (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          CREATE TABLE IF NOT EXISTS users (\n            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT,

@@ -2,4 +2,7 @@ node_modules/
 .env
 dist/
 *.log
-.vercel
+.wrangler/
+.dev.vars
+frontend/out/
+frontend/.next/

@@ -10,7 +10,7 @@ export const reminderService = {
    * Scans active subscriptions due within the reminder window (default 1 to 3 days before renewal)
    * and sends an email reminder to the user.
    *
-   * Can be run for a single user (e.g. manual trigger) or for all users (e.g. Vercel Cron).
+   * Can be run for a single user (e.g. manual trigger) or for all users (e.g. Cloudflare Cron Trigger).
    */
   async sendDueReminders({ userId = null, force = false } = {}) {
     const today = new Date();

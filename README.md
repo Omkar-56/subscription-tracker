@@ -71,21 +71,21 @@ All protected endpoints require a JWT token passed in the `Authorization: Bearer
 | `POST` | `/api/reminders/send-due` | Trigger sending due email reminders for current user | Yes |
 | `POST` | `/api/reminders/test-email` | Send a test reminder email to verify SMTP setup | Yes |
 | `PATCH` | `/api/reminders/:id/dismiss` | Dismiss an active reminder | Yes |
-| `GET/POST` | `/api/reminders/cron` | Automated endpoint invoked by Vercel Cron to dispatch emails | CRON_SECRET |
+| `GET/POST` | `/api/reminders/cron` | Automated endpoint invoked by Cloudflare Cron Trigger or external scheduler | CRON_SECRET |
 
 ---
 
 ## Tech Stack
 
-- **Frontend**: React 18, Next.js, Tailwind CSS, Recharts
+- **Frontend**: React 19, Next.js, Tailwind CSS, Recharts
 - **Backend**: Node.js, Express, PostgreSQL, JWT Authentication
 - **AI Integration**: Google Gemini API
 - **Email Service**: Nodemailer (Gmail SMTP)
-- **Deployment**: Vercel ready (Next.js & Serverless API)
+- **Deployment**: Cloudflare Workers (Full Stack: Next.js Static Assets + Express API Worker + Cron Trigger)
 
 ---
 
-## Quick Start
+## Quick Start (Local Development)
 
 ### 1. Backend Setup
 ```bash
@@ -101,4 +101,63 @@ npm run dev              # Runs on http://localhost:4000
 cd frontend
 npm install
 npm run dev              # Runs on http://localhost:3000
+```
+
+---
+
+## Cloudflare Workers Deployment
+
+This application is configured as a full-stack Cloudflare Worker using **Cloudflare Workers Static Assets** (for Next.js frontend delivery at the edge) and **Node.js compatibility (`nodejs_compat`)** for the Express backend API and scheduled cron reminders.
+
+### Step 1: Install Wrangler & Log In
+```bash
+npm install
+npx wrangler login
+```
+
+### Step 2: Configure Environment Variables & Secrets
+Set your production secrets directly in Cloudflare Workers using Wrangler:
+```bash
+# Database connection string (e.g. Supabase, Neon, or Cloudflare Hyperdrive)
+npx wrangler secret put DATABASE_URL
+
+# Auth Secret
+npx wrangler secret put JWT_SECRET
+
+# Google Gemini API Key (for receipt parsing)
+npx wrangler secret put GEMINI_API_KEY
+
+# Email Notification Secrets (Nodemailer / Gmail)
+npx wrangler secret put SMTP_USER
+npx wrangler secret put SMTP_PASS
+npx wrangler secret put EMAIL_FROM
+
+# Optional secrets
+npx wrangler secret put GOOGLE_CLIENT_ID
+npx wrangler secret put CRON_SECRET
+```
+
+### Step 3: Run Database Migrations
+Before first run, apply the database schema to your hosted PostgreSQL database (e.g. Supabase / Neon):
+```bash
+npm run migrate
+```
+*(Note: Ensure your `DATABASE_URL` is set in `backend/.env` or passed via environment variable when running migrations).*
+
+### Step 4: Build and Deploy to Cloudflare Workers
+Build the frontend static export and deploy both the assets and the API Worker with one command:
+```bash
+npm run deploy
+```
+
+Once deployed, Cloudflare will output your live URL (e.g. `https://subtrack.<your-subdomain>.workers.dev`).
+
+### Local Worker Preview
+To preview the full-stack worker and static assets locally using Wrangler:
+```bash
+# Copy and populate .dev.vars for local secrets
+cp .dev.vars.example .dev.vars
+
+# Run full-stack worker preview
+npm run preview
 ```

@@ -3,7 +3,7 @@ import { env } from '../config/env.js';
 
 export const reminderController = {
   /**
-   * Vercel Cron handler (invoked automatically via Vercel Cron Job schedule)
+   * Cron handler (invoked automatically via Cloudflare Workers Cron Trigger or manual endpoint)
    */
   async handleCron(req, res, next) {
     try {

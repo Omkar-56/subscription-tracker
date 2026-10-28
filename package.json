@@ -12,6 +12,10 @@
     "start": "node backend/src/server.js",
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:worker": "npm run build && wrangler dev",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:worker": "wrangler deploy",
     "migrate": "npm run migrate --workspace=backend"
   },
   "dependencies": {
@@ -22,5 +26,11 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0",
     "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "wrangler": "^4.154.0"
+  },
+  "overrides": {
+    "iconv-lite": "^0.6.3"
   }
 }

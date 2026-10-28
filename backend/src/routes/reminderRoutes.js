@@ -4,7 +4,7 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-// Vercel Cron routes (GET or POST called by Vercel scheduler)
+// Cron routes (GET or POST called by Cloudflare scheduler or external caller)
 router.get('/cron', reminderController.handleCron);
 router.post('/cron', reminderController.handleCron);
 

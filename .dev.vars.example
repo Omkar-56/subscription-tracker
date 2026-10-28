@@ -1,0 +1,32 @@
+# Environment variables & secrets for Cloudflare Workers local development (`wrangler dev`)
+# Copy this file to `.dev.vars` and fill in your actual values.
+# For production deployment, set these secrets using: `npx wrangler secret put <KEY>`
+
+NODE_ENV=development
+
+# PostgreSQL connection string (e.g. Supabase, Neon, or local PostgreSQL)
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/subtrack
+
+# Auth Secret
+JWT_SECRET=change_this_to_a_long_random_string
+JWT_EXPIRES_IN=7d
+
+# CORS / Allowed Origin
+CLIENT_ORIGIN=*
+
+# Google OAuth (Optional)
+GOOGLE_CLIENT_ID=your_google_client_id_here.apps.googleusercontent.com
+
+# Gemini LLM Receipt Parser API Key
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# SMTP Email Configuration (e.g. Gmail App Password)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_16_digit_gmail_app_password
+EMAIL_FROM=SubTrack <your_email@gmail.com>
+
+# Cron Secret (Optional, for protecting manual /api/reminders/cron HTTP triggers)
+CRON_SECRET=your_random_cron_secret

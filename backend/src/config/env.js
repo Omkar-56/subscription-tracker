@@ -13,19 +13,15 @@ try {
   // ignore
 }
 
-function required(name, fallback) {
-  const value = process.env[name] ?? fallback;
-  if (value === undefined) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-  return value;
+function getEnv(name, fallback = '') {
+  return process.env[name] ?? fallback;
 }
 
 export const env = {
   port: Number(process.env.PORT || 4000),
   nodeEnv: process.env.NODE_ENV || 'development',
-  databaseUrl: required('DATABASE_URL'),
-  jwtSecret: required('JWT_SECRET'),
+  databaseUrl: getEnv('DATABASE_URL'),
+  jwtSecret: getEnv('JWT_SECRET', 'fallback_secret_for_dev'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
