@@ -1,28 +1,42 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "subtrack",
-  "main": "src/worker.js",
-  "compatibility_date": "2025-04-01",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
-  "alias": {
-    "iconv-lite": "./stubs/iconv-lite.js"
-  },
-  "assets": {
-    "directory": "./frontend/out",
-    "binding": "ASSETS",
-    "not_found_handling": "single-page-application",
-    "run_worker_first": [
-      "/api/*"
-    ]
-  },
-  "triggers": {
-    "crons": [
-      "0 9 * * *"
-    ]
-  },
-  "vars": {
-    "NODE_ENV": "production"
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "subtrack",
+	"main": "src/worker.js",
+	"compatibility_date": "2025-09-01",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"alias": {
+		"iconv-lite": "./stubs/iconv-lite.js"
+	},
+	"assets": {
+		"directory": "./frontend/out",
+		"binding": "ASSETS",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": [
+			"/api/*"
+		]
+	},
+	"triggers": {
+		"crons": [
+			"0 9 * * *"
+		]
+	},
+	"vars": {
+		"NODE_ENV": "production",
+		"CLIENT_ORIGIN": "https://subtrack.subtrackweb.workers.dev",
+		"SMTP_HOST": "smtp.gmail.com",
+		"SMTP_PORT": "465",
+		"SMTP_SECURE": "true",
+		"JWT_EXPIRES_IN": "7d",
+		"SMTP_USER": "unalone.app@gmail.com",
+		"EMAIL_FROM": "SubTrack <unalone.app@gmail.com>",
+		"GOOGLE_CLIENT_ID": "716397457965-fu0mp9f7h1j0djfds3clff0psvad46do.apps.googleusercontent.com"
+	},
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "465ad8df0c7e430ea375f7b5aebd44b1"
+		}
+	]
 }

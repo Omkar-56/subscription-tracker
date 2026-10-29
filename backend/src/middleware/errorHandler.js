@@ -8,6 +8,10 @@ export function errorHandler(err, req, res, next) { // eslint-disable-line no-un
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({ error: err.message, details: err.details });
   }
-  console.error(err);
-  res.status(500).json({ error: 'Internal server error' });
+  console.error('[API Error]:', err);
+  const isDev = process.env.NODE_ENV !== 'production';
+  res.status(500).json({ 
+    error: err?.message || 'Internal server error',
+    ...(isDev || !process.env.DATABASE_URL ? { details: err?.stack || String(err) } : {})
+  });
 }

@@ -5,6 +5,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  env: {
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID:
+      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+      '716397457965-fu0mp9f7h1j0djfds3clff0psvad46do.apps.googleusercontent.com',
+  },
   ...(process.env.NODE_ENV === 'development'
     ? {
         async rewrites() {

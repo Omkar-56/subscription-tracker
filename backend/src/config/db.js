@@ -1,18 +1,37 @@
 import pg from 'pg';
 import { env } from './env.js';
 
-const isProduction = env.nodeEnv === 'production';
-const isSupabase = (env.databaseUrl || '').includes('supabase.co');
+const { Client } = pg;
 
-export const pool = new pg.Pool({
-  connectionString: env.databaseUrl,
-  ssl: isProduction || isSupabase ? { rejectUnauthorized: false } : false,
-});
+function getDbConfig() {
+  // If Cloudflare Hyperdrive is available, use its managed connection
+  // Hyperdrive manages SSL to PostgreSQL upstream, so local SSL must NOT be enabled.
+  if (process.env.HYPERDRIVE_CONNECTION_STRING) {
+    return {
+      connectionString: process.env.HYPERDRIVE_CONNECTION_STRING,
+      ssl: false,
+    };
+  }
+
+  let connectionString = env.databaseUrl || process.env.DATABASE_URL || '';
+
+  // Clean any trailing query parameters like ?sslmode=require if we are handling SSL object
+  const isSupabase = connectionString.includes('supabase.co') || connectionString.includes('pooler.supabase.com');
+  const isProduction = (env.nodeEnv || process.env.NODE_ENV) === 'production';
+
+  return {
+    connectionString,
+    ssl: isProduction || isSupabase ? { rejectUnauthorized: false } : false,
+    // Keep connection setup alive
+    connectionTimeoutMillis: 10000,
+  };
+}
 
 let schemaPromise = null;
 
 export async function ensureSchema() {
-  if (!env.databaseUrl) {
+  const dbUrl = process.env.HYPERDRIVE_CONNECTION_STRING || env.databaseUrl || process.env.DATABASE_URL;
+  if (!dbUrl) {
     console.warn('[ensureSchema] DATABASE_URL is not set. Skipping schema initialization.');
     return;
   }
@@ -20,7 +39,7 @@ export async function ensureSchema() {
   if (!schemaPromise) {
     schemaPromise = (async () => {
       try {
-        await pool.query(`
+        await executeDirectQuery(`
           DO $$
           BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'billing_cycle') THEN
@@ -32,7 +51,8 @@ export async function ensureSchema() {
           END
           $$;
 
-          CREATE TABLE IF NOT EXISTS users (\n            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          CREATE TABLE IF NOT EXISTS users (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT,
@@ -127,23 +147,64 @@ export async function ensureSchema() {
   return schemaPromise;
 }
 
+/**
+ * Execute query using an ephemeral pg.Client with connection timeout
+ */
+async function executeDirectQuery(text, params) {
+  const config = getDbConfig();
+  const client = new Client(config);
+  try {
+    await client.connect();
+    return await client.query(text, params);
+  } finally {
+    try {
+      await client.end();
+    } catch {
+      // ignore
+    }
+  }
+}
+
 export async function query(text, params) {
   await ensureSchema();
-  return pool.query(text, params);
+  return executeDirectQuery(text, params);
 }
 
 export async function withTransaction(callback) {
   await ensureSchema();
-  const client = await pool.connect();
+  const config = getDbConfig();
+  const client = new Client(config);
   try {
+    await client.connect();
     await client.query('BEGIN');
     const result = await callback(client);
     await client.query('COMMIT');
     return result;
   } catch (err) {
-    await client.query('ROLLBACK');
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      // ignore
+    }
     throw err;
   } finally {
-    client.release();
+    try {
+      await client.end();
+    } catch {
+      // ignore
+    }
   }
 }
+
+export const pool = {
+  query: (text, params) => executeDirectQuery(text, params),
+  connect: async () => {
+    const client = new Client(getDbConfig());
+    await client.connect();
+    return {
+      query: (t, p) => client.query(t, p),
+      release: () => client.end(),
+    };
+  },
+  end: async () => {},
+};
