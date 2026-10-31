@@ -71,6 +71,22 @@ function computeGuestSummary(currency) {
 }
 
 function computeGuestForecast(currency) {
+  let subs = [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem('subtrack_guest_subs') || '[]');
+    if (Array.isArray(parsed)) {
+      subs = parsed.filter((s) => !(typeof s.id === 'string' && s.id.startsWith('demo-')));
+    }
+  } catch {
+    subs = [];
+  }
+  const activeSubs = subs.filter((s) => s.status === 'active' && !s.isFreeTrial);
+  const monthlyTotal = activeSubs.reduce((acc, s) => {
+    const cycle = s.billingCycle || 'monthly';
+    const factor = cycle === 'yearly' ? 1 / 12 : cycle === 'quarterly' ? 1 / 3 : cycle === 'weekly' ? 52 / 12 : 1;
+    return acc + (Number(s.amount) || 0) * factor;
+  }, 0);
+
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const now = new Date();
   const timeline = [];
@@ -78,12 +94,13 @@ function computeGuestForecast(currency) {
     const m = new Date(now.getFullYear(), now.getMonth() + i, 1);
     timeline.push({
       month: months[m.getMonth()] + ' ' + m.getFullYear().toString().slice(2),
-      projectedSpend: 0,
+      total: monthlyTotal,
+      renewals: [],
     });
   }
   return {
     baseCurrency: currency,
-    forecast: timeline,
+    months: timeline,
   };
 }
 
@@ -238,7 +255,7 @@ export default function Dashboard() {
                       <p className="text-[11px] text-ink/65 mt-0.5">
                         Cancel cutoff: <strong>{formatDate(deadline)}</strong>
                       </p>
-                      <p className="text-[10px] text-ink/50 mt-0.2">
+                      <p className="text-[10px] text-ink/65 mt-0.2">
                         Post-trial: {formatMoney(t.postTrialAmount || t.amount, t.postTrialCurrency || t.currency)}/{t.billingCycle}
                       </p>
                     </div>
@@ -316,16 +333,13 @@ export default function Dashboard() {
           <div>
             <div className="flex items-baseline justify-between">
               <h1 className="font-display text-xl sm:text-2xl font-semibold">Overview</h1>
-              <span className="text-xs text-ink/50">
+              <span className="text-xs text-ink/70">
                 Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong>
               </span>
             </div>
-            <p className="mt-1 text-xs sm:text-sm text-ink/60">
-              Live summary of your active commitments and financial savings.
-            </p>
           </div>
 
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-start">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3.5 items-stretch">
             <StatCard
               label="Monthly commitment"
               value={formatMoney(summary.totalMonthly, baseCurrency)}
@@ -352,21 +366,20 @@ export default function Dashboard() {
         </section>
 
         {/* Right Side: Spend by category with Interactive Donut Chart */}
-        <section className="lg:col-span-6">
-          <div className="flex justify-between mb-1">
+        <section className="lg:col-span-6 pt-1 sm:pt-1.5">
+          <div className="flex items-baseline justify-between">
             <h2 className="font-display text-lg sm:text-xl font-semibold">Spend by category</h2>
-            <span className="text-xs text-ink/50">
+            <span className="text-xs text-ink/70">
               {summary.categoryBreakdown.length} {summary.categoryBreakdown.length === 1 ? 'category' : 'categories'}
             </span>
           </div>
-          <p className="mt-2 text-xs sm:text-sm text-ink/60">
-            See how much you spend on each category.
-          </p>
-          <CategoryBreakdown
-            categories={summary.categoryBreakdown}
-            totalMonthly={summary.totalMonthly}
-            currency={baseCurrency}
-          />
+          <div className="mt-3">
+            <CategoryBreakdown
+              categories={summary.categoryBreakdown}
+              totalMonthly={summary.totalMonthly}
+              currency={baseCurrency}
+            />
+          </div>
         </section>
       </div>
 
@@ -374,31 +387,31 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
         {/* Left Side: 12-month forecast */}
-        <section className="lg:col-span-8">
+        <section className="lg:col-span-6">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-lg sm:text-xl font-semibold">12-month forecast</h2>
-            <span className="text-xs text-ink/50">Normalized in {baseCurrency}</span>
+            <span className="text-xs text-ink/70">Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong></span>
           </div>
           {forecast ? (
-            <ForecastChart months={forecast.months} currency={baseCurrency} />
+            <ForecastChart months={forecast.months || forecast.forecast} currency={baseCurrency} />
           ) : (
-            <div className="mt-3 border border-line bg-white p-8 text-center text-sm text-ink/50 shadow-2xs">
-              Calculating forecast…
+            <div className="mt-3 border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
+              Add subscriptions to see your projected 12-month spend.
             </div>
           )}
         </section>
 
         {/* Right Side: Renewing soon */}
-        <section className="lg:col-span-4">
+        <section className="lg:col-span-6">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-lg sm:text-xl font-semibold">Renewing soon</h2>
             <Link href="/subscriptions" className="text-xs sm:text-sm text-ledger hover:underline font-medium">
               See all →
             </Link>
           </div>
-          <div className="mt-3 border border-line bg-white shadow-2xs">
+          <div className="mt-3 border border-line bg-paper shadow-2xs">
             {summary.upcomingRenewals.length === 0 && (
-              <p className="px-4 py-8 text-center text-sm text-ink/50">Nothing renewing in the next two weeks.</p>
+              <p className="px-4 py-8 text-center text-sm text-ink/70">Nothing renewing in the next two weeks.</p>
             )}
             {summary.upcomingRenewals.map((s) => {
               const isDifferentCurrency = s.currency !== baseCurrency && s.convertedAmount;
@@ -412,7 +425,7 @@ export default function Dashboard() {
                     <BrandLogo name={s.name} category={s.category} size="sm" />
                     <div className="min-w-0">
                       <p className="font-medium text-xs sm:text-sm truncate">{s.name}</p>
-                      <p className="text-[11px] sm:text-xs text-ink/50">
+                      <p className="text-[11px] sm:text-xs text-ink/70">
                         {formatDate(s.nextRenewalDate)} · in {days}d
                       </p>
                     </div>
@@ -423,7 +436,7 @@ export default function Dashboard() {
                         {formatMoney(s.amount, s.currency)}
                       </p>
                       {isDifferentCurrency && (
-                        <p className="tabular text-[10px] sm:text-[11px] text-ink/40">
+                        <p className="tabular text-[10px] sm:text-[11px] text-ink/65">
                           ≈ {formatMoney(s.convertedAmount, baseCurrency)}
                         </p>
                       )}

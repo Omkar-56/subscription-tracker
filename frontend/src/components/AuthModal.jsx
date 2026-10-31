@@ -95,14 +95,14 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-ink/25 backdrop-blur-sm transition-opacity"
         onClick={() => {
           if (!submitting) onClose();
         }}
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative w-full max-w-sm rounded-lg border border-line bg-white p-6 sm:p-7 shadow-xl z-10 animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-sm rounded-lg border border-line bg-paper p-6 sm:p-7 shadow-xl z-10 animate-in fade-in zoom-in-95 duration-150">
         {/* 1. SubTrack Logo and Cross (X) Button */}
         <div className="flex items-center justify-between pb-4 border-b border-line/60">
           <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded hover:bg-stone-100 disabled:opacity-40 transition-colors cursor-pointer"
+            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded hover:bg-line/40 disabled:opacity-40 transition-colors cursor-pointer"
             aria-label="Close"
           >
             ✕
@@ -129,7 +129,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
         </div>
 
         {/* 2. Navigator: Log In <-> Sign Up */}
-        <div className="mt-5 flex rounded-sm bg-stone-100 p-1 text-xs font-semibold">
+        <div className="mt-5 flex rounded-sm border border-line/60 bg-line/30 p-1 text-xs font-semibold">
           <button
             type="button"
             onClick={() => {
@@ -138,7 +138,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             }}
             className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
               mode === 'login'
-                ? 'bg-white text-ink shadow-2xs font-semibold'
+                ? 'bg-paper text-ink shadow-2xs font-semibold'
                 : 'text-ink/50 hover:text-ink'
             }`}
           >
@@ -152,7 +152,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             }}
             className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
               mode === 'register'
-                ? 'bg-white text-ink shadow-2xs font-semibold'
+                ? 'bg-paper text-ink shadow-2xs font-semibold'
                 : 'text-ink/50 hover:text-ink'
             }`}
           >
@@ -194,7 +194,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             <div className="w-full border-t border-line/70" />
           </div>
           <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
-            <span className="bg-white px-2.5 text-ink/40 font-medium">Or continue with email</span>
+            <span className="bg-paper px-2.5 text-ink/50 font-medium">Or continue with email</span>
           </div>
         </div>
 
@@ -232,20 +232,6 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             >
               {submitting ? 'Signing in…' : 'Sign in'}
             </button>
-
-            <p className="pt-1 text-center text-xs text-ink/60">
-              New here?{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('register');
-                  setError('');
-                }}
-                className="text-ledger font-semibold hover:underline cursor-pointer"
-              >
-                Create an account
-              </button>
-            </p>
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
@@ -292,20 +278,6 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             >
               {submitting ? 'Creating account…' : 'Create account'}
             </button>
-
-            <p className="pt-1 text-center text-xs text-ink/60">
-              Already have an account?{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('login');
-                  setError('');
-                }}
-                className="text-ledger font-semibold hover:underline cursor-pointer"
-              >
-                Sign in
-              </button>
-            </p>
           </form>
         )}
       </div>

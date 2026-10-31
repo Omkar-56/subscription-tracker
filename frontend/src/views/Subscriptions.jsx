@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import SubscriptionCard from '../components/SubscriptionCard';
@@ -19,11 +19,28 @@ const CYCLE_TO_MONTHS = {
   yearly: 12,
 };
 
+const CYCLES = [
+  { id: 'weekly',    label: 'Weekly'    },
+  { id: 'monthly',   label: 'Monthly'   },
+  { id: 'quarterly', label: 'Quarterly' },
+  { id: 'yearly',    label: 'Yearly'    },
+];
+
+const SORT_OPTIONS = [
+  { id: 'renewal_asc',  label: 'Next renewal (soonest)'  },
+  { id: 'renewal_desc', label: 'Next renewal (furthest)' },
+  { id: 'cost_desc',    label: 'Cost — high to low'      },
+  { id: 'cost_asc',     label: 'Cost — low to high'      },
+  { id: 'name_asc',     label: 'Name (A → Z)'            },
+  { id: 'name_desc',    label: 'Name (Z → A)'            },
+];
+
 function monthlyEquivalent(sub) {
   const months = CYCLE_TO_MONTHS[sub.billingCycle] || 1;
   const amt = sub.convertedAmount !== undefined ? sub.convertedAmount : Number(sub.amount);
   return amt / months;
 }
+
 function getGuestSubs() {
   const stored = localStorage.getItem('subtrack_guest_subs');
   if (stored) {
@@ -73,6 +90,18 @@ export default function Subscriptions() {
   const [cycleFilter, setCycleFilter] = useState('all');
   const [sortBy, setSortBy] = useState('renewal_asc');
 
+  // Filter panel state
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [filterSection, setFilterSection] = useState('categories'); // 'categories' | 'cycles'
+  // Pending (uncommitted) filter state while panel is open
+  const [pendingCategory, setPendingCategory] = useState('all');
+  const [pendingCycle, setPendingCycle] = useState('all');
+  const filterPanelRef = useRef(null);
+
+  // Sort dropdown state
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortRef = useRef(null);
+
   async function refresh() {
     try {
       const [{ subscriptions: rawSubs }, summary] = await Promise.all([
@@ -99,17 +128,48 @@ export default function Subscriptions() {
     }
   }
 
-  useEffect(() => {
-    refresh();
-  }, [user, baseCurrency]);
+  useEffect(() => { refresh(); }, [user, baseCurrency]);
 
   useEffect(() => {
-    function onExternalRefresh() {
-      refresh();
-    }
+    function onExternalRefresh() { refresh(); }
     window.addEventListener('subtrack:refresh', onExternalRefresh);
     return () => window.removeEventListener('subtrack:refresh', onExternalRefresh);
   }, [user, baseCurrency]);
+
+  // Close panels on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (filterPanelRef.current && !filterPanelRef.current.contains(e.target)) {
+        setFilterPanelOpen(false);
+      }
+      if (sortRef.current && !sortRef.current.contains(e.target)) {
+        setSortOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Sync pending state when panel opens
+  function openFilterPanel() {
+    setPendingCategory(categoryFilter);
+    setPendingCycle(cycleFilter);
+    setFilterSection('categories');
+    setFilterPanelOpen(true);
+  }
+
+  function applyFilters() {
+    setCategoryFilter(pendingCategory);
+    setCycleFilter(pendingCycle);
+    setFilterPanelOpen(false);
+  }
+
+  function closeFilterPanel() {
+    setFilterPanelOpen(false);
+  }
+
+  // Active filter count badge
+  const activeFilterCount = (categoryFilter !== 'all' ? 1 : 0) + (cycleFilter !== 'all' ? 1 : 0);
 
   async function handleCreate(data) {
     try {
@@ -218,89 +278,56 @@ export default function Subscriptions() {
   }, [subscriptions]);
 
   // Counts by status
-  const counts = useMemo(() => {
-    return {
-      all: subscriptions.length,
-      active: subscriptions.filter((s) => s.status === 'active' && !s.isFreeTrial).length,
-      trials: subscriptions.filter((s) => s.isFreeTrial && s.status === 'active').length,
-      paused: subscriptions.filter((s) => s.status === 'paused').length,
-      cancelled: subscriptions.filter((s) => s.status === 'cancelled').length,
-    };
-  }, [subscriptions]);
+  const counts = useMemo(() => ({
+    all:       subscriptions.length,
+    active:    subscriptions.filter((s) => s.status === 'active' && !s.isFreeTrial).length,
+    trials:    subscriptions.filter((s) => s.isFreeTrial && s.status === 'active').length,
+    paused:    subscriptions.filter((s) => s.status === 'paused').length,
+    cancelled: subscriptions.filter((s) => s.status === 'cancelled').length,
+  }), [subscriptions]);
 
   // Filtered and sorted subscriptions
   const filteredSubscriptions = useMemo(() => {
     return subscriptions
       .filter((s) => {
-        // Status filter
         if (statusFilter === 'trials') {
           if (!s.isFreeTrial || s.status !== 'active') return false;
         } else if (statusFilter !== 'all' && s.status !== statusFilter) {
           return false;
         }
-
-        // Category filter
-        if (categoryFilter !== 'all' && s.category.toLowerCase() !== categoryFilter.toLowerCase()) {
-          return false;
-        }
-
-        // Billing Cycle filter
+        if (categoryFilter !== 'all' && s.category.toLowerCase() !== categoryFilter.toLowerCase()) return false;
         if (cycleFilter !== 'all' && s.billingCycle !== cycleFilter) return false;
-
-        // Search text
         if (searchTerm.trim()) {
           const q = searchTerm.toLowerCase();
-          const matchName = s.name.toLowerCase().includes(q);
-          const matchCat = s.category.toLowerCase().includes(q);
+          const matchName  = s.name.toLowerCase().includes(q);
+          const matchCat   = s.category.toLowerCase().includes(q);
           const matchNotes = (s.notes || '').toLowerCase().includes(q);
           if (!matchName && !matchCat && !matchNotes) return false;
         }
-
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === 'renewal_asc') {
-          const dateA = a.isFreeTrial && a.cancellationDeadline ? a.cancellationDeadline : a.nextRenewalDate;
-          const dateB = b.isFreeTrial && b.cancellationDeadline ? b.cancellationDeadline : b.nextRenewalDate;
-          return new Date(dateA) - new Date(dateB);
-        }
-        if (sortBy === 'renewal_desc') {
-          const dateA = a.isFreeTrial && a.cancellationDeadline ? a.cancellationDeadline : a.nextRenewalDate;
-          const dateB = b.isFreeTrial && b.cancellationDeadline ? b.cancellationDeadline : b.nextRenewalDate;
-          return new Date(dateB) - new Date(dateA);
-        }
-        if (sortBy === 'cost_desc') {
-          return monthlyEquivalent(b) - monthlyEquivalent(a);
-        }
-        if (sortBy === 'cost_asc') {
-          return monthlyEquivalent(a) - monthlyEquivalent(b);
-        }
-        if (sortBy === 'name_asc') {
-          return a.name.localeCompare(b.name);
-        }
-        if (sortBy === 'name_desc') {
-          return b.name.localeCompare(a.name);
-        }
-        if (sortBy === 'created_desc') {
-          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-        }
+        if (sortBy === 'renewal_asc')  { const dA = a.isFreeTrial && a.cancellationDeadline ? a.cancellationDeadline : a.nextRenewalDate; const dB = b.isFreeTrial && b.cancellationDeadline ? b.cancellationDeadline : b.nextRenewalDate; return new Date(dA) - new Date(dB); }
+        if (sortBy === 'renewal_desc') { const dA = a.isFreeTrial && a.cancellationDeadline ? a.cancellationDeadline : a.nextRenewalDate; const dB = b.isFreeTrial && b.cancellationDeadline ? b.cancellationDeadline : b.nextRenewalDate; return new Date(dB) - new Date(dA); }
+        if (sortBy === 'cost_desc')    return monthlyEquivalent(b) - monthlyEquivalent(a);
+        if (sortBy === 'cost_asc')     return monthlyEquivalent(a) - monthlyEquivalent(b);
+        if (sortBy === 'name_asc')     return a.name.localeCompare(b.name);
+        if (sortBy === 'name_desc')    return b.name.localeCompare(a.name);
+        if (sortBy === 'created_desc') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         return 0;
       });
   }, [subscriptions, statusFilter, categoryFilter, cycleFilter, searchTerm, sortBy]);
 
-  // Calculate monthly total of currently filtered active subscriptions
-  const filteredMonthlySpend = useMemo(() => {
-    return filteredSubscriptions
+  const filteredMonthlySpend = useMemo(() =>
+    filteredSubscriptions
       .filter((s) => s.status === 'active')
-      .reduce((sum, s) => sum + monthlyEquivalent(s), 0);
-  }, [filteredSubscriptions]);
+      .reduce((sum, s) => sum + monthlyEquivalent(s), 0),
+    [filteredSubscriptions]
+  );
 
   const hasActiveFilters =
-    searchTerm !== '' ||
-    statusFilter !== 'all' ||
-    categoryFilter !== 'all' ||
-    cycleFilter !== 'all' ||
-    sortBy !== 'renewal_asc';
+    searchTerm !== '' || statusFilter !== 'all' ||
+    categoryFilter !== 'all' || cycleFilter !== 'all' || sortBy !== 'renewal_asc';
 
   function resetFilters() {
     setSearchTerm('');
@@ -310,14 +337,16 @@ export default function Subscriptions() {
     setSortBy('renewal_asc');
   }
 
+  const currentSortLabel = SORT_OPTIONS.find((o) => o.id === sortBy)?.label ?? 'Sort';
+
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Page Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold text-ink">Subscriptions</h1>
           <p className="mt-1 text-sm text-ink/60">
-            Everything you're paying for or trialing, in one searchable ledger.
+            Everything you&apos;re paying for or trialing, in one searchable ledger.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
@@ -331,7 +360,6 @@ export default function Subscriptions() {
             </svg>
             <span>Upload Receipt</span>
           </button>
-
           {subscriptions.length > 0 && (
             <button
               onClick={() => setShowForm(true)}
@@ -352,7 +380,6 @@ export default function Subscriptions() {
           onParsed={() => refresh()}
         />
       )}
-
       {showForm && (
         <SubscriptionForm
           defaultCurrency={baseCurrency}
@@ -360,7 +387,6 @@ export default function Subscriptions() {
           onCancel={() => setShowForm(false)}
         />
       )}
-
       {editing && (
         <SubscriptionForm
           defaultCurrency={baseCurrency}
@@ -385,142 +411,285 @@ export default function Subscriptions() {
         />
       )}
 
-      {/* Filter & Search Bar */}
-      <div className="space-y-3 rounded-t border border-line bg-white p-4 shadow-2xs">
-        {/* Top Row: Search & Status Tabs */}
+      {/* ── Filter & Search Card ────────────────────────────────────── */}
+      <div className="space-y-3 rounded-t border border-line bg-paper p-4 shadow-2xs">
+
+        {/* Row 1: Status tabs + Search */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Status Tabs including Free Trials */}
-          <div className="inline-flex rounded-sm bg-paper p-0.5 text-xs font-medium border border-line">
-            {[
-              { id: 'all', label: 'All', count: counts.all },
-              { id: 'active', label: 'Active Paid', count: counts.active },
-              { id: 'trials', label: '🛡️ Trials', count: counts.trials },
-              { id: 'paused', label: 'Paused', count: counts.paused },
-              { id: 'cancelled', label: 'Cancelled', count: counts.cancelled },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setStatusFilter(tab.id)}
-                className={`flex items-center gap-1.5 rounded-xs px-3 py-1.5 transition-all cursor-pointer ${
-                  statusFilter === tab.id
-                    ? 'bg-white text-ink shadow-2xs font-semibold'
-                    : 'text-ink/60 hover:text-ink'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`rounded-full px-1.5 py-0.2 text-[10px] ${
+          {/* Status Tabs */}
+          <div className="w-full overflow-x-auto">
+            <div className="inline-flex min-w-max rounded-sm bg-paper p-0.5 text-xs font-medium border border-line">
+              {[
+                { id: 'all',       label: 'All',        count: counts.all       },
+                { id: 'active',    label: 'Active',      count: counts.active    },
+                { id: 'trials',    label: 'Trials',   count: counts.trials    },
+                { id: 'paused',    label: 'Paused',      count: counts.paused    },
+                { id: 'cancelled', label: 'Cancelled',   count: counts.cancelled },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setStatusFilter(tab.id)}
+                  className={`flex items-center gap-1.5 rounded-xs px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
                     statusFilter === tab.id
-                      ? tab.id === 'trials'
-                        ? 'bg-amber text-white'
-                        : 'bg-ledger-light text-ledger-dark'
-                      : 'bg-line/60 text-ink/50'
+                      ? 'bg-ledger-light text-ledger-dark shadow-2xs font-semibold'
+                      : 'text-ink/60 hover:text-ink'
                   }`}
                 >
-                  {tab.count}
-                </span>
-              </button>
-            ))}
+                  <span>{tab.label}</span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${
+                    statusFilter === tab.id
+                      ? tab.id === 'trials' ? 'bg-amber text-white' : 'bg-ledger text-white'
+                      : 'bg-line/60 text-ink/50'
+                  }`}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Search Input */}
-          <div className="relative min-w-[220px] flex-1 sm:max-w-xs">
+          {/* Search */}
+          <div className="relative w-full">
             <input
               type="text"
               placeholder="Search by name, category, notes…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-sm border border-line bg-paper/40 px-3 py-1.5 pl-8 text-xs text-ink outline-none transition-all placeholder:text-ink/40 focus:border-ledger focus:bg-white focus:ring-1 focus:ring-ledger"
+              className="w-full rounded-sm border border-line bg-line/15 hover:bg-line/25 px-3 py-1.5 pl-8 text-xs text-ink outline-none transition-all placeholder:text-ink/40 focus:border-line focus:bg-line/60 focus:outline-none focus:ring-0"
             />
-            <svg
-              className="absolute left-2.5 top-2 h-3.5 w-3.5 text-ink/40"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
+            <svg className="absolute left-2.5 top-2 h-3.5 w-3.5 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-2.5 top-1.5 text-xs text-ink/40 hover:text-ink cursor-pointer"
-              >
-                ✕
-              </button>
+              <button onClick={() => setSearchTerm('')} className="absolute right-2.5 top-1.5 text-xs text-ink/40 hover:text-ink cursor-pointer">✕</button>
             )}
           </div>
         </div>
 
-        {/* Bottom Row: Category, Cycle, Sort & Reset */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-line/60 text-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Category Filter */}
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="rounded-sm border border-line bg-paper/30 px-2.5 py-1 text-ink outline-none hover:border-line focus:border-ledger cursor-pointer"
-            >
-              <option value="all">All Categories</option>
-              {availableCategories.map((c) => (
-                <option key={c} value={c}>
-                  {formatCategoryLabel(c)}
-                </option>
-              ))}
-            </select>
+        {/* Row 2: Filters button + Sort dropdown + summary */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-line/60">
+          <div className="flex items-center gap-2">
 
-            {/* Cycle Filter */}
-            <select
-              value={cycleFilter}
-              onChange={(e) => setCycleFilter(e.target.value)}
-              className="rounded-sm border border-line bg-paper/30 px-2.5 py-1 text-ink outline-none hover:border-line focus:border-ledger cursor-pointer"
-            >
-              <option value="all">All Cycles</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="yearly">Yearly</option>
-            </select>
-
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-1.5 text-ink/60">
-              <span className="hidden sm:inline">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="rounded-sm border border-line bg-paper/30 px-2.5 py-1 text-ink outline-none hover:border-line focus:border-ledger cursor-pointer"
+            {/* ── Filters button + panel ─────────────────────────── */}
+            <div className="relative" ref={filterPanelRef}>
+              <button
+                onClick={() => filterPanelOpen ? closeFilterPanel() : openFilterPanel()}
+                className={`flex items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                  filterPanelOpen || activeFilterCount > 0
+                    ? 'border-ledger bg-ledger/5 text-ledger'
+                    : 'border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink'
+                }`}
               >
-                <option value="renewal_asc">Next renewal / deadline (soonest)</option>
-                <option value="renewal_desc">Next renewal / deadline (furthest)</option>
-                <option value="cost_desc">Cost (highest/mo)</option>
-                <option value="cost_asc">Cost (lowest/mo)</option>
-                <option value="name_asc">Name (A → Z)</option>
-                <option value="name_desc">Name (Z → A)</option>
-              </select>
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                </svg>
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="rounded-full bg-ledger px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Filter panel dropdown */}
+              {filterPanelOpen && (
+                <div className="absolute left-0 top-full z-40 mt-1.5 w-[300px] rounded-md border border-line bg-white shadow-lg">
+                  {/* Header */}
+                  <div className="border-b border-line/60 px-4 py-2.5">
+                    <span className="text-[11px] font-semibold uppercase tracking-widest text-ink/40">Filters</span>
+                  </div>
+
+                  {/* Two-column body */}
+                  <div className="flex" style={{ minHeight: '200px' }}>
+                    {/* Left: filter sections */}
+                    <div className="w-[110px] shrink-0 border-r border-line/60 py-1">
+                      {[
+                        { id: 'categories', label: 'Categories' },
+                        { id: 'cycles',     label: 'Cycles'     },
+                      ].map((sec) => (
+                        <button
+                          key={sec.id}
+                          onClick={() => setFilterSection(sec.id)}
+                          className={`w-full px-4 py-2.5 text-left text-xs font-medium transition-colors cursor-pointer ${
+                            filterSection === sec.id
+                              ? 'bg-ink text-white'
+                              : 'text-ink/60 hover:bg-paper hover:text-ink'
+                          }`}
+                        >
+                          {sec.label}
+                          {/* Active indicator */}
+                          {((sec.id === 'categories' && pendingCategory !== 'all') ||
+                            (sec.id === 'cycles'     && pendingCycle     !== 'all')) && (
+                            <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-ledger align-middle" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Right: options for selected section */}
+                    <div className="flex-1 overflow-y-auto py-1 max-h-64">
+                      {filterSection === 'categories' && (
+                        <>
+                          <button
+                            onClick={() => setPendingCategory('all')}
+                            className={`flex w-full items-center justify-between px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                              pendingCategory === 'all' ? 'bg-ledger-light/50 font-semibold text-ledger-dark' : 'text-ink/60 hover:bg-paper hover:text-ink'
+                            }`}
+                          >
+                            <span>All Categories</span>
+                            {pendingCategory === 'all' && (
+                              <svg className="h-3.5 w-3.5 text-ledger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                          {availableCategories.length === 0 && (
+                            <p className="px-4 py-3 text-xs text-ink/40 italic">No categories yet</p>
+                          )}
+                          {availableCategories.map((cat) => (
+                            <button
+                              key={cat}
+                              onClick={() => setPendingCategory(cat)}
+                              className={`flex w-full items-center justify-between px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                                pendingCategory === cat ? 'bg-ledger-light/50 font-semibold text-ledger-dark' : 'text-ink/60 hover:bg-paper hover:text-ink'
+                              }`}
+                            >
+                              <span>{formatCategoryLabel(cat)}</span>
+                              {pendingCategory === cat && (
+                                <svg className="h-3.5 w-3.5 text-ledger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </button>
+                          ))}
+                        </>
+                      )}
+
+                      {filterSection === 'cycles' && (
+                        <>
+                          <button
+                            onClick={() => setPendingCycle('all')}
+                            className={`flex w-full items-center justify-between px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                              pendingCycle === 'all' ? 'bg-ledger-light/50 font-semibold text-ledger-dark' : 'text-ink/60 hover:bg-paper hover:text-ink'
+                            }`}
+                          >
+                            <span>All Cycles</span>
+                            {pendingCycle === 'all' && (
+                              <svg className="h-3.5 w-3.5 text-ledger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                          {CYCLES.map((cyc) => (
+                            <button
+                              key={cyc.id}
+                              onClick={() => setPendingCycle(cyc.id)}
+                              className={`flex w-full items-center justify-between px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                                pendingCycle === cyc.id ? 'bg-ledger-light/50 font-semibold text-ledger-dark' : 'text-ink/60 hover:bg-paper hover:text-ink'
+                              }`}
+                            >
+                              <span>{cyc.label}</span>
+                              {pendingCycle === cyc.id && (
+                                <svg className="h-3.5 w-3.5 text-ledger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </button>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Footer: Close + Apply */}
+                  <div className="flex items-center justify-between border-t border-line/60 px-4 py-2.5">
+                    <button
+                      onClick={closeFilterPanel}
+                      className="text-xs font-semibold uppercase tracking-wide text-ink/40 hover:text-ink transition-colors cursor-pointer"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={applyFilters}
+                      className="text-xs font-semibold uppercase tracking-wide text-ledger hover:text-ledger-dark transition-colors cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* ── Sort dropdown ─────────────────────────────────── */}
+            <div className="relative" ref={sortRef}>
+              <button
+                onClick={() => setSortOpen((o) => !o)}
+                className={`flex items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                  sortOpen || sortBy !== 'renewal_asc'
+                    ? 'border-ledger bg-ledger/5 text-ledger'
+                    : 'border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink'
+                }`}
+              >
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                <span className="sm:hidden">Sort</span>
+                <span className="hidden sm:inline">Sort:</span>
+                <span className="hidden sm:inline max-w-[120px] truncate">{currentSortLabel}</span>
+                <svg className={`h-3 w-3 transition-transform ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {sortOpen && (
+                <div className="absolute left-0 top-full z-40 mt-1.5 w-56 rounded-md border border-line bg-white shadow-lg py-1">
+                  <div className="border-b border-line/60 px-4 py-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-widest text-ink/40">Sort by</span>
+                  </div>
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => { setSortBy(opt.id); setSortOpen(false); }}
+                      className={`flex w-full items-center justify-between px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                        sortBy === opt.id ? 'bg-ledger-light/50 font-semibold text-ledger-dark' : 'text-ink/60 hover:bg-paper hover:text-ink'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                      {sortBy === opt.id && (
+                        <svg className="h-3.5 w-3.5 text-ledger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Active filter chips */}
+            {categoryFilter !== 'all' && (
+              <span className="flex items-center gap-1 rounded-full border border-ledger/30 bg-ledger/5 px-2.5 py-1 text-[11px] font-medium text-ledger">
+                {formatCategoryLabel(categoryFilter)}
+                <button onClick={() => setCategoryFilter('all')} className="ml-0.5 text-ledger/60 hover:text-ledger cursor-pointer">✕</button>
+              </span>
+            )}
+            {cycleFilter !== 'all' && (
+              <span className="flex items-center gap-1 rounded-full border border-ledger/30 bg-ledger/5 px-2.5 py-1 text-[11px] font-medium text-ledger">
+                {CYCLES.find((c) => c.id === cycleFilter)?.label}
+                <button onClick={() => setCycleFilter('all')} className="ml-0.5 text-ledger/60 hover:text-ledger cursor-pointer">✕</button>
+              </span>
+            )}
           </div>
 
-          {/* Quick Summary and Reset Button */}
-          <div className="flex items-center gap-3">
+          {/* Summary + reset */}
+          <div className="flex items-center gap-3 text-xs">
             <span className="text-ink/60">
-              Showing <strong className="text-ink">{filteredSubscriptions.length}</strong> of{' '}
-              {subscriptions.length} (
-              <span className="tabular font-medium text-ledger-dark">
-                {formatMoney(filteredMonthlySpend, baseCurrency)}/mo
-              </span>
-              )
+              Showing <strong className="text-ink">{filteredSubscriptions.length}</strong> of {subscriptions.length}{' '}
+              (<span className="tabular font-medium text-ledger-dark">{formatMoney(filteredMonthlySpend, baseCurrency)}/mo</span>)
             </span>
-
             {hasActiveFilters && (
-              <button
-                onClick={resetFilters}
-                className="font-medium text-rust hover:underline cursor-pointer"
-              >
-                Reset filters
+              <button onClick={resetFilters} className="font-medium text-rust hover:underline cursor-pointer">
+                Reset all
               </button>
             )}
           </div>
@@ -528,7 +697,7 @@ export default function Subscriptions() {
       </div>
 
       {/* Subscription List */}
-      <div className="border border-t-0 border-line bg-white px-4">
+      <div className="border border-t-0 border-line bg-paper px-4">
         {filteredSubscriptions.length === 0 && (
           <div className="py-14 text-center flex flex-col items-center justify-center">
             {subscriptions.length === 0 && (
@@ -555,17 +724,13 @@ export default function Subscriptions() {
             )}
           </div>
         )}
-
         {filteredSubscriptions.map((s) => (
           <SubscriptionCard
             key={s.id}
             subscription={s}
             baseCurrency={baseCurrency}
             priceIncrease={priceIncreases.find((p) => p.subscriptionId === s.id)}
-            onEdit={(sub) => {
-              setShowForm(false);
-              setEditing(sub);
-            }}
+            onEdit={(sub) => { setShowForm(false); setEditing(sub); }}
             onConvertTrial={handleConvertTrial}
             onConfirmPayment={(sub) => setPayingSub(sub)}
             onCancelGuide={(sub) => setGuideSub(sub)}
@@ -575,7 +740,6 @@ export default function Subscriptions() {
         ))}
       </div>
 
-      {/* Payment Confirmation Modal */}
       {payingSub && (
         <PaymentConfirmModal
           subscription={payingSub}
@@ -583,8 +747,6 @@ export default function Subscriptions() {
           onCancel={() => setPayingSub(null)}
         />
       )}
-
-      {/* Cancellation Guide Modal */}
       {guideSub && (
         <CancellationGuideModal
           subscription={guideSub}
@@ -592,8 +754,6 @@ export default function Subscriptions() {
           onStatusChange={handleStatusChange}
         />
       )}
-
-      {/* Payment Receipts / History Modal */}
       {historySub && (
         <PaymentHistoryModal
           subscription={historySub}

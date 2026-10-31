@@ -19,7 +19,7 @@ function TrendTooltip({ active, payload, label, currency = 'USD' }) {
   const point = payload[0].payload;
 
   return (
-    <div className="border border-line bg-white px-3 py-2 shadow-sm rounded-sm text-xs">
+    <div className="border border-line bg-paper px-3 py-2 shadow-sm rounded-sm text-xs">
       <p className="font-display font-semibold">{label}</p>
       <p className="tabular mt-1 font-medium text-ink">
         Spend: {formatMoney(point.total, currency)}
@@ -69,7 +69,7 @@ export default function TrendChart({
   const peakMonth = summary?.peakMonth ?? data.reduce((max, p) => (p.total > max.total ? p : max), data[0]);
 
   return (
-    <div className="mt-3 border border-line bg-white p-4 shadow-2xs">
+    <div className="mt-3 border border-line bg-paper p-4 shadow-2xs">
       {/* KPI strip */}
       <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-line pb-3">
         <div>
