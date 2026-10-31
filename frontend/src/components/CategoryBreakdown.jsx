@@ -10,9 +10,8 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
 
   if (!categories || categories.length === 0) {
     return (
-      <div className="rounded-sm border border-line bg-white p-5 shadow-2xs">
-        <h2 className="font-display text-sm font-semibold text-ink">Spend by Category</h2>
-        <p className="mt-6 text-xs text-ink/40 text-center">
+      <div className="rounded-sm border border-line bg-paper p-8 text-center shadow-2xs">
+        <p className="text-sm text-ink/70">
           Add subscriptions to see your spend distributed by category.
         </p>
       </div>
@@ -36,17 +35,10 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
   const activeCategory = activeIndex !== null ? chartData[activeIndex] : null;
 
   return (
-    <div className="rounded-sm border border-line bg-white p-5 shadow-2xs flex flex-col justify-between">
+    <div className="rounded-sm border border-line bg-paper p-5 shadow-2xs flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-sm font-semibold text-ink">Spend by Category</h2>
-          <span className="text-xs text-ink/40">
-            {categories.length} {categories.length === 1 ? 'category' : 'categories'}
-          </span>
-        </div>
-
         {/* Donut Chart with Centered Metric */}
-        <div className="relative mt-4 h-48 w-full">
+        <div className="relative mt-1 h-48 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

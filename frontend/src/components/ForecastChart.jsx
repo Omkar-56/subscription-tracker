@@ -19,7 +19,7 @@ function ForecastTooltip({ active, payload, label, currency = 'USD' }) {
   const charges = point.charges || point.renewals || [];
 
   return (
-    <div className="max-w-xs border border-line bg-white px-3 py-2 shadow-sm rounded-sm">
+    <div className="max-w-xs border border-line bg-paper px-3 py-2 shadow-sm rounded-sm">
       <p className="font-display text-sm font-semibold">{label}</p>
       <p className="tabular mt-1 text-sm font-medium" style={{ color: COLORS.due }}>
         Due this month: {formatMoney(point.total, currency)}
@@ -55,10 +55,12 @@ export default function ForecastChart({ months, currency = 'USD' }) {
   const data = useMemo(() => {
     let running = 0;
     return (months || []).map((m) => {
-      running += m.total;
+      const val = Number(m.total ?? m.projectedSpend ?? 0);
+      running += val;
       const monthLabel = m.label || m.month || '';
       return {
         ...m,
+        total: val,
         label: monthLabel,
         shortLabel: monthLabel ? monthLabel.split(' ')[0] : '',
         cumulative: Number(running.toFixed(2)),
@@ -66,12 +68,22 @@ export default function ForecastChart({ months, currency = 'USD' }) {
     });
   }, [months]);
 
-  if (data.length === 0) return null;
+  const hasSpend = useMemo(() => {
+    return data.some((m) => (m.total || 0) > 0);
+  }, [data]);
+
+  if (data.length === 0 || !hasSpend) {
+    return (
+      <div className="mt-3 border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
+        Add subscriptions to see your projected 12-month spend.
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-3 border border-line bg-white px-4 pb-4 pt-5 shadow-2xs">
+    <div className="mt-3 border border-line bg-paper px-4 pb-4 pt-5 shadow-2xs">
       <div className="mb-2 flex justify-end">
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-ink/60">
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-ink/75">
           <input
             type="checkbox"
             checked={showCumulative}
@@ -124,7 +136,7 @@ export default function ForecastChart({ months, currency = 'USD' }) {
         </LineChart>
       </ResponsiveContainer>
 
-      <p className="mt-2 text-xs text-ink/40">
+      <p className="mt-2 text-xs text-ink/65">
         Hover any month to see exactly which subscriptions fall due in it.
       </p>
     </div>
