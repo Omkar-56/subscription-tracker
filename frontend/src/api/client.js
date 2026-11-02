@@ -34,6 +34,8 @@ export const api = {
   register: (payload) => request('/auth/register', { method: 'POST', body: payload, auth: false }),
   login: (payload) => request('/auth/login', { method: 'POST', body: payload, auth: false }),
   googleAuth: (credential) => request('/auth/google', { method: 'POST', body: { credential }, auth: false }),
+  forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email }, auth: false }),
+  resetPassword: (payload) => request('/auth/reset-password', { method: 'POST', body: payload, auth: false }),
   me: () => request('/auth/me'),
   updateCurrency: (currency) => request('/auth/currency', { method: 'PUT', body: { currency } }),
 

@@ -15,7 +15,7 @@ export const userModel = {
 
   async findByEmail(email) {
     const { rows } = await query(
-      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'USD') AS "baseCurrency", created_at AS "createdAt" FROM users WHERE email = $1`,
+      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'USD') AS "baseCurrency", created_at AS "createdAt" FROM users WHERE LOWER(email) = LOWER($1)`,
       [email]
     );
     return rows[0] || null;
@@ -53,6 +53,39 @@ export const userModel = {
     const { rows } = await query(
       `UPDATE users SET base_currency = $2 WHERE id = $1 RETURNING ${USER_COLUMNS}`,
       [id, baseCurrency]
+    );
+    return rows[0] || null;
+  },
+
+  async setResetPasswordToken(id, tokenHash, expiresAt) {
+    await query(
+      `UPDATE users 
+       SET reset_password_token = $2, reset_password_expires_at = $3 
+       WHERE id = $1`,
+      [id, tokenHash, expiresAt]
+    );
+  },
+
+  async findByValidResetToken(tokenHash) {
+    const { rows } = await query(
+      `SELECT id, name, email, reset_password_expires_at 
+       FROM users 
+       WHERE reset_password_token = $1 
+         AND reset_password_expires_at > now()`,
+      [tokenHash]
+    );
+    return rows[0] || null;
+  },
+
+  async updatePasswordAndClearResetToken(id, passwordHash) {
+    const { rows } = await query(
+      `UPDATE users 
+       SET password_hash = $2, 
+           reset_password_token = NULL, 
+           reset_password_expires_at = NULL 
+       WHERE id = $1 
+       RETURNING ${USER_COLUMNS}`,
+      [id, passwordHash]
     );
     return rows[0] || null;
   },

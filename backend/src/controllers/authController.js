@@ -18,6 +18,17 @@ export const authController = {
     res.json({ user, token });
   }),
 
+  forgotPassword: asyncHandler(async (req, res) => {
+    const origin = req.get('origin') || (req.get('referer') ? new URL(req.get('referer')).origin : null);
+    const result = await authService.forgotPassword(req.body.email, origin);
+    res.json(result);
+  }),
+
+  resetPassword: asyncHandler(async (req, res) => {
+    const result = await authService.resetPassword(req.body);
+    res.json(result);
+  }),
+
   me: asyncHandler(async (req, res) => {
     const user = await authService.me(req.user.id);
     res.json({ user });

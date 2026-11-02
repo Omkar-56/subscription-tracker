@@ -14,3 +14,12 @@ export const loginSchema = z.object({
 export const googleAuthSchema = z.object({
   credential: z.string().min(10, 'Google credential token is required'),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Password reset token is required'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters').max(128),
+});

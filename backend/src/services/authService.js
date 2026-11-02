@@ -1,8 +1,10 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { userModel } from '../models/userModel.js';
 import { env } from '../config/env.js';
 import { ApiError } from '../utils/ApiError.js';
+import { sendEmail, buildPasswordResetEmailHtml, buildPasswordResetEmailText } from './emailService.js';
 
 const SALT_ROUNDS = 10;
 
@@ -29,7 +31,7 @@ export const authService = {
       throw new ApiError(401, 'Invalid email or password');
     }
     if (!user.password_hash) {
-      throw new ApiError(400, 'This account was created with Google. Please use "Sign in with Google"');
+      throw new ApiError(400, 'This account was created with Google. Please use "Sign in with Google" or reset your password to set a manual password.');
     }
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
@@ -105,6 +107,94 @@ export const authService = {
     };
 
     return { user: safeUser, token: signToken(safeUser) };
+  },
+
+  async forgotPassword(email, requestOrigin = null) {
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const user = await userModel.findByEmail(normalizedEmail);
+
+    // Standard security: Always return the exact same response to prevent user enumeration
+    const genericSuccess = {
+      message: 'If an account exists with this email address, you will receive password reset instructions.',
+    };
+
+    if (!user) {
+      return genericSuccess;
+    }
+
+    // Generate secure random token
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await userModel.setResetPasswordToken(user.id, tokenHash, expiresAt);
+
+    // Determine the base app URL securely:
+    // Prefer trusted request origin (localhost:3000, preview .workers.dev / .pages.dev, or production domain),
+    // otherwise fallback to env.clientOrigin or 'http://localhost:3000'.
+    let appUrl = (env.clientOrigin || 'http://localhost:3000').replace(/\/$/, '');
+    if (requestOrigin) {
+      try {
+        const parsed = new URL(requestOrigin);
+        const host = parsed.hostname;
+        if (
+          host === 'localhost' ||
+          host === '127.0.0.1' ||
+          host.endsWith('.workers.dev') ||
+          host.endsWith('.pages.dev') ||
+          (env.clientOrigin && requestOrigin.startsWith(env.clientOrigin))
+        ) {
+          appUrl = parsed.origin;
+        }
+      } catch {
+        // Ignore parsing errors and keep appUrl fallback
+      }
+    }
+
+    const resetUrl = `${appUrl}/reset-password?token=${rawToken}`;
+
+    const html = buildPasswordResetEmailHtml({
+      userName: user.name,
+      resetUrl,
+    });
+
+    const text = buildPasswordResetEmailText({
+      userName: user.name,
+      resetUrl,
+    });
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Reset your SubTrack password',
+        html,
+        text,
+      });
+    } catch (err) {
+      console.error('[forgotPassword email send error]:', err.message);
+    }
+
+    return genericSuccess;
+  },
+
+  async resetPassword({ token, newPassword }) {
+    if (!token) {
+      throw new ApiError(400, 'Password reset token is required');
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token.trim()).digest('hex');
+    const user = await userModel.findByValidResetToken(tokenHash);
+
+    if (!user) {
+      throw new ApiError(400, 'Invalid or expired password reset link. Please request a new link.');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await userModel.updatePasswordAndClearResetToken(user.id, passwordHash);
+
+    return {
+      message: 'Your password has been reset successfully. You can now log in with your new password.',
+    };
   },
 
   async me(userId) {

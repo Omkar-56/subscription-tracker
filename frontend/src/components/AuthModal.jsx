@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
 import GoogleSignInButton from './GoogleSignInButton';
 
 export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
-  const [mode, setMode] = useState(initialMode); // 'login' | 'register'
+  const [mode, setMode] = useState(initialMode); // 'login' | 'register' | 'forgot'
   const { login, register } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -17,6 +18,8 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState('');
 
   // Sync mode with initialMode prop when modal opens
   useEffect(() => {
@@ -27,6 +30,8 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
       setEmail('');
       setPassword('');
       setSubmitting(false);
+      setForgotSuccess(false);
+      setForgotMessage('');
     }
   }, [isOpen, initialMode]);
 
@@ -91,6 +96,21 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
     }
   }
 
+  async function handleForgotSubmit(e) {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+    try {
+      const res = await api.forgotPassword(email);
+      setForgotSuccess(true);
+      setForgotMessage(res.message || 'If an account exists with this email, a reset link has been sent.');
+    } catch (err) {
+      setError(err.message || 'Failed to request password reset');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -128,40 +148,56 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
           </button>
         </div>
 
-        {/* 2. Navigator: Log In <-> Sign Up */}
-        <div className="mt-5 flex rounded-sm border border-line/60 bg-line/30 p-1 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => {
-              setMode('login');
-              setError('');
-            }}
-            className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
-              mode === 'login'
-                ? 'bg-paper text-ink shadow-2xs font-semibold'
-                : 'text-ink/50 hover:text-ink'
-            }`}
-          >
-            Log In
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('register');
-              setError('');
-            }}
-            className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
-              mode === 'register'
-                ? 'bg-paper text-ink shadow-2xs font-semibold'
-                : 'text-ink/50 hover:text-ink'
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
+        {/* 2. Navigator: Log In <-> Sign Up (hidden in 'forgot' mode) */}
+        {mode !== 'forgot' ? (
+          <div className="mt-5 flex rounded-sm border border-line/60 bg-line/30 p-1 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setError('');
+              }}
+              className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
+                mode === 'login'
+                  ? 'bg-paper text-ink shadow-2xs font-semibold'
+                  : 'text-ink/50 hover:text-ink'
+              }`}
+            >
+              Log In
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('register');
+                setError('');
+              }}
+              className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
+                mode === 'register'
+                  ? 'bg-paper text-ink shadow-2xs font-semibold'
+                  : 'text-ink/50 hover:text-ink'
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setError('');
+                setForgotSuccess(false);
+              }}
+              className="inline-flex items-center gap-1.5 text-xs text-ink/60 hover:text-ink font-medium transition-colors cursor-pointer"
+            >
+              ← Back to Log In
+            </button>
+          </div>
+        )}
 
-        {/* 3. Header of the particular card */}
-        <div className="mt-5">
+        {/* 3. Header */}
+        <div className="mt-4">
           {mode === 'login' ? (
             <div>
               <h2 className="font-display text-2xl font-semibold text-ink">Welcome back</h2>
@@ -169,36 +205,47 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                 Sign in to see what's renewing.
               </p>
             </div>
-          ) : (
+          ) : mode === 'register' ? (
             <div>
               <h2 className="font-display text-2xl font-semibold text-ink">Create your account</h2>
               <p className="mt-1 text-xs sm:text-sm text-ink/60">
                 Start tracking what you pay for, monthly.
               </p>
             </div>
+          ) : (
+            <div>
+              <h2 className="font-display text-2xl font-semibold text-ink">Reset password</h2>
+              <p className="mt-1 text-xs sm:text-sm text-ink/60">
+                Enter your email address and we'll send you a password reset link.
+              </p>
+            </div>
           )}
         </div>
 
-        {/* 4. Google Option */}
-        <div className="mt-5">
-          <GoogleSignInButton
-            text={mode === 'login' ? 'signin_with' : 'signup_with'}
-            onSuccess={handleAuthSuccess}
-            onError={(err) => setError(err)}
-          />
-        </div>
+        {/* 4. Google Option (only for login and register) */}
+        {mode !== 'forgot' && (
+          <>
+            <div className="mt-5">
+              <GoogleSignInButton
+                text={mode === 'login' ? 'signin_with' : 'signup_with'}
+                onSuccess={handleAuthSuccess}
+                onError={(err) => setError(err)}
+              />
+            </div>
 
-        {/* Divider */}
-        <div className="relative my-5">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-line/70" />
-          </div>
-          <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
-            <span className="bg-paper px-2.5 text-ink/50 font-medium">Or continue with email</span>
-          </div>
-        </div>
+            {/* Divider */}
+            <div className="relative my-5">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-line/70" />
+              </div>
+              <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
+                <span className="bg-paper px-2.5 text-ink/50 font-medium">Or continue with email</span>
+              </div>
+            </div>
+          </>
+        )}
 
-        {/* 5. Form (labels converted to placeholders) */}
+        {/* 5. Forms */}
         {mode === 'login' ? (
           <form onSubmit={handleLoginSubmit} className="space-y-3.5">
             <div>
@@ -213,6 +260,19 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             </div>
 
             <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-ink/60">Password</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('forgot');
+                    setError('');
+                  }}
+                  className="text-xs text-ledger hover:underline font-medium cursor-pointer"
+                >
+                  Forgot password?
+                </button>
+              </div>
               <input
                 type="password"
                 required
@@ -233,7 +293,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
               {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
-        ) : (
+        ) : mode === 'register' ? (
           <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
             <div>
               <input
@@ -279,6 +339,61 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
               {submitting ? 'Creating account…' : 'Create account'}
             </button>
           </form>
+        ) : (
+          /* Forgot Password Mode */
+          <div className="mt-4">
+            {forgotSuccess ? (
+              <div className="space-y-4 text-center py-2 animate-in fade-in">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-ledger">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-semibold text-ink">Check your email</h3>
+                  <p className="text-xs text-ink/65 leading-relaxed">
+                    {forgotMessage || `We sent a password reset link to ${email}.`}
+                  </p>
+                </div>
+                <p className="text-[11px] text-ink/45">
+                  Didn't receive an email? Check your spam folder or try again in a few minutes.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('login');
+                    setForgotSuccess(false);
+                  }}
+                  className="w-full rounded-sm bg-stone-100 py-2.5 text-xs font-semibold text-ink hover:bg-stone-200 transition-colors cursor-pointer"
+                >
+                  Return to Log In
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotSubmit} className="space-y-3.5">
+                <div>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Enter your account email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full rounded-sm border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                  />
+                </div>
+
+                {error && <p className="text-xs text-rust font-medium">{error}</p>}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full rounded-sm bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
+                >
+                  {submitting ? 'Sending link…' : 'Send reset link'}
+                </button>
+              </form>
+            )}
+          </div>
         )}
       </div>
     </div>
