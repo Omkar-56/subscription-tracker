@@ -65,7 +65,6 @@ function computeGuestSummary(currency) {
       monthlySaved: 0,
       yearlySaved: 0,
       cancelledCount: 0,
-      pausedCount: 0,
     },
   };
 }
@@ -191,7 +190,6 @@ export default function Dashboard() {
     monthlySaved: 0,
     yearlySaved: 0,
     cancelledCount: 0,
-    pausedCount: 0,
   };
 
   return (
@@ -359,7 +357,7 @@ export default function Dashboard() {
             <StatCard
               label="Monthly savings"
               value={formatMoney(savings.monthlySaved, baseCurrency)}
-              sublabel={`≈ ${formatMoney(savings.yearlySaved, baseCurrency)}/yr (${savings.cancelledCount} cancelled, ${savings.pausedCount} paused)`}
+              sublabel={`≈ ${formatMoney(savings.yearlySaved, baseCurrency)}/yr (${savings.cancelledCount} cancelled)`}
               tone={savings.monthlySaved > 0 ? 'emerald' : 'default'}
             />
           </div>

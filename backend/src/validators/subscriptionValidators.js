@@ -9,7 +9,7 @@ export const subscriptionSchema = z.object({
   nextRenewalDate: z.string().transform((str) => str.slice(0, 10)).pipe(
     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD')
   ),
-  status: z.enum(['active', 'paused', 'cancelled']).default('active'),
+  status: z.enum(['active', 'cancelled']).default('active'),
   notes: z.string().max(500).nullish().transform((v) => v || ''),
   reminderDaysBefore: z.coerce.number().int().min(1).max(30).optional().default(3),
   // Free-Trial Expiry Sentinel & Cancellation Deadline

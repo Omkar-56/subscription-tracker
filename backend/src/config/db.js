@@ -46,7 +46,7 @@ export async function ensureSchema() {
               CREATE TYPE billing_cycle AS ENUM ('weekly', 'monthly', 'quarterly', 'yearly');
             END IF;
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'subscription_status') THEN
-              CREATE TYPE subscription_status AS ENUM ('active', 'paused', 'cancelled');
+              CREATE TYPE subscription_status AS ENUM ('active', 'cancelled');
             END IF;
           END
           $$;
@@ -66,6 +66,8 @@ export async function ensureSchema() {
           ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT UNIQUE;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
           CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+
+          UPDATE subscriptions SET status = 'cancelled' WHERE status::text = 'paused';
 
           CREATE TABLE IF NOT EXISTS subscriptions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

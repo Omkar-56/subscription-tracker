@@ -25,10 +25,10 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
-DO $$ BEGIN
-  CREATE TYPE subscription_status AS ENUM ('active', 'paused', 'cancelled');
+DO $ BEGIN
+  CREATE TYPE subscription_status AS ENUM ('active', 'cancelled');
 EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
+END $;
 
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

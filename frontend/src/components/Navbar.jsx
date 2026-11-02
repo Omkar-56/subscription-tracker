@@ -136,7 +136,11 @@ export default function Navbar() {
         <div className="relative mx-auto flex items-center justify-between px-6 sm:px-10 lg:px-14 py-5 sm:py-6 max-w-[1440px] w-full">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href={user ? '/subscriptions' : '/'} className="flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90"
+            >
               <img
                 src="/logo/logo.svg"
                 alt="SubTrack"
