@@ -34,7 +34,7 @@ const FEATURES = [
   {
     icon: '📉',
     title: 'Waste & Savings Meter',
-    desc: 'Track monthly and annual money saved from cancelled or paused subscriptions. Watch your financial leaks close in real time.',
+    desc: 'Track monthly and annual money saved from cancelled subscriptions. Watch your financial leaks close in real time.',
   },
 ];
 

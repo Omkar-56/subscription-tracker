@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [guestCurrency, setGuestCurrency] = useState('USD');
-  const [authModal, setAuthModal] = useState(null); // null | 'login' | 'register'
+  const [authModal, setAuthModal] = useState(null); // null | 'login' | 'register' | 'forgot'
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
 
   const openLogin = useCallback(() => setAuthModal('login'), []);
   const openRegister = useCallback(() => setAuthModal('register'), []);
+  const openForgotPassword = useCallback(() => setAuthModal('forgot'), []);
   const closeAuthModal = useCallback(() => setAuthModal(null), []);
 
   useEffect(() => {
@@ -87,6 +88,7 @@ export function AuthProvider({ children }) {
         authModal,
         openLogin,
         openRegister,
+        openForgotPassword,
         closeAuthModal,
         setAuthModal,
         login,

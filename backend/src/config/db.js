@@ -46,26 +46,32 @@ export async function ensureSchema() {
               CREATE TYPE billing_cycle AS ENUM ('weekly', 'monthly', 'quarterly', 'yearly');
             END IF;
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'subscription_status') THEN
-              CREATE TYPE subscription_status AS ENUM ('active', 'paused', 'cancelled');
+              CREATE TYPE subscription_status AS ENUM ('active', 'cancelled');
             END IF;
           END
           $$;
 
-          CREATE TABLE IF NOT EXISTS users (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          CREATE TABLE IF NOT EXISTS users (\n            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT,
             google_id TEXT UNIQUE,
             avatar_url TEXT,
             base_currency TEXT NOT NULL DEFAULT 'USD',
+            reset_password_token TEXT,
+            reset_password_expires_at TIMESTAMPTZ,
             created_at TIMESTAMPTZ NOT NULL DEFAULT now()
           );
 
           ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT UNIQUE;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_token TEXT;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_expires_at TIMESTAMPTZ;
           CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+          CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_password_token);
+
+          UPDATE subscriptions SET status = 'cancelled' WHERE status::text = 'paused';
 
           CREATE TABLE IF NOT EXISTS subscriptions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

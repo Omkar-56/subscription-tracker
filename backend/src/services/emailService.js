@@ -98,118 +98,89 @@ export function buildReminderEmailHtml({
 
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SubTrack Renewal Reminder</title>
+  <title>SubTrack Reminder</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f7f6f2; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1c1c1a;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f7f6f2; padding: 32px 16px;">
+<body style="margin: 0; padding: 0; background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1E293B;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8F9FA; padding: 32px 16px;">
     <tr>
       <td align="center">
-        <table width="100%" max-width="540" style="max-width: 540px; background-color: #ffffff; border-radius: 6px; border: 1px solid #e3e1da; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-          <!-- Header Banner -->
+        <table role="presentation" width="100%" style="max-width: 540px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); border: 1px solid #E2E8F0;" cellspacing="0" cellpadding="0">
+          <!-- Top Accent Banner -->
           <tr>
-            <td style="background-color: #1F6F54; padding: 20px 24px; text-align: left;">
-              <span style="font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">SubTrack</span>
-              <span style="font-size: 11px; color: #e2f1ec; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Renewal Sentinel</span>
+            <td style="background-color: ${bannerBg}; padding: 16px 28px; text-align: left;">
+              <span style="color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
+                ${isTrial ? 'Free Trial Deadline' : 'Upcoming Renewal Alert'}
+              </span>
             </td>
           </tr>
 
           <!-- Main Content -->
           <tr>
-            <td style="padding: 28px 24px;">
-              <p style="margin: 0 0 16px; font-size: 15px; color: #3d3d3a;">
+            <td style="padding: 28px 28px 20px 28px;">
+              <h1 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600; color: #0F172A; line-height: 1.3;">
                 Hi ${userName || 'there'},
-              </p>
-
-              <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.5; color: #55544f;">
+              </h1>
+              <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
                 ${
                   isTrial
-                    ? `This is a reminder that your free trial for <strong>${subscriptionName}</strong> is approaching its cancellation deadline.`
-                    : `You have an upcoming subscription renewal for <strong>${subscriptionName}</strong> scheduled soon.`
+                    ? `Your free trial for <strong style="color: #0F172A;">${subscriptionName}</strong> ends on <strong style="color: #0F172A;">${dueDateFormatted}</strong>. Cancel before this deadline to avoid being automatically charged.`
+                    : `Your subscription for <strong style="color: #0F172A;">${subscriptionName}</strong> is scheduled to renew on <strong style="color: #0F172A;">${dueDateFormatted}</strong>.`
                 }
               </p>
 
-              <!-- Subscription Highlight Box -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #faf9f6; border: 1px solid #ebe9e1; border-radius: 4px; margin-bottom: 24px;">
+              <!-- Highlight Subscription Box -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; margin-bottom: 24px;">
                 <tr>
-                  <td style="padding: 16px 20px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
+                  <td style="padding: 18px 20px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                       <tr>
-                        <td align="left">
-                          <span style="display: inline-block; font-size: 10px; font-weight: 700; background-color: ${bannerBg}; color: #ffffff; padding: 2px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
-                            ${daysText}
-                          </span>
-                          <h3 style="margin: 4px 0 2px; font-size: 18px; font-weight: 700; color: #1c1c1a;">
-                            ${subscriptionName}
-                          </h3>
-                          <span style="font-size: 12px; color: #76746e; text-transform: capitalize;">
-                            ${category}
-                          </span>
+                        <td style="font-size: 16px; font-weight: 600; color: #0F172A; padding-bottom: 8px;">
+                          ${subscriptionName}
                         </td>
-                        <td align="right" valign="top">
-                          <span style="font-size: 20px; font-weight: 700; color: #1c1c1a; font-family: monospace, sans-serif;">
-                            ${currency} ${Number(amount).toFixed(2)}
-                          </span>
-                          <div style="font-size: 11px; color: #76746e; text-transform: capitalize;">
-                            per ${billingCycle}
-                          </div>
+                        <td align="right" style="font-size: 12px; font-weight: 700; color: ${bannerBg}; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 8px;">
+                          ${daysText}
                         </td>
                       </tr>
-                    </table>
-
-                    <hr style="border: none; border-top: 1px solid #e3e1da; margin: 14px 0;" />
-
-                    <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #55544f;">
                       <tr>
-                        <td style="padding: 4px 0;"><strong>${isTrial ? 'Trial Deadline' : 'Renewal Date'}:</strong></td>
-                        <td align="right" style="padding: 4px 0; font-weight: 600; color: #1c1c1a;">${dueDateFormatted}</td>
+                        <td style="font-size: 13px; color: #64748B; text-transform: capitalize;">
+                          Category: ${category}
+                        </td>
+                        <td align="right" style="font-size: 15px; font-weight: 700; color: #0F172A;">
+                          ${chargeAmountStr}
+                        </td>
                       </tr>
-                      ${
-                        isTrial && postTrialAmount !== null
-                          ? `<tr>
-                              <td style="padding: 4px 0;"><strong>Cost After Trial:</strong></td>
-                              <td align="right" style="padding: 4px 0; font-weight: 600; color: #1c1c1a;">${chargeAmountStr}</td>
-                            </tr>`
-                          : ''
-                      }
                     </table>
                   </td>
                 </tr>
               </table>
 
-              ${
-                isTrial
-                  ? `<div style="background-color: #fff7ed; border-left: 3px solid #EA580C; padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: #9a3412;">
-                      <strong>Action Required:</strong> If you don't intend to keep ${subscriptionName}, remember to cancel it before <strong>${dueDateFormatted}</strong> to avoid being billed.
-                    </div>`
-                  : ''
-              }
-
-              <!-- Button CTA -->
-              <table width="100%" cellpadding="0" cellspacing="0">
+              <!-- Call to Action -->
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
                 <tr>
-                  <td align="center" style="padding: 8px 0 16px;">
-                    <a href="${appUrl}/subscriptions" target="_blank" style="display: inline-block; background-color: #1F6F54; color: #ffffff; text-decoration: none; padding: 12px 24px; font-size: 13px; font-weight: 600; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.06);">
-                      Manage in SubTrack &rarr;
+                  <td align="center" style="border-radius: 6px; background-color: #1F6F54;">
+                    <a href="${appUrl}/subscriptions" target="_blank" style="font-size: 14px; font-weight: 600; color: #FFFFFF; text-decoration: none; padding: 11px 22px; display: inline-block; border-radius: 6px;">
+                      View in SubTrack &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin: 16px 0 0; font-size: 12px; color: #8a8880; line-height: 1.4; text-align: center;">
-                Need to record payment? Open SubTrack and click <strong>"✓ Paid"</strong> to advance your billing cycle.
+              <p style="margin: 0; font-size: 12px; color: #94A3B8; line-height: 1.5;">
+                Tip: You can customize advance reminder windows or record manual payments from your SubTrack dashboard anytime.
               </p>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #faf9f6; border-top: 1px solid #ebe9e1; padding: 16px 24px; text-align: center; font-size: 11px; color: #9a9890;">
-              SubTrack · Minimalist Recurring Bill & Subscription Tracker<br />
-              You received this automated reminder based on your subscription settings (alerting 1–3 days prior to due date).
+            <td style="background-color: #F8FAFC; padding: 18px 28px; border-top: 1px solid #E2E8F0; text-align: center;">
+              <p style="margin: 0; font-size: 12px; color: #64748B;">
+                Sent with care by <strong style="color: #0F172A;">SubTrack</strong> &bull; Minimalist Subscription Ledger
+              </p>
             </td>
           </tr>
         </table>
@@ -222,7 +193,7 @@ export function buildReminderEmailHtml({
 }
 
 /**
- * Plain text fallback version for email clients
+ * Format a plain-text fallback reminder email
  */
 export function buildReminderEmailText({
   userName = 'there',
@@ -264,6 +235,113 @@ Subscription Details:
 - Amount: ${currency} ${Number(amount).toFixed(2)} (${billingCycle})
 
 Manage your subscriptions at: ${appUrl}/subscriptions
+
+--
+SubTrack · Minimalist Recurring Bill & Subscription Tracker
+`.trim();
+}
+
+/**
+ * Format a clean HTML password reset email
+ */
+export function buildPasswordResetEmailHtml({ userName = 'there', resetUrl }) {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Your SubTrack Password</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1E293B;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8F9FA; padding: 36px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width: 520px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); border: 1px solid #E2E8F0;" cellspacing="0" cellpadding="0">
+          <!-- Top Accent Banner -->
+          <tr>
+            <td style="background-color: #1F6F54; padding: 18px 28px; text-align: left;">
+              <span style="color: #FFFFFF; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+                SubTrack &bull; Account Security
+              </span>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 32px 28px 24px 28px;">
+              <h1 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 600; color: #0F172A; line-height: 1.3;">
+                Reset Your Password
+              </h1>
+              <p style="margin: 0 0 16px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                Hi ${userName || 'there'},
+              </p>
+              <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                We received a request to reset the password for your SubTrack account. Click the button below to choose a new password:
+              </p>
+
+              <!-- Call to Action Button -->
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
+                <tr>
+                  <td align="center" style="border-radius: 6px; background-color: #1F6F54;">
+                    <a href="${resetUrl}" target="_blank" style="font-size: 14px; font-weight: 600; color: #FFFFFF; text-decoration: none; padding: 12px 26px; display: inline-block; border-radius: 6px;">
+                      Reset Password &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Expiration and Security Notice -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 14px 16px; font-size: 13px; color: #64748B; line-height: 1.5;">
+                    <strong style="color: #0F172A;">Important:</strong> This link is valid for <strong>1 hour</strong> and can only be used once. If you did not request a password reset, you can safely ignore this email &mdash; your password will remain unchanged.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Fallback Plain URL -->
+              <p style="margin: 0; font-size: 12px; color: #94A3B8; line-height: 1.6; word-break: break-all;">
+                Button not working? Copy and paste this link into your browser:<br>
+                <a href="${resetUrl}" style="color: #1F6F54; text-decoration: underline;">${resetUrl}</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #F8FAFC; padding: 16px 28px; border-top: 1px solid #E2E8F0; text-align: center;">
+              <p style="margin: 0; font-size: 12px; color: #64748B;">
+                SubTrack &bull; Minimalist Subscription Ledger &bull; <a href="https://subtrack.app" style="color: #64748B; text-decoration: underline;">subtrack.app</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Format a plain-text password reset email
+ */
+export function buildPasswordResetEmailText({ userName = 'there', resetUrl }) {
+  return `
+Reset Your SubTrack Password
+
+Hi ${userName || 'there'},
+
+We received a request to reset the password for your SubTrack account.
+To reset your password, visit the following link:
+
+${resetUrl}
+
+This link is valid for 1 hour.
+
+If you didn't request a password reset, you can safely ignore this email — your password will remain unchanged.
 
 --
 SubTrack · Minimalist Recurring Bill & Subscription Tracker

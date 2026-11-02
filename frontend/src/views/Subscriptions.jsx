@@ -47,13 +47,11 @@ function getGuestSubs() {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        // Purge any pre-populated demo subscriptions
-        const realSubs = parsed.filter(
-          (s) => !(typeof s.id === 'string' && s.id.startsWith('demo-'))
-        );
-        if (realSubs.length !== parsed.length) {
-          localStorage.setItem('subtrack_guest_subs', JSON.stringify(realSubs));
-        }
+        // Purge any pre-populated demo subscriptions & migrate paused to cancelled
+        const realSubs = parsed
+          .filter((s) => !(typeof s.id === 'string' && s.id.startsWith('demo-')))
+          .map((s) => (s.status === 'paused' ? { ...s, status: 'cancelled' } : s));
+        localStorage.setItem('subtrack_guest_subs', JSON.stringify(realSubs));
         return realSubs;
       }
     } catch {
@@ -282,7 +280,6 @@ export default function Subscriptions() {
     all:       subscriptions.length,
     active:    subscriptions.filter((s) => s.status === 'active' && !s.isFreeTrial).length,
     trials:    subscriptions.filter((s) => s.isFreeTrial && s.status === 'active').length,
-    paused:    subscriptions.filter((s) => s.status === 'paused').length,
     cancelled: subscriptions.filter((s) => s.status === 'cancelled').length,
   }), [subscriptions]);
 
@@ -412,7 +409,7 @@ export default function Subscriptions() {
       )}
 
       {/* ── Filter & Search Card ────────────────────────────────────── */}
-      <div className="space-y-3 rounded-t border border-line bg-paper p-4 shadow-2xs">
+      <div className="space-y-3 rounded-t border border-line bg-paper p-3 sm:p-4 shadow-2xs">
 
         {/* Row 1: Status tabs + Search */}
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -423,7 +420,6 @@ export default function Subscriptions() {
                 { id: 'all',       label: 'All',        count: counts.all       },
                 { id: 'active',    label: 'Active',      count: counts.active    },
                 { id: 'trials',    label: 'Trials',   count: counts.trials    },
-                { id: 'paused',    label: 'Paused',      count: counts.paused    },
                 { id: 'cancelled', label: 'Cancelled',   count: counts.cancelled },
               ].map((tab) => (
                 <button
@@ -697,7 +693,7 @@ export default function Subscriptions() {
       </div>
 
       {/* Subscription List */}
-      <div className="border border-t-0 border-line bg-paper px-4">
+      <div className="border border-t-0 border-line bg-paper px-2 sm:px-4">
         {filteredSubscriptions.length === 0 && (
           <div className="py-14 text-center flex flex-col items-center justify-center">
             {subscriptions.length === 0 && (

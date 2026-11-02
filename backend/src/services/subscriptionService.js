@@ -229,7 +229,6 @@ export const subscriptionService = {
     const rawSubs = await subscriptionModel.findAllForUser(userId);
     const all = await syncOverdueSubscriptions(userId, rawSubs);
     const active = all.filter((s) => s.status === 'active');
-    const paused = all.filter((s) => s.status === 'paused');
     const cancelled = all.filter((s) => s.status === 'cancelled');
 
     let totalMonthly = 0;
@@ -303,7 +302,7 @@ export const subscriptionService = {
     }
 
     let monthlySaved = 0;
-    for (const s of [...paused, ...cancelled]) {
+    for (const s of cancelled) {
       const converted = await currencyService.convert(s.amount, s.currency, baseCurrency);
       const months = CYCLE_TO_MONTHS[s.billingCycle] || 1;
       monthlySaved += converted / months;
@@ -334,7 +333,6 @@ export const subscriptionService = {
         monthlySaved,
         yearlySaved: monthlySaved * 12,
         cancelledCount: cancelled.length,
-        pausedCount: paused.length,
       },
     };
   },
