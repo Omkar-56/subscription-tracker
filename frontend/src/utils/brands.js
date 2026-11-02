@@ -265,14 +265,24 @@ export function normalizeCategory(val = '') {
 }
 
 export const CATEGORY_CHART_COLORS = {
-  'software / ai': '#064e3b',   // Emerald Green (Primary SubTrack Ledger)
+  'software / ai': '#059669',   // Emerald Green
   entertainment: '#2563EB',     // Royal Blue
   gaming: '#7C3AED',            // Violet / Purple
   'news and media': '#0284C7',  // Sky / Ocean Blue
-  education: '#16A34A',         // Vibrant Leaf Green
-  'health & fitness': '#EA580C',// Warm Amber / Orange
+  education: '#D97706',         // Amber / Gold
+  'health & fitness': '#EA580C',// Warm Coral / Orange
   other: '#64748B',             // Slate Grey
 };
+
+export const CATEGORY_LEGEND = [
+  { key: 'software / ai', label: 'Software / AI', color: '#059669' },
+  { key: 'entertainment', label: 'Entertainment', color: '#2563EB' },
+  { key: 'gaming', label: 'Gaming', color: '#7C3AED' },
+  { key: 'news and media', label: 'News & Media', color: '#0284C7' },
+  { key: 'education', label: 'Education', color: '#D97706' },
+  { key: 'health & fitness', label: 'Health & Fitness', color: '#EA580C' },
+  { key: 'other', label: 'Other', color: '#64748B' },
+];
 
 export function getCategoryChartColor(category = 'other') {
   const norm = normalizeCategory(category).toLowerCase();
@@ -284,7 +294,7 @@ export const CATEGORY_COLORS = {
   entertainment: { bg: 'bg-blue-50 text-blue-700 border-blue-200' },
   gaming: { bg: 'bg-purple-50 text-purple-700 border-purple-200' },
   'news and media': { bg: 'bg-sky-50 text-sky-700 border-sky-200' },
-  education: { bg: 'bg-green-50 text-green-800 border-green-200' },
+  education: { bg: 'bg-amber-50 text-amber-800 border-amber-200' },
   'health & fitness': { bg: 'bg-orange-50 text-orange-800 border-orange-200' },
   other: { bg: 'bg-stone-100 text-stone-700 border-stone-200' },
 };

@@ -72,9 +72,12 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'USD', onS
       if (!finalCurrency) throw new Error('Please select or specify a 3-letter currency code.');
 
       const trialEnd = form.isFreeTrial && form.trialEndDate ? form.trialEndDate : null;
+      const rawName = (form.name || '').trim();
+      const capitalizedName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : '';
 
       const payload = {
         ...form,
+        name: capitalizedName,
         category: normalizeCategory(form.category),
         currency: finalCurrency,
         amount: form.isFreeTrial ? (Number(form.amount) || 0) : (Number(form.amount) || 0),

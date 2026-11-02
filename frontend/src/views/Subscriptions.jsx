@@ -10,7 +10,7 @@ import PaymentConfirmModal from '../components/PaymentConfirmModal';
 import PaymentHistoryModal from '../components/PaymentHistoryModal';
 import CancellationGuideModal from '../components/CancellationGuideModal';
 import { formatMoney } from '../utils/date';
-import { formatCategoryLabel } from '../utils/brands';
+import { formatCategoryLabel, CATEGORY_LEGEND, normalizeCategory } from '../utils/brands';
 
 const CYCLE_TO_MONTHS = {
   weekly: 12 / 52,
@@ -27,6 +27,7 @@ const CYCLES = [
 ];
 
 const SORT_OPTIONS = [
+  { id: 'default',      label: 'Default'                 },
   { id: 'renewal_asc',  label: 'Next renewal (soonest)'  },
   { id: 'renewal_desc', label: 'Next renewal (furthest)' },
   { id: 'cost_desc',    label: 'Cost — high to low'      },
@@ -47,10 +48,17 @@ function getGuestSubs() {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        // Purge any pre-populated demo subscriptions & migrate paused to cancelled
+        // Purge demo subscriptions, migrate paused to cancelled, capitalize names
         const realSubs = parsed
           .filter((s) => !(typeof s.id === 'string' && s.id.startsWith('demo-')))
-          .map((s) => (s.status === 'paused' ? { ...s, status: 'cancelled' } : s));
+          .map((s) => {
+            const clean = s.status === 'paused' ? { ...s, status: 'cancelled' } : s;
+            if (clean.name) {
+              const trimmed = clean.name.trim();
+              return { ...clean, name: trimmed.charAt(0).toUpperCase() + trimmed.slice(1) };
+            }
+            return clean;
+          });
         localStorage.setItem('subtrack_guest_subs', JSON.stringify(realSubs));
         return realSubs;
       }
@@ -86,7 +94,7 @@ export default function Subscriptions() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [cycleFilter, setCycleFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('renewal_asc');
+  const [sortBy, setSortBy] = useState('default');
 
   // Filter panel state
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
@@ -99,6 +107,10 @@ export default function Subscriptions() {
   // Sort dropdown state
   const [sortOpen, setSortOpen] = useState(false);
   const sortRef = useRef(null);
+
+  // Category color legend state
+  const [legendOpen, setLegendOpen] = useState(false);
+  const legendRef = useRef(null);
 
   async function refresh() {
     try {
@@ -143,13 +155,29 @@ export default function Subscriptions() {
       if (sortRef.current && !sortRef.current.contains(e.target)) {
         setSortOpen(false);
       }
+      if (legendRef.current && !legendRef.current.contains(e.target)) {
+        setLegendOpen(false);
+      }
+    }
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') {
+        setFilterPanelOpen(false);
+        setSortOpen(false);
+        setLegendOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   // Sync pending state when panel opens
   function openFilterPanel() {
+    setSortOpen(false);
+    setLegendOpen(false);
     setPendingCategory(categoryFilter);
     setPendingCycle(cycleFilter);
     setFilterSection('categories');
@@ -170,16 +198,21 @@ export default function Subscriptions() {
   const activeFilterCount = (categoryFilter !== 'all' ? 1 : 0) + (cycleFilter !== 'all' ? 1 : 0);
 
   async function handleCreate(data) {
+    const rawName = (data.name || '').trim();
+    const formattedData = {
+      ...data,
+      name: rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : '',
+    };
     try {
-      await api.createSubscription(data);
+      await api.createSubscription(formattedData);
     } catch {
       const guestSubs = getGuestSubs();
       const newSub = {
-        ...data,
+        ...formattedData,
         id: 'guest-' + Date.now(),
-        amount: Number(data.amount),
-        status: data.status || 'active',
-        convertedAmount: Number(data.amount),
+        amount: Number(formattedData.amount),
+        status: formattedData.status || 'active',
+        convertedAmount: Number(formattedData.amount),
       };
       saveGuestSubs([newSub, ...guestSubs]);
     }
@@ -188,11 +221,16 @@ export default function Subscriptions() {
   }
 
   async function handleUpdate(data) {
+    const rawName = (data.name || '').trim();
+    const formattedData = {
+      ...data,
+      name: rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : '',
+    };
     try {
-      await api.updateSubscription(editing.id, data);
+      await api.updateSubscription(editing.id, formattedData);
     } catch {
       const guestSubs = getGuestSubs().map((s) =>
-        s.id === editing.id ? { ...s, ...data, amount: Number(data.amount) } : s
+        s.id === editing.id ? { ...s, ...formattedData, amount: Number(formattedData.amount) } : s
       );
       saveGuestSubs(guestSubs);
     }
@@ -275,6 +313,19 @@ export default function Subscriptions() {
     return Array.from(set).sort();
   }, [subscriptions]);
 
+  // Legend items with live counts
+  const legendItems = useMemo(() => {
+    const counts = {};
+    for (const s of subscriptions) {
+      const cat = normalizeCategory(s.category).toLowerCase();
+      counts[cat] = (counts[cat] || 0) + 1;
+    }
+    return CATEGORY_LEGEND.map((item) => ({
+      ...item,
+      count: counts[item.key.toLowerCase()] || 0,
+    }));
+  }, [subscriptions]);
+
   // Counts by status
   const counts = useMemo(() => ({
     all:       subscriptions.length,
@@ -304,8 +355,22 @@ export default function Subscriptions() {
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === 'renewal_asc')  { const dA = a.isFreeTrial && a.cancellationDeadline ? a.cancellationDeadline : a.nextRenewalDate; const dB = b.isFreeTrial && b.cancellationDeadline ? b.cancellationDeadline : b.nextRenewalDate; return new Date(dA) - new Date(dB); }
-        if (sortBy === 'renewal_desc') { const dA = a.isFreeTrial && a.cancellationDeadline ? a.cancellationDeadline : a.nextRenewalDate; const dB = b.isFreeTrial && b.cancellationDeadline ? b.cancellationDeadline : b.nextRenewalDate; return new Date(dB) - new Date(dA); }
+        // Cancelled subscriptions always go to the bottom of the list
+        const aCancelled = a.status === 'cancelled';
+        const bCancelled = b.status === 'cancelled';
+        if (aCancelled !== bCancelled) {
+          return aCancelled ? 1 : -1;
+        }
+
+        const getRenewalDate = (sub) =>
+          sub.isFreeTrial && sub.cancellationDeadline ? sub.cancellationDeadline : sub.nextRenewalDate;
+
+        if (sortBy === 'default' || sortBy === 'renewal_asc') {
+          return new Date(getRenewalDate(a)) - new Date(getRenewalDate(b));
+        }
+        if (sortBy === 'renewal_desc') {
+          return new Date(getRenewalDate(b)) - new Date(getRenewalDate(a));
+        }
         if (sortBy === 'cost_desc')    return monthlyEquivalent(b) - monthlyEquivalent(a);
         if (sortBy === 'cost_asc')     return monthlyEquivalent(a) - monthlyEquivalent(b);
         if (sortBy === 'name_asc')     return a.name.localeCompare(b.name);
@@ -324,14 +389,14 @@ export default function Subscriptions() {
 
   const hasActiveFilters =
     searchTerm !== '' || statusFilter !== 'all' ||
-    categoryFilter !== 'all' || cycleFilter !== 'all' || sortBy !== 'renewal_asc';
+    categoryFilter !== 'all' || cycleFilter !== 'all' || sortBy !== 'default';
 
   function resetFilters() {
     setSearchTerm('');
     setStatusFilter('all');
     setCategoryFilter('all');
     setCycleFilter('all');
-    setSortBy('renewal_asc');
+    setSortBy('default');
   }
 
   const currentSortLabel = SORT_OPTIONS.find((o) => o.id === sortBy)?.label ?? 'Sort';
@@ -619,9 +684,13 @@ export default function Subscriptions() {
             {/* ── Sort dropdown ─────────────────────────────────── */}
             <div className="relative" ref={sortRef}>
               <button
-                onClick={() => setSortOpen((o) => !o)}
+                onClick={() => {
+                  setFilterPanelOpen(false);
+                  setLegendOpen(false);
+                  setSortOpen((o) => !o);
+                }}
                 className={`flex items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                  sortOpen || sortBy !== 'renewal_asc'
+                  sortOpen || sortBy !== 'default'
                     ? 'border-ledger bg-ledger/5 text-ledger'
                     : 'border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink'
                 }`}
@@ -658,6 +727,90 @@ export default function Subscriptions() {
                       )}
                     </button>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* ── Category Color Legend "i" Info Button ────────────── */}
+            <div className="relative" ref={legendRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterPanelOpen(false);
+                  setSortOpen(false);
+                  setLegendOpen((o) => !o);
+                }}
+                className={`flex items-center justify-center h-6 w-6 rounded-full border text-[11px] font-bold transition-all cursor-pointer ${
+                  legendOpen
+                    ? 'border-ledger bg-ledger/10 text-ledger'
+                    : 'border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink'
+                }`}
+                title="Category color legend"
+                aria-label="Category color legend"
+                aria-expanded={legendOpen}
+              >
+                i
+              </button>
+
+              {legendOpen && (
+                <div className="absolute left-1/2 -translate-x-[60%] sm:left-0 sm:translate-x-0 sm:right-auto top-full z-40 mt-1.5 w-60 sm:w-64 max-w-[calc(100vw-32px)] rounded-md border border-line bg-white p-3 shadow-lg animate-in fade-in duration-100">
+                  <div className="flex items-center justify-between border-b border-line/60 pb-2 mb-2">
+                    <span className="text-xs font-semibold text-ink">Category Colors</span>
+                    <button
+                      onClick={() => setLegendOpen(false)}
+                      className="text-ink/40 hover:text-ink text-xs cursor-pointer p-0.5"
+                      aria-label="Close color legend"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-ink/50 mb-2 leading-relaxed">
+                    Color dots identify the category of each subscription.
+                  </p>
+
+                  <div className="space-y-1">
+                    {legendItems.map((item) => (
+                      <button
+                        key={item.key}
+                        onClick={() => {
+                          setCategoryFilter((prev) => (prev.toLowerCase() === item.key.toLowerCase() ? 'all' : item.key));
+                          setLegendOpen(false);
+                        }}
+                        className={`flex w-full items-center justify-between px-2 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                          categoryFilter.toLowerCase() === item.key.toLowerCase()
+                            ? 'bg-ledger-light/60 font-semibold text-ledger-dark'
+                            : 'hover:bg-paper text-ink/80 hover:text-ink'
+                        }`}
+                        title={`Click to filter by ${item.label}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs ring-1 ring-black/10"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span>{item.label}</span>
+                        </div>
+                        <span className="text-[11px] text-ink/40 tabular">
+                          {item.count} {item.count === 1 ? 'sub' : 'subs'}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {categoryFilter !== 'all' && (
+                    <div className="mt-2.5 pt-2 border-t border-line/50 text-center">
+                      <button
+                        onClick={() => {
+                          setCategoryFilter('all');
+                          setLegendOpen(false);
+                        }}
+                        className="text-[11px] text-rust hover:underline cursor-pointer"
+                      >
+                        Clear category filter
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

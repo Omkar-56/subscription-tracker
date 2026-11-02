@@ -241,7 +241,7 @@ export default function Dashboard() {
                     <BrandLogo name={t.name} category={t.category} size="sm" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <p className="font-semibold text-xs text-ink truncate">{t.name}</p>
+                        <p className="font-semibold text-xs text-ink truncate">{t.name ? t.name.charAt(0).toUpperCase() + t.name.slice(1) : ''}</p>
                         <span
                           className={`rounded px-1.5 py-0.2 text-[10px] font-bold ${
                             isUrgent ? 'bg-rust text-white animate-pulse' : 'bg-amber-light text-amber-dark'
@@ -422,7 +422,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3 min-w-0">
                     <BrandLogo name={s.name} category={s.category} size="sm" />
                     <div className="min-w-0">
-                      <p className="font-medium text-xs sm:text-sm truncate">{s.name}</p>
+                      <p className="font-medium text-xs sm:text-sm truncate">{s.name ? s.name.charAt(0).toUpperCase() + s.name.slice(1) : ''}</p>
                       <p className="text-[11px] sm:text-xs text-ink/70">
                         {formatDate(s.nextRenewalDate)} · in {days}d
                       </p>

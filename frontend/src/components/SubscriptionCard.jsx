@@ -3,12 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import BrandLogo from './BrandLogo';
 import { formatDate, formatMoney, daysUntil } from '../utils/date';
-import { formatCategoryLabel } from '../utils/brands';
+import { formatCategoryLabel, getCategoryChartColor } from '../utils/brands';
 
-const STATUS_BADGE = {
-  active: 'bg-ledger-light text-ledger-dark border-ledger/20',
-  cancelled: 'bg-stone-100 text-ink/40 border-stone-200 line-through',
-};
+
 
 export default function SubscriptionCard({
   subscription,
@@ -56,73 +53,63 @@ export default function SubscriptionCard({
   const soon = subscription.status === 'active' && days >= 0 && days <= 7;
   const overdue = subscription.status === 'active' && days < 0;
   const isDifferentCurrency = baseCurrency && subscription.currency !== baseCurrency && subscription.convertedAmount;
+  const isCancelled = subscription.status === 'cancelled';
+  const displayName = subscription.name
+    ? subscription.name.trim().charAt(0).toUpperCase() + subscription.name.trim().slice(1)
+    : '';
+  const renewalTooltip = isTrial
+    ? `Trial cancellation deadline: ${formatDate(deadlineDate)} (${days < 0 ? `passed ${Math.abs(days)}d ago` : days === 0 ? 'today' : `in ${days}d`})`
+    : `Renewal deadline: ${formatDate(deadlineDate)} (${days < 0 ? `overdue by ${Math.abs(days)}d` : days === 0 ? 'today' : `in ${days}d`})`;
 
   return (
     <div
       className={`group relative flex items-center justify-between gap-3 sm:gap-4 border-b border-line px-1 sm:px-2 py-3.5 transition-colors hover:bg-paper/40 last:border-b-0 ${
         isTrial ? 'bg-amber-light/10' : ''
-      } ${menuOpen ? 'z-30' : ''}`}
+      } ${menuOpen ? 'z-30' : ''} ${
+        isCancelled ? 'opacity-40 hover:opacity-75 bg-stone-100/30' : ''
+      }`}
     >
       {/* Left section: BrandLogo + Info */}
       <div className="flex min-w-0 items-center gap-3 sm:gap-3.5 flex-1">
-        <BrandLogo name={subscription.name} category={subscription.category} size="md" />
+        <BrandLogo name={displayName || subscription.name} category={subscription.category} size="md" />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <p className="truncate font-medium text-ink text-sm sm:text-base max-w-[140px] xs:max-w-[180px] sm:max-w-none">
-              {subscription.name}
-            </p>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <p className="truncate font-medium text-ink text-sm sm:text-base max-w-[140px] xs:max-w-[180px] sm:max-w-none">
+                {displayName}
+              </p>
+              <span
+                className="w-2 h-2 rounded-full shrink-0 shadow-2xs"
+                style={{ backgroundColor: getCategoryChartColor(subscription.category) }}
+                title={`Category: ${formatCategoryLabel(subscription.category)}`}
+              />
+            </div>
 
-            {isTrial ? (
+            {isTrial && (
               <span className="rounded bg-amber-light border border-amber/40 px-1.5 py-0.5 text-[11px] font-bold text-amber tracking-wide flex items-center gap-1 shrink-0">
                 <span>🛡️</span>
                 <span>TRIAL</span>
               </span>
-            ) : (
-              <span className="rounded bg-stone-100 px-1.5 py-0.5 text-xs text-ink/60 border border-stone-200/60 shrink-0">
-                {formatCategoryLabel(subscription.category)}
-              </span>
             )}
 
-            <span
-              className={`rounded border px-1.5 py-0.5 text-xs font-medium shrink-0 ${
-                STATUS_BADGE[subscription.status] || STATUS_BADGE.active
-              }`}
-            >
-              {subscription.status}
-            </span>
-
-            {/* Trial Sentinel Urgency Badges */}
-            {isTrial && subscription.status === 'active' && (
-              <span
-                className={`rounded border px-1.5 py-0.5 text-xs font-bold shrink-0 ${
-                  days <= 1
-                    ? 'bg-rust text-white border-rust animate-pulse'
-                    : days <= 3
-                    ? 'bg-amber text-white border-amber'
-                    : 'bg-amber-light text-amber border-amber/40'
-                }`}
-              >
-                {days < 0
-                  ? `Deadline passed (${Math.abs(days)}d ago)`
-                  : days === 0
-                  ? '🚨 Deadline TODAY!'
-                  : days === 1
-                  ? '⚠️ Deadline tomorrow!'
-                  : `⏳ Deadline in ${days}d`}
-              </span>
-            )}
-
-            {!isTrial && soon && (
-              <span className="rounded bg-amber-light border border-amber/30 px-1.5 py-0.5 text-xs font-medium text-amber shrink-0">
-                {days === 0 ? 'renews today' : `renews in ${days}d`}
-              </span>
-            )}
-
-            {!isTrial && overdue && (
-              <span className="rounded bg-rust-light border border-rust/30 px-1.5 py-0.5 text-xs font-medium text-rust shrink-0">
-                renewal due (${Math.abs(days)}d ago)
-              </span>
+            {/* Renewal Urgency "!" Icon with Red BG Tint & Hover Tooltip */}
+            {subscription.status === 'active' && (soon || overdue) && (
+              <div className="relative inline-flex items-center group/alert shrink-0">
+                <span
+                  className="flex items-center justify-center w-[18px] h-[18px] rounded-full bg-rust-light text-rust border border-rust/40 text-[11px] font-bold cursor-help select-none shadow-2xs"
+                  aria-label={renewalTooltip}
+                >
+                  !
+                </span>
+                {/* Tooltip on hover */}
+                <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/alert:flex flex-col items-center z-50 whitespace-nowrap">
+                  <div className="rounded bg-ink px-2 py-1 text-[11px] font-medium text-white shadow-md">
+                    {renewalTooltip}
+                  </div>
+                  <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-ink" />
+                </div>
+              </div>
             )}
 
             {priceIncrease && (
