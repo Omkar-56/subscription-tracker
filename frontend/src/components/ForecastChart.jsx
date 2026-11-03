@@ -13,7 +13,7 @@ const COLORS = {
   axis: '#353535',
 };
 
-function ForecastTooltip({ active, payload, label, currency = 'USD' }) {
+function ForecastTooltip({ active, payload, label, currency = 'INR' }) {
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
   const charges = point.charges || point.renewals || [];
@@ -49,7 +49,7 @@ function ForecastTooltip({ active, payload, label, currency = 'USD' }) {
   );
 }
 
-export default function ForecastChart({ months, currency = 'USD' }) {
+export default function ForecastChart({ months, currency = 'INR' }) {
   const [showCumulative, setShowCumulative] = useState(false);
 
   const data = useMemo(() => {

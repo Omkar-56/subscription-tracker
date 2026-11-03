@@ -5,7 +5,7 @@ const COLUMNS = `
   id, user_id AS "userId", name, category, amount, currency,
   billing_cycle AS "billingCycle", next_renewal_date AS "nextRenewalDate",
   status, notes,
-  COALESCE(reminder_days_before, 3) AS "reminderDaysBefore",
+  COALESCE(reminder_days_before, 2) AS "reminderDaysBefore",
   last_reminder_sent_at AS "lastReminderSentAt",
   COALESCE(is_free_trial, FALSE) AS "isFreeTrial",
   trial_end_date AS "trialEndDate",
@@ -21,7 +21,7 @@ export const subscriptionModel = {
     const trialEndDate = isFreeTrial && data.trialEndDate ? String(data.trialEndDate).slice(0, 10) : null;
     const cancellationDeadline = isFreeTrial && data.cancellationDeadline ? String(data.cancellationDeadline).slice(0, 10) : null;
     const postTrialAmount = isFreeTrial && data.postTrialAmount !== undefined && data.postTrialAmount !== null ? Number(data.postTrialAmount) : null;
-    const postTrialCurrency = isFreeTrial && data.postTrialCurrency ? data.postTrialCurrency : data.currency;
+    const postTrialCurrency = isFreeTrial && data.postTrialCurrency ? data.postTrialCurrency : data.currency || 'INR';
     const category = normalizeCategory(data.category);
     const status = data.status || 'active';
 
@@ -36,12 +36,12 @@ export const subscriptionModel = {
         data.name,
         category,
         data.amount,
-        data.currency,
+        data.currency || 'INR',
         data.billingCycle,
         data.nextRenewalDate,
         status,
         data.notes ?? null,
-        data.reminderDaysBefore ?? 3,
+        data.reminderDaysBefore ?? 2,
         isFreeTrial,
         trialEndDate,
         cancellationDeadline,
@@ -73,7 +73,7 @@ export const subscriptionModel = {
     const trialEndDate = isFreeTrial && data.trialEndDate ? String(data.trialEndDate).slice(0, 10) : null;
     const cancellationDeadline = isFreeTrial && data.cancellationDeadline ? String(data.cancellationDeadline).slice(0, 10) : null;
     const postTrialAmount = isFreeTrial && data.postTrialAmount !== undefined && data.postTrialAmount !== null ? Number(data.postTrialAmount) : null;
-    const postTrialCurrency = isFreeTrial && data.postTrialCurrency ? data.postTrialCurrency : data.currency;
+    const postTrialCurrency = isFreeTrial && data.postTrialCurrency ? data.postTrialCurrency : data.currency || 'INR';
     const category = normalizeCategory(data.category);
     const status = data.status || 'active';
 
@@ -93,7 +93,7 @@ export const subscriptionModel = {
         data.name,
         category,
         data.amount,
-        data.currency,
+        data.currency || 'INR',
         data.billingCycle,
         data.nextRenewalDate,
         status,
@@ -155,7 +155,7 @@ export const subscriptionModel = {
       `SELECT
         s.id, s.user_id AS "userId", s.name, s.category, s.amount, s.currency,
         s.billing_cycle AS "billingCycle", s.next_renewal_date AS "nextRenewalDate",
-        s.status, s.notes, COALESCE(s.reminder_days_before, 3) AS "reminderDaysBefore",
+        s.status, s.notes, COALESCE(s.reminder_days_before, 2) AS "reminderDaysBefore",
         s.last_reminder_sent_at AS "lastReminderSentAt",
         COALESCE(s.is_free_trial, FALSE) AS "isFreeTrial",
         s.trial_end_date AS "trialEndDate",

@@ -7,7 +7,7 @@ import { formatDate, formatMoney, parseLocalDate } from '../utils/date';
 export default function PaymentConfirmModal({ subscription, onConfirm, onCancel }) {
   const todayStr = new Date().toISOString().slice(0, 10);
   const [amount, setAmount] = useState(subscription?.amount || 0);
-  const [currency, setCurrency] = useState(subscription?.currency || 'USD');
+  const [currency, setCurrency] = useState(subscription?.currency || 'INR');
   const [paidDate, setPaidDate] = useState(todayStr);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);

@@ -62,7 +62,7 @@ export default function PaymentHistoryModal({ subscription, onClose }) {
                     {formatDate(p.paidDate)}
                   </p>
                   <p className="text-[11px] text-ink/50 capitalize">
-                    {p.billingCycle} cycle {p.notes ? `· ${p.notes}` : ''}
+                    {p.billingCycle} cycle
                   </p>
                 </div>
                 <div className="text-right">

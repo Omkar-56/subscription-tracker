@@ -24,8 +24,8 @@ export function daysUntil(dateStr) {
   return Math.round(diffMs / (24 * 60 * 60 * 1000));
 }
 
-export function formatMoney(amount, currency = 'USD') {
-  const curr = (currency || 'USD').toUpperCase();
+export function formatMoney(amount, currency = 'INR') {
+  const curr = (currency || 'INR').toUpperCase();
   try {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

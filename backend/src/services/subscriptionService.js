@@ -103,7 +103,7 @@ async function resolveUserBaseCurrency(userId, overrideCurrency) {
     return overrideCurrency.toUpperCase();
   }
   const user = await userModel.findById(userId);
-  return user?.baseCurrency || 'USD';
+  return user?.baseCurrency || 'INR';
 }
 
 export const subscriptionService = {
@@ -171,11 +171,10 @@ export const subscriptionService = {
   async confirmPayment(userId, id, paymentData = {}) {
     const sub = await this.get(userId, id);
     const amount = Number(paymentData.amount) || Number(sub.amount);
-    const currency = paymentData.currency || sub.currency;
+    const currency = paymentData.currency || sub.currency || 'INR';
     const paidDate = paymentData.paidDate || formatDateString(new Date());
-    const notes = paymentData.notes || `Payment confirmed for ${sub.billingCycle} cycle`;
 
-    // 1. Record payment history
+    // 1. Record payment history (notes removed)
     const payment = await paymentModel.create({
       userId,
       subscriptionId: sub.id,
@@ -183,7 +182,6 @@ export const subscriptionService = {
       currency,
       paidDate,
       billingCycle: sub.billingCycle,
-      notes,
     });
 
     // 2. Advance renewal date to the next cycle

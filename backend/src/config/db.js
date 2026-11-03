@@ -22,7 +22,6 @@ function getDbConfig() {
   return {
     connectionString,
     ssl: isProduction || isSupabase ? { rejectUnauthorized: false } : false,
-    // Keep connection setup alive
     connectionTimeoutMillis: 10000,
   };
 }
@@ -40,6 +39,8 @@ export async function ensureSchema() {
     schemaPromise = (async () => {
       try {
         await executeDirectQuery(`
+          CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
           DO $$
           BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'billing_cycle') THEN
@@ -51,13 +52,15 @@ export async function ensureSchema() {
           END
           $$;
 
-          CREATE TABLE IF NOT EXISTS users (\n            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          -- 1. Users table
+          CREATE TABLE IF NOT EXISTS users (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT,
             google_id TEXT UNIQUE,
             avatar_url TEXT,
-            base_currency TEXT NOT NULL DEFAULT 'USD',
+            base_currency TEXT NOT NULL DEFAULT 'INR',
             reset_password_token TEXT,
             reset_password_expires_at TIMESTAMPTZ,
             created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -66,51 +69,86 @@ export async function ensureSchema() {
           ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT UNIQUE;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS base_currency TEXT NOT NULL DEFAULT 'INR';
+          ALTER TABLE users ALTER COLUMN base_currency SET DEFAULT 'INR';
           ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_token TEXT;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_expires_at TIMESTAMPTZ;
-          CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
-          CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_password_token);
 
-          UPDATE subscriptions SET status = 'cancelled' WHERE status::text = 'paused';
+          -- Drop obsolete columns from users (plan tiers, unused scans & reminders)
+          ALTER TABLE users DROP COLUMN IF EXISTS reminder_days_before CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS plan CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS plan_status CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS billing_cycle CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS current_period_start CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS current_period_end CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS trial_ends_at CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS cancel_at_period_end CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS customer_id CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS subscription_external_id CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS ai_scans_used CASCADE;
+          ALTER TABLE users DROP COLUMN IF EXISTS ai_scans_reset_at CASCADE;
 
+          -- Drop obsolete tables
+          DROP TABLE IF EXISTS user_plan_subscriptions CASCADE;
+
+          -- Users Indexes
+          CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL;
+          CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_password_token) WHERE reset_password_token IS NOT NULL;
+
+          -- 2. Subscriptions table
           CREATE TABLE IF NOT EXISTS subscriptions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             name TEXT NOT NULL,
             category TEXT NOT NULL DEFAULT 'other',
             amount NUMERIC(10, 2) NOT NULL CHECK (amount >= 0),
-            currency TEXT NOT NULL DEFAULT 'USD',
+            currency TEXT NOT NULL DEFAULT 'INR',
             billing_cycle billing_cycle NOT NULL DEFAULT 'monthly',
             next_renewal_date DATE NOT NULL,
             status subscription_status NOT NULL DEFAULT 'active',
             notes TEXT,
-            reminder_days_before INT NOT NULL DEFAULT 3,
+            reminder_days_before INT NOT NULL DEFAULT 2,
             last_reminder_sent_at TIMESTAMPTZ,
             is_free_trial BOOLEAN NOT NULL DEFAULT FALSE,
             trial_end_date DATE,
             cancellation_deadline DATE,
             post_trial_amount NUMERIC(10, 2),
-            post_trial_currency TEXT DEFAULT 'USD',
+            post_trial_currency TEXT DEFAULT 'INR',
             created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
           );
 
-          ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS reminder_days_before INT NOT NULL DEFAULT 3;
-          ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS last_reminder_sent_at TIMESTAMPTZ;
-          ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS is_free_trial BOOLEAN NOT NULL DEFAULT FALSE;
-          ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS trial_end_date DATE;
-          ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS cancellation_deadline DATE;
-          ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS post_trial_amount NUMERIC(10, 2);
-          ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS post_trial_currency TEXT DEFAULT 'USD';
+          ALTER TABLE subscriptions ALTER COLUMN currency SET DEFAULT 'INR';
+          ALTER TABLE subscriptions ALTER COLUMN post_trial_currency SET DEFAULT 'INR';
+          ALTER TABLE subscriptions ALTER COLUMN reminder_days_before SET DEFAULT 2;
 
-          CREATE INDEX IF NOT EXISTS idx_subscriptions_trial ON subscriptions(is_free_trial, trial_end_date);
+          -- Subscriptions Indexes
+          CREATE INDEX IF NOT EXISTS idx_subscriptions_user_renewal ON subscriptions(user_id, next_renewal_date ASC);
+          CREATE INDEX IF NOT EXISTS idx_subscriptions_user_status ON subscriptions(user_id, status);
+          CREATE INDEX IF NOT EXISTS idx_subscriptions_active_due ON subscriptions(status, next_renewal_date) WHERE status = 'active';
+          CREATE INDEX IF NOT EXISTS idx_subscriptions_trial ON subscriptions(user_id, is_free_trial, trial_end_date) WHERE is_free_trial = TRUE;
 
-          -- Category harmonization migrations
-          UPDATE subscriptions SET category = 'entertainment' WHERE LOWER(category) IN ('streaming');
-          UPDATE subscriptions SET category = 'software / AI' WHERE LOWER(category) IN ('ai', 'artificial intelligence', 'software', 'cloud', 'infrastructure', 'utilities');
-          UPDATE subscriptions SET category = 'news and media' WHERE LOWER(category) IN ('news');
-          UPDATE subscriptions SET category = 'health & fitness' WHERE LOWER(category) IN ('fitness', 'health');
+          -- 3. Payments table (notes column removed)
+          CREATE TABLE IF NOT EXISTS payments (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            subscription_id UUID NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
+            amount NUMERIC(10, 2) NOT NULL,
+            currency TEXT NOT NULL DEFAULT 'INR',
+            paid_date DATE NOT NULL DEFAULT CURRENT_DATE,
+            billing_cycle billing_cycle NOT NULL DEFAULT 'monthly',
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          );
 
+          -- Remove notes from payments if present
+          ALTER TABLE payments DROP COLUMN IF EXISTS notes CASCADE;
+          ALTER TABLE payments ALTER COLUMN currency SET DEFAULT 'INR';
+
+          -- Payments Indexes
+          CREATE INDEX IF NOT EXISTS idx_payments_sub_date ON payments(subscription_id, paid_date DESC, created_at DESC);
+          CREATE INDEX IF NOT EXISTS idx_payments_user_date ON payments(user_id, paid_date DESC, created_at DESC);
+
+          -- 4. Price History table
           CREATE TABLE IF NOT EXISTS price_history (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             subscription_id UUID NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
@@ -119,18 +157,10 @@ export async function ensureSchema() {
             changed_at TIMESTAMPTZ NOT NULL DEFAULT now()
           );
 
-          CREATE TABLE IF NOT EXISTS payments (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            subscription_id UUID NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
-            amount NUMERIC(10, 2) NOT NULL,
-            currency TEXT NOT NULL DEFAULT 'USD',
-            paid_date DATE NOT NULL DEFAULT CURRENT_DATE,
-            billing_cycle billing_cycle NOT NULL DEFAULT 'monthly',
-            notes TEXT,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-          );
+          -- Price History Indexes
+          CREATE INDEX IF NOT EXISTS idx_price_history_sub_changed ON price_history(subscription_id, changed_at DESC);
 
+          -- 5. Reminders table
           CREATE TABLE IF NOT EXISTS reminders (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -142,6 +172,10 @@ export async function ensureSchema() {
             message TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT now()
           );
+
+          -- Reminders Indexes
+          CREATE INDEX IF NOT EXISTS idx_reminders_user_pending ON reminders(user_id, due_date ASC) WHERE status = 'pending';
+          CREATE INDEX IF NOT EXISTS idx_reminders_sub_due ON reminders(user_id, subscription_id, due_date);
         `);
       } catch (err) {
         console.error('[ensureSchema error]', err.message);

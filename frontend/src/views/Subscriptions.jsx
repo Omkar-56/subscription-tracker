@@ -87,7 +87,7 @@ export default function Subscriptions() {
   const [historySub, setHistorySub] = useState(null);
   const [guideSub, setGuideSub] = useState(null);
 
-  const baseCurrency = user?.baseCurrency || ctxBaseCurrency || 'USD';
+  const baseCurrency = user?.baseCurrency || ctxBaseCurrency || 'INR';
 
   // Search, Filter & Sort States
   const [searchTerm, setSearchTerm] = useState('');
@@ -275,12 +275,12 @@ export default function Subscriptions() {
         name: subscription.name,
         category: subscription.category || 'other',
         amount: Number(subscription.amount),
-        currency: subscription.currency || 'USD',
+        currency: subscription.currency || 'INR',
         billingCycle: subscription.billingCycle || 'monthly',
         nextRenewalDate: String(subscription.nextRenewalDate).slice(0, 10),
         status: newStatus,
         notes: subscription.notes || '',
-        reminderDaysBefore: subscription.reminderDaysBefore || 3,
+        reminderDaysBefore: subscription.reminderDaysBefore || 2,
         isFreeTrial: Boolean(subscription.isFreeTrial),
         trialEndDate: subscription.trialEndDate ? String(subscription.trialEndDate).slice(0, 10) : null,
         cancellationDeadline: subscription.cancellationDeadline ? String(subscription.cancellationDeadline).slice(0, 10) : null,
@@ -461,7 +461,7 @@ export default function Subscriptions() {
             nextRenewalDate: editing.nextRenewalDate?.slice(0, 10),
             status: editing.status,
             notes: editing.notes || '',
-            reminderDaysBefore: editing.reminderDaysBefore || 3,
+            reminderDaysBefore: editing.reminderDaysBefore || 2,
             isFreeTrial: Boolean(editing.isFreeTrial),
             trialEndDate: editing.trialEndDate ? String(editing.trialEndDate).slice(0, 10) : '',
             cancellationDeadline: editing.cancellationDeadline ? String(editing.cancellationDeadline).slice(0, 10) : '',

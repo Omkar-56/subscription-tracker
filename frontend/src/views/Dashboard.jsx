@@ -111,7 +111,7 @@ export default function Dashboard() {
   const [guideSub, setGuideSub] = useState(null);
   const [error, setError] = useState('');
 
-  const currentCurrency = user?.baseCurrency || ctxBaseCurrency || 'USD';
+  const currentCurrency = user?.baseCurrency || ctxBaseCurrency || 'INR';
 
   function refresh() {
     api.dashboardSummary(14, currentCurrency)
@@ -167,7 +167,7 @@ export default function Dashboard() {
         name: subscription.name,
         category: subscription.category || 'other',
         amount: Number(subscription.amount),
-        currency: subscription.currency || 'USD',
+        currency: subscription.currency || 'INR',
         billingCycle: subscription.billingCycle || 'monthly',
         nextRenewalDate: String(subscription.nextRenewalDate).slice(0, 10),
         status: newStatus,

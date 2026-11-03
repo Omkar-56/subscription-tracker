@@ -9,7 +9,7 @@ import { formatCategoryLabel, getCategoryChartColor } from '../utils/brands';
 
 export default function SubscriptionCard({
   subscription,
-  baseCurrency = 'USD',
+  baseCurrency = 'INR',
   onEdit,
   onDelete,
   onConfirmPayment,

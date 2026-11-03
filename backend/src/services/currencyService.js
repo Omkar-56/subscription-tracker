@@ -4,22 +4,17 @@ let lastFetchedAt = 0;
 const CACHE_TTL_MS = 1000 * 60 * 60 * 1; 
 
 export const SUPPORTED_CURRENCIES = [
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
   { code: 'USD', symbol: '$', name: 'US Dollar' },
   { code: 'EUR', symbol: '€', name: 'Euro' },
-  { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
   { code: 'CAD', symbol: 'CA$', name: 'Canadian Dollar' },
-  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
-  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
-  { code: 'SGD', symbol: 'SG$', name: 'Singapore Dollar' },
-  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
-  { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
-  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
-  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
-  { code: 'MXN', symbol: 'MX$', name: 'Mexican Peso' },
   { code: 'AED', symbol: 'AED', name: 'UAE Dirham' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'SGD', symbol: 'SG$', name: 'Singapore Dollar' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
 ];
+
+export const ALLOWED_CURRENCY_CODES = SUPPORTED_CURRENCIES.map((c) => c.code);
 
 /**
  * Fetches real-time exchange rates with USD as the base.
@@ -36,10 +31,9 @@ async function fetchLiveRates() {
     const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(6000) });
     if (res.ok) {
       const data = await res.json();
-      if (data && data.rates && Object.keys(data.rates).length > 10) {
+      if (data && data.rates && Object.keys(data.rates).length > 5) {
         cachedRates = { ...data.rates, USD: 1.0 };
         lastFetchedAt = now;
-        console.log(`[CurrencyService] Updated live rates via ExchangeRate-API. INR: ${cachedRates.INR}, EUR: ${cachedRates.EUR}`);
         return cachedRates;
       }
     }
@@ -55,7 +49,6 @@ async function fetchLiveRates() {
       if (data && data.rates) {
         cachedRates = { ...data.rates, USD: 1.0 };
         lastFetchedAt = now;
-        console.log(`[CurrencyService] Updated live rates via Frankfurter API. INR: ${cachedRates.INR}, EUR: ${cachedRates.EUR}`);
         return cachedRates;
       }
     }
@@ -63,9 +56,18 @@ async function fetchLiveRates() {
     console.warn('[CurrencyService] Secondary rates API error:', err.message);
   }
 
-  // Return existing cache or 1.0 mapping if internet is completely unreachable
+  // Fallback offline rates for the supported 8 currencies if offline
   if (Object.keys(cachedRates).length === 0) {
-    return { USD: 1.0, EUR: 0.87, GBP: 0.74, INR: 95.8, CAD: 1.36, AUD: 1.52, JPY: 155.0 };
+    return {
+      USD: 1.0,
+      INR: 87.5,
+      EUR: 0.92,
+      CAD: 1.39,
+      AED: 3.67,
+      JPY: 153.2,
+      SGD: 1.34,
+      AUD: 1.54,
+    };
   }
 
   return cachedRates;
@@ -76,15 +78,15 @@ export const currencyService = {
     return fetchLiveRates();
   },
 
-  async convert(amount, from = 'USD', to = 'USD') {
+  async convert(amount, from = 'INR', to = 'INR') {
     const num = Number(amount) || 0;
-    const f = (from || 'USD').toUpperCase();
-    const t = (to || 'USD').toUpperCase();
+    const f = (from || 'INR').toUpperCase();
+    const t = (to || 'INR').toUpperCase();
     if (f === t) return num;
 
     const rates = await fetchLiveRates();
-    const rateFrom = rates[f] || (f === 'USD' ? 1 : 1);
-    const rateTo = rates[t] || (t === 'USD' ? 1 : 1);
+    const rateFrom = rates[f] || (f === 'USD' ? 1 : rates.INR ? rates.INR / 87.5 : 1);
+    const rateTo = rates[t] || (t === 'USD' ? 1 : rates.INR ? rates.INR / 87.5 : 1);
 
     // Convert from -> USD base -> target currency
     const amountInUSD = num / rateFrom;
@@ -94,5 +96,10 @@ export const currencyService = {
 
   getSupportedCurrencies() {
     return SUPPORTED_CURRENCIES;
+  },
+
+  isSupported(currency) {
+    if (!currency) return false;
+    return ALLOWED_CURRENCY_CODES.includes(String(currency).toUpperCase());
   },
 };

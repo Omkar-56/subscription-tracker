@@ -5,6 +5,7 @@ import { userModel } from '../models/userModel.js';
 import { env } from '../config/env.js';
 import { ApiError } from '../utils/ApiError.js';
 import { sendEmail, buildPasswordResetEmailHtml, buildPasswordResetEmailText } from './emailService.js';
+import { ALLOWED_CURRENCY_CODES } from './currencyService.js';
 
 const SALT_ROUNDS = 10;
 
@@ -15,13 +16,17 @@ function signToken(user) {
 }
 
 export const authService = {
-  async register({ name, email, password, baseCurrency = 'USD' }) {
+  async register({ name, email, password, baseCurrency = 'INR' }) {
     const existing = await userModel.findByEmail(email);
     if (existing) {
       throw new ApiError(409, 'An account with this email already exists');
     }
+    const cleanCurrency = (baseCurrency || 'INR').toUpperCase();
+    if (!ALLOWED_CURRENCY_CODES.includes(cleanCurrency)) {
+      throw new ApiError(400, `Unsupported currency. Allowed: ${ALLOWED_CURRENCY_CODES.join(', ')}`);
+    }
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const user = await userModel.create({ name, email, passwordHash, baseCurrency });
+    const user = await userModel.create({ name, email, passwordHash, baseCurrency: cleanCurrency });
     return { user, token: signToken(user) };
   },
 
@@ -43,7 +48,7 @@ export const authService = {
       email: user.email,
       googleId: user.googleId,
       avatarUrl: user.avatarUrl,
-      baseCurrency: user.baseCurrency || 'USD',
+      baseCurrency: user.baseCurrency || 'INR',
     };
     return { user: safeUser, token: signToken(safeUser) };
   },
@@ -92,7 +97,7 @@ export const authService = {
           googleId,
           avatarUrl,
           passwordHash: null,
-          baseCurrency: 'USD',
+          baseCurrency: 'INR',
         });
       }
     }
@@ -103,7 +108,7 @@ export const authService = {
       email: user.email,
       googleId: user.googleId,
       avatarUrl: user.avatarUrl,
-      baseCurrency: user.baseCurrency || 'USD',
+      baseCurrency: user.baseCurrency || 'INR',
     };
 
     return { user: safeUser, token: signToken(safeUser) };
@@ -204,7 +209,10 @@ export const authService = {
   },
 
   async updateCurrency(userId, currency) {
-    const validCurrency = (currency || 'USD').toUpperCase();
+    const validCurrency = (currency || 'INR').toUpperCase();
+    if (!ALLOWED_CURRENCY_CODES.includes(validCurrency)) {
+      throw new ApiError(400, `Unsupported currency. Allowed: ${ALLOWED_CURRENCY_CODES.join(', ')}`);
+    }
     const updated = await userModel.updateBaseCurrency(userId, validCurrency);
     return updated;
   },

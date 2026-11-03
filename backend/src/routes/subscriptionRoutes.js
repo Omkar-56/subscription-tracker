@@ -12,19 +12,16 @@ router.use(requireAuth);
 router.get('/', subscriptionController.list);
 router.post('/', validate(subscriptionSchema), subscriptionController.create);
 router.post('/parse-receipt', subscriptionController.parseReceipt);
-router.get('/reminders', subscriptionController.reminders);
-router.post('/reminders/:id/dismiss', subscriptionController.dismissReminder);
-router.get('/payments/recent', subscriptionController.allPayments);
+router.get('/payments/recent', subscriptionController.getAllPayments);
 
 // Individual item routes
 router.get('/:id', subscriptionController.get);
 router.get('/:id/price-history', subscriptionController.priceHistory);
-router.get('/:id/payments', subscriptionController.payments);
-router.post('/:id/advance', subscriptionController.advanceCycle);
+router.get('/:id/payments', subscriptionController.getPayments);
+router.post('/:id/advance', subscriptionController.advance);
 router.post('/:id/confirm-payment', subscriptionController.confirmPayment);
 router.post('/:id/convert-trial', subscriptionController.convertTrial);
-router.post('/:id/remind', subscriptionController.triggerReminder);
 router.put('/:id', validate(subscriptionSchema), subscriptionController.update);
-router.delete('/:id', subscriptionController.remove);
+router.delete('/:id', subscriptionController.delete);
 
 export default router;

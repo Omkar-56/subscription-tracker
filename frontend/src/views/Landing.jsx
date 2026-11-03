@@ -19,7 +19,7 @@ const FEATURES = [
   {
     icon: '💱',
     title: 'Real-Time Currency Normalization',
-    desc: 'Pay in USD, EUR, INR, GBP, or JPY. SubTrack uses live European Central Bank exchange rates to show your true global spend.',
+    desc: 'Pay in INR, USD, EUR, CAD, AED, JPY, SGD, or AUD. SubTrack uses live European Central Bank exchange rates to show your true global spend.',
   },
   {
     icon: '📊',
