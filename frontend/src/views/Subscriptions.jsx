@@ -203,8 +203,13 @@ export default function Subscriptions() {
       ...data,
       name: rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : '',
     };
+    setShowForm(false);
+
     try {
-      await api.createSubscription(formattedData);
+      const res = await api.createSubscription(formattedData);
+      if (res?.subscription) {
+        setSubscriptions((prev) => [res.subscription, ...prev]);
+      }
     } catch {
       const guestSubs = getGuestSubs();
       const newSub = {
@@ -215,8 +220,8 @@ export default function Subscriptions() {
         convertedAmount: Number(formattedData.amount),
       };
       saveGuestSubs([newSub, ...guestSubs]);
+      setSubscriptions((prev) => [newSub, ...prev]);
     }
-    setShowForm(false);
     refresh();
   }
 
@@ -226,19 +231,30 @@ export default function Subscriptions() {
       ...data,
       name: rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : '',
     };
+    const idToEdit = editing?.id;
+    setEditing(null);
+
+    // Optimistic update
+    setSubscriptions((prev) =>
+      prev.map((s) => (s.id === idToEdit ? { ...s, ...formattedData, amount: Number(formattedData.amount) } : s))
+    );
+
     try {
-      await api.updateSubscription(editing.id, formattedData);
+      await api.updateSubscription(idToEdit, formattedData);
     } catch {
       const guestSubs = getGuestSubs().map((s) =>
-        s.id === editing.id ? { ...s, ...formattedData, amount: Number(formattedData.amount) } : s
+        s.id === idToEdit ? { ...s, ...formattedData, amount: Number(formattedData.amount) } : s
       );
       saveGuestSubs(guestSubs);
     }
-    setEditing(null);
     refresh();
   }
 
   async function handleConvertTrial(subscription) {
+    // Optimistic update
+    setSubscriptions((prev) =>
+      prev.map((s) => (s.id === subscription.id ? { ...s, isFreeTrial: false } : s))
+    );
     try {
       await api.convertTrial(subscription.id);
     } catch {
@@ -252,11 +268,26 @@ export default function Subscriptions() {
 
   async function handleConfirmPayment(paymentData) {
     if (!payingSub) return;
+    const subToPay = payingSub;
+    setPayingSub(null);
+
+    // Optimistic update
+    setSubscriptions((prev) =>
+      prev.map((s) => {
+        if (s.id === subToPay.id) {
+          const next = new Date(s.nextRenewalDate);
+          next.setMonth(next.getMonth() + 1);
+          return { ...s, nextRenewalDate: next.toISOString().slice(0, 10) };
+        }
+        return s;
+      })
+    );
+
     try {
-      await api.confirmPayment(payingSub.id, paymentData);
+      await api.confirmPayment(subToPay.id, paymentData);
     } catch {
       const guestSubs = getGuestSubs().map((s) => {
-        if (s.id === payingSub.id) {
+        if (s.id === subToPay.id) {
           const next = new Date(s.nextRenewalDate);
           next.setMonth(next.getMonth() + 1);
           return { ...s, nextRenewalDate: next.toISOString().slice(0, 10) };
@@ -265,11 +296,15 @@ export default function Subscriptions() {
       });
       saveGuestSubs(guestSubs);
     }
-    setPayingSub(null);
     refresh();
   }
 
   async function handleStatusChange(subscription, newStatus) {
+    // Optimistic update
+    setSubscriptions((prev) =>
+      prev.map((s) => (s.id === subscription.id ? { ...s, status: newStatus } : s))
+    );
+
     try {
       await api.updateSubscription(subscription.id, {
         name: subscription.name,
@@ -298,6 +333,10 @@ export default function Subscriptions() {
 
   async function handleDelete(subscription) {
     if (!confirm(`Delete ${subscription.name}?`)) return;
+
+    // Optimistic removal: remove immediately from UI so there's 0 delay
+    setSubscriptions((prev) => prev.filter((s) => s.id !== subscription.id));
+
     try {
       await api.deleteSubscription(subscription.id);
     } catch {
