@@ -114,22 +114,35 @@ export default function Dashboard() {
   const currentCurrency = user?.baseCurrency || ctxBaseCurrency || 'INR';
 
   function refresh() {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('subtrack_token') : null;
+    if (!token && !user) {
+      setSummary(computeGuestSummary(currentCurrency));
+      setForecast(computeGuestForecast(currentCurrency));
+      return;
+    }
+
     api.dashboardSummary(14, currentCurrency)
       .then((data) => {
         setSummary(data);
         setError('');
       })
-      .catch(() => {
-        setSummary(computeGuestSummary(currentCurrency));
-        setError('');
+      .catch((err) => {
+        if (err?.status === 401) {
+          setSummary(computeGuestSummary(currentCurrency));
+        } else {
+          console.error('Failed to load dashboard summary:', err);
+          setError(err?.message || 'Failed to load overview data');
+        }
       });
 
     api.dashboardForecast(12, currentCurrency)
       .then((data) => {
         setForecast(data);
       })
-      .catch(() => {
-        setForecast(computeGuestForecast(currentCurrency));
+      .catch((err) => {
+        if (err?.status === 401) {
+          setForecast(computeGuestForecast(currentCurrency));
+        }
       });
   }
 
@@ -181,9 +194,23 @@ export default function Dashboard() {
   }
 
   if (error) return <p className="text-sm text-rust">{error}</p>;
-  if (!summary) return <p className="text-sm text-ink/50">Loading…</p>;
+  if (!summary) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-28 rounded-xl bg-ink/5 border border-ink/10" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-64 rounded-xl bg-ink/5 border border-ink/10" />
+          <div className="h-64 rounded-xl bg-ink/5 border border-ink/10" />
+        </div>
+      </div>
+    );
+  }
 
-  const baseCurrency = summary.baseCurrency || currentCurrency;
+    const baseCurrency = summary.baseCurrency || currentCurrency;
   const pendingReminders = summary.pendingReminders || [];
   const activeTrials = summary.activeTrials || [];
   const savings = summary.savings || {

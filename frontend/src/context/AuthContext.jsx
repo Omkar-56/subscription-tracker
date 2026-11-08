@@ -32,7 +32,14 @@ export function AuthProvider({ children }) {
     api
       .me()
       .then(({ user }) => setUser(user))
-      .catch(() => localStorage.removeItem('subtrack_token'))
+      .catch((err) => {
+        // ONLY invalidate token if server explicitly returned 401 Unauthorized
+        // Never wipe credentials on network errors, timeouts, or 5xx server cold starts
+        if (err?.status === 401) {
+          localStorage.removeItem('subtrack_token');
+          setUser(null);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 

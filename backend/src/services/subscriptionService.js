@@ -56,10 +56,15 @@ export function getNextActiveRenewalDate(renewalDateInput, cycle, today = new Da
   return formatDateString(current);
 }
 
-async function syncOverdueSubscriptions(userId, subscriptions) {
+/**
+ * Calculates in-memory projected renewal dates for overdue subscriptions.
+ * Updates the database in the background without blocking the GET response.
+ */
+function syncOverdueSubscriptions(userId, subscriptions) {
+  if (!Array.isArray(subscriptions)) return [];
   const today = new Date();
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const updatePromises = [];
+  const backgroundUpdates = [];
 
   for (const sub of subscriptions) {
     if (sub.status === 'active' && !sub.isFreeTrial) {
@@ -68,18 +73,17 @@ async function syncOverdueSubscriptions(userId, subscriptions) {
         const nextDateStr = getNextActiveRenewalDate(sub.nextRenewalDate, sub.billingCycle, today);
         if (nextDateStr !== formatDateString(subDate)) {
           sub.nextRenewalDate = nextDateStr;
-          updatePromises.push(
-            subscriptionModel.updateRenewalDate(userId, sub.id, nextDateStr).catch((e) => {
-              console.warn(`[syncOverdueSubscriptions] failed to update sub ${sub.id}:`, e.message);
-            })
+          backgroundUpdates.push(
+            subscriptionModel.updateRenewalDate(userId, sub.id, nextDateStr).catch(() => {})
           );
         }
       }
     }
   }
 
-  if (updatePromises.length > 0) {
-    await Promise.all(updatePromises);
+  // Non-blocking background sync
+  if (backgroundUpdates.length > 0) {
+    Promise.all(backgroundUpdates).catch(() => {});
   }
 
   return subscriptions;
@@ -135,8 +139,8 @@ export const subscriptionService = {
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       if (parseDateParts(sub.nextRenewalDate) < todayStart) {
         const nextDateStr = getNextActiveRenewalDate(sub.nextRenewalDate, sub.billingCycle, today);
-        await subscriptionModel.updateRenewalDate(userId, sub.id, nextDateStr).catch(() => {});
         sub.nextRenewalDate = nextDateStr;
+        subscriptionModel.updateRenewalDate(userId, sub.id, nextDateStr).catch(() => {});
       }
     }
 
@@ -233,9 +237,17 @@ export const subscriptionService = {
   },
 
   async dashboard(userId, { upcomingWithinDays = 14, currency = null } = {}) {
-    const baseCurrency = await resolveUserBaseCurrency(userId, currency);
-    const rawSubs = await subscriptionModel.findAllForUser(userId);
-    const all = await syncOverdueSubscriptions(userId, rawSubs);
+    // 1. Fetch user, raw subscriptions, reminders, price increases, and live rates all concurrently
+    const [user, rawSubs, pendingReminders, recentPriceIncreases, rates] = await Promise.all([
+      userModel.findById(userId),
+      subscriptionModel.findAllForUser(userId),
+      reminderModel.findPendingForUser(userId).catch(() => []),
+      priceHistoryModel.findRecentIncreasesForUser(userId, 30).catch(() => []),
+      currencyService.getRates(),
+    ]);
+
+    const baseCurrency = (currency && currency.length === 3 ? currency : user?.baseCurrency) || 'INR';
+    const all = syncOverdueSubscriptions(userId, rawSubs);
     const active = all.filter((s) => s.status === 'active');
     const cancelled = all.filter((s) => s.status === 'cancelled');
 
@@ -243,7 +255,7 @@ export const subscriptionService = {
     const byCategory = {};
 
     for (const s of active) {
-      const converted = await currencyService.convert(s.amount, s.currency, baseCurrency);
+      const converted = currencyService.convertWithRates(s.amount, s.currency, baseCurrency, rates);
       const months = CYCLE_TO_MONTHS[s.billingCycle] || 1;
       const normalizedMonthly = converted / months;
 
@@ -266,40 +278,13 @@ export const subscriptionService = {
     for (const s of active) {
       const ren = parseDateParts(s.nextRenewalDate);
       if (ren >= todayStart && ren <= horizon) {
-        const converted = await currencyService.convert(s.amount, s.currency, baseCurrency);
+        const converted = currencyService.convertWithRates(s.amount, s.currency, baseCurrency, rates);
         upcomingRenewals.push({
           ...s,
           convertedAmount: converted,
         });
       }
     }
-
-    // Parallel fetch price history for all subscriptions to avoid N+1 waterfall
-    const priceHistoryResults = await Promise.all(
-      all.map((s) => priceHistoryModel.findForSubscription(userId, s.id).catch(() => []))
-    );
-
-    const recentPriceIncreases = [];
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    all.forEach((s, idx) => {
-      const changes = priceHistoryResults[idx] || [];
-      const recent = changes.find(
-        (c) => new Date(c.changedAt) >= thirtyDaysAgo && Number(c.newAmount) > Number(c.oldAmount)
-      );
-      if (recent) {
-        recentPriceIncreases.push({
-          subscriptionId: s.id,
-          name: s.name,
-          category: s.category,
-          oldAmount: Number(recent.oldAmount),
-          newAmount: Number(recent.newAmount),
-          currency: s.currency,
-          changedAt: recent.changedAt,
-        });
-      }
-    });
 
     const activeTrials = [];
     for (const s of active) {
@@ -316,12 +301,10 @@ export const subscriptionService = {
 
     let monthlySaved = 0;
     for (const s of cancelled) {
-      const converted = await currencyService.convert(s.amount, s.currency, baseCurrency);
+      const converted = currencyService.convertWithRates(s.amount, s.currency, baseCurrency, rates);
       const months = CYCLE_TO_MONTHS[s.billingCycle] || 1;
       monthlySaved += converted / months;
     }
-
-    const pendingReminders = await reminderModel.findPendingForUser(userId).catch(() => []);
 
     return {
       baseCurrency,
@@ -351,9 +334,14 @@ export const subscriptionService = {
   },
 
   async forecast(userId, { monthsAhead = 12, currency = null } = {}) {
-    const baseCurrency = await resolveUserBaseCurrency(userId, currency);
-    const rawSubs = await subscriptionModel.findAllForUser(userId);
-    const subs = await syncOverdueSubscriptions(userId, rawSubs);
+    const [user, rawSubs, rates] = await Promise.all([
+      userModel.findById(userId),
+      subscriptionModel.findAllForUser(userId),
+      currencyService.getRates(),
+    ]);
+
+    const baseCurrency = (currency && currency.length === 3 ? currency : user?.baseCurrency) || 'INR';
+    const subs = syncOverdueSubscriptions(userId, rawSubs);
     const active = subs.filter((s) => s.status === 'active');
 
     const today = new Date();
@@ -372,7 +360,7 @@ export const subscriptionService = {
 
         while (renewalDate <= endOfMonth && guard < 60) {
           if (renewalDate >= startOfMonth) {
-            const converted = await currencyService.convert(s.amount, s.currency, baseCurrency);
+            const converted = currencyService.convertWithRates(s.amount, s.currency, baseCurrency, rates);
             total += converted;
             renewals.push({
               subscriptionId: s.id,
@@ -401,16 +389,23 @@ export const subscriptionService = {
   },
 
   async trend(userId, { monthsBack = 12, currency = null } = {}) {
-    const baseCurrency = await resolveUserBaseCurrency(userId, currency);
-    const subs = await subscriptionModel.findAllForUser(userId);
+    const [user, subs, allChanges, rates] = await Promise.all([
+      userModel.findById(userId),
+      subscriptionModel.findAllForUser(userId),
+      priceHistoryModel.findAllForUser(userId).catch(() => []),
+      currencyService.getRates(),
+    ]);
 
+    const baseCurrency = (currency && currency.length === 3 ? currency : user?.baseCurrency) || 'INR';
+
+    // Group price history by subscriptionId in memory (1 single query instead of N queries)
     const priceHistories = {};
-    const historyResults = await Promise.all(
-      subs.map((s) => priceHistoryModel.findForSubscription(userId, s.id).catch(() => []))
-    );
-    subs.forEach((s, idx) => {
-      priceHistories[s.id] = historyResults[idx] || [];
-    });
+    for (const change of allChanges) {
+      if (!priceHistories[change.subscriptionId]) {
+        priceHistories[change.subscriptionId] = [];
+      }
+      priceHistories[change.subscriptionId].push(change);
+    }
 
     const today = new Date();
     const months = [];
@@ -431,7 +426,7 @@ export const subscriptionService = {
         }
 
         const amountAtPoint = amountAsOf(s, priceHistories[s.id], pointEnd);
-        const converted = await currencyService.convert(amountAtPoint, s.currency, baseCurrency);
+        const converted = currencyService.convertWithRates(amountAtPoint, s.currency, baseCurrency, rates);
         const cycleMonths = CYCLE_TO_MONTHS[s.billingCycle] || 1;
         total += converted / cycleMonths;
       }

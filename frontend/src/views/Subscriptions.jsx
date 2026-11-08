@@ -113,32 +113,45 @@ export default function Subscriptions() {
   const legendRef = useRef(null);
 
   async function refresh() {
-    try {
-      const [{ subscriptions: rawSubs }, summary] = await Promise.all([
-        api.listSubscriptions(),
-        api.dashboardSummary(14, baseCurrency),
-      ]);
-
-      const upcomingMap = new Map((summary?.upcomingRenewals || []).map((u) => [u.id, u]));
-      const enriched = rawSubs.map((s) => {
-        const matchingUpcoming = upcomingMap.get(s.id);
-        if (matchingUpcoming) {
-          return { ...s, convertedAmount: matchingUpcoming.convertedAmount };
-        }
-        return s;
-      });
-
-      setSubscriptions(enriched);
-      setPriceIncreases(summary?.recentPriceIncreases || []);
-      setError('');
-    } catch {
-      // Fallback to guest subscriptions when unauthenticated or offline
+    const token = typeof window !== 'undefined' ? localStorage.getItem('subtrack_token') : null;
+    if (!token && !user) {
       setSubscriptions(getGuestSubs());
+      return;
+    }
+
+    try {
+      // 1. Fetch subscriptions list directly and display immediately
+      const res = await api.listSubscriptions();
+      const rawSubs = res?.subscriptions || [];
+      setSubscriptions(rawSubs);
       setError('');
+
+      // 2. Fetch summary non-blockingly to enrich price increases and conversions
+      api.dashboardSummary(14, baseCurrency)
+        .then((summary) => {
+          if (summary) {
+            setPriceIncreases(summary.recentPriceIncreases || []);
+            const upcomingMap = new Map((summary.upcomingRenewals || []).map((u) => [u.id, u]));
+            setSubscriptions((current) =>
+              current.map((s) => {
+                const match = upcomingMap.get(s.id);
+                return match ? { ...s, convertedAmount: match.convertedAmount } : s;
+              })
+            );
+          }
+        })
+        .catch(() => {});
+    } catch (err) {
+      if (err?.status === 401) {
+        setSubscriptions(getGuestSubs());
+      } else {
+        console.error('Failed to load subscriptions:', err);
+        setError(err?.message || 'Failed to load subscriptions');
+      }
     }
   }
 
-  useEffect(() => { refresh(); }, [user, baseCurrency]);
+    useEffect(() => { refresh(); }, [user, baseCurrency]);
 
   useEffect(() => {
     function onExternalRefresh() { refresh(); }
