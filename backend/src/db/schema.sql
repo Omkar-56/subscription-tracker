@@ -1,22 +1,24 @@
--- SubTrack Schema (Minimal, High-Performance, Cloudflare-Ready)
+-- SubTrack Streamlined Database Schema
+-- Production Ready & Cloudflare / Supabase Compatible
+
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Enums
-DO $$ BEGIN
-  CREATE TYPE billing_cycle AS ENUM ('weekly', 'monthly', 'quarterly', 'yearly');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-DO $$ BEGIN
-  CREATE TYPE subscription_status AS ENUM ('active', 'cancelled');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'billing_cycle') THEN
+    CREATE TYPE billing_cycle AS ENUM ('weekly', 'monthly', 'quarterly', 'yearly');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'subscription_status') THEN
+    CREATE TYPE subscription_status AS ENUM ('active', 'cancelled');
+  END IF;
+END
+$$;
 
 -- 1. Users Table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
+  email TEXT UNIQUE NOT NULL,
   password_hash TEXT,
   google_id TEXT UNIQUE,
   avatar_url TEXT,
@@ -26,34 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Ensure users structure & cleanup obsolete columns
-ALTER TABLE users ADD COLUMN IF NOT EXISTS base_currency TEXT NOT NULL DEFAULT 'INR';
-ALTER TABLE users ALTER COLUMN base_currency SET DEFAULT 'INR';
-ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
-ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_token TEXT;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_expires_at TIMESTAMPTZ;
-
--- Drop obsolete columns from users (plan tiers, unused scans & reminders)
-ALTER TABLE users DROP COLUMN IF EXISTS reminder_days_before CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS plan CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS plan_status CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS billing_cycle CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS current_period_start CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS current_period_end CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS trial_ends_at CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS cancel_at_period_end CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS customer_id CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS subscription_external_id CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS ai_scans_used CASCADE;
-ALTER TABLE users DROP COLUMN IF EXISTS ai_scans_reset_at CASCADE;
-
--- Drop obsolete tables
-DROP TABLE IF EXISTS user_plan_subscriptions CASCADE;
-
 -- Users Indexes
-CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_password_token) WHERE reset_password_token IS NOT NULL;
 
@@ -80,10 +55,6 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-ALTER TABLE subscriptions ALTER COLUMN currency SET DEFAULT 'INR';
-ALTER TABLE subscriptions ALTER COLUMN post_trial_currency SET DEFAULT 'INR';
-ALTER TABLE subscriptions ALTER COLUMN reminder_days_before SET DEFAULT 2;
-
 -- Subscriptions Indexes
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_renewal ON subscriptions(user_id, next_renewal_date ASC);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_status ON subscriptions(user_id, status);
@@ -101,10 +72,6 @@ CREATE TABLE IF NOT EXISTS payments (
   billing_cycle billing_cycle NOT NULL DEFAULT 'monthly',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
--- Remove notes column from payments if present
-ALTER TABLE payments DROP COLUMN IF EXISTS notes CASCADE;
-ALTER TABLE payments ALTER COLUMN currency SET DEFAULT 'INR';
 
 -- Payments Indexes
 CREATE INDEX IF NOT EXISTS idx_payments_sub_date ON payments(subscription_id, paid_date DESC, created_at DESC);
@@ -138,3 +105,4 @@ CREATE TABLE IF NOT EXISTS reminders (
 -- Reminders Indexes
 CREATE INDEX IF NOT EXISTS idx_reminders_user_pending ON reminders(user_id, due_date ASC) WHERE status = 'pending';
 CREATE INDEX IF NOT EXISTS idx_reminders_sub_due ON reminders(user_id, subscription_id, due_date);
+CREATE INDEX IF NOT EXISTS idx_reminders_subscription_id ON reminders(subscription_id);

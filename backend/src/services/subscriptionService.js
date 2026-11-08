@@ -59,6 +59,7 @@ export function getNextActiveRenewalDate(renewalDateInput, cycle, today = new Da
 async function syncOverdueSubscriptions(userId, subscriptions) {
   const today = new Date();
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const updatePromises = [];
 
   for (const sub of subscriptions) {
     if (sub.status === 'active' && !sub.isFreeTrial) {
@@ -66,12 +67,21 @@ async function syncOverdueSubscriptions(userId, subscriptions) {
       if (subDate < todayStart) {
         const nextDateStr = getNextActiveRenewalDate(sub.nextRenewalDate, sub.billingCycle, today);
         if (nextDateStr !== formatDateString(subDate)) {
-          await subscriptionModel.updateRenewalDate(userId, sub.id, nextDateStr).catch(() => {});
           sub.nextRenewalDate = nextDateStr;
+          updatePromises.push(
+            subscriptionModel.updateRenewalDate(userId, sub.id, nextDateStr).catch((e) => {
+              console.warn(`[syncOverdueSubscriptions] failed to update sub ${sub.id}:`, e.message);
+            })
+          );
         }
       }
     }
   }
+
+  if (updatePromises.length > 0) {
+    await Promise.all(updatePromises);
+  }
+
   return subscriptions;
 }
 
@@ -264,12 +274,17 @@ export const subscriptionService = {
       }
     }
 
+    // Parallel fetch price history for all subscriptions to avoid N+1 waterfall
+    const priceHistoryResults = await Promise.all(
+      all.map((s) => priceHistoryModel.findForSubscription(userId, s.id).catch(() => []))
+    );
+
     const recentPriceIncreases = [];
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    for (const s of all) {
-      const changes = await priceHistoryModel.findForSubscription(userId, s.id);
+    all.forEach((s, idx) => {
+      const changes = priceHistoryResults[idx] || [];
       const recent = changes.find(
         (c) => new Date(c.changedAt) >= thirtyDaysAgo && Number(c.newAmount) > Number(c.oldAmount)
       );
@@ -284,7 +299,7 @@ export const subscriptionService = {
           changedAt: recent.changedAt,
         });
       }
-    }
+    });
 
     const activeTrials = [];
     for (const s of active) {
@@ -306,7 +321,7 @@ export const subscriptionService = {
       monthlySaved += converted / months;
     }
 
-    const pendingReminders = await reminderModel.findPendingForUser(userId);
+    const pendingReminders = await reminderModel.findPendingForUser(userId).catch(() => []);
 
     return {
       baseCurrency,
@@ -390,9 +405,12 @@ export const subscriptionService = {
     const subs = await subscriptionModel.findAllForUser(userId);
 
     const priceHistories = {};
-    for (const s of subs) {
-      priceHistories[s.id] = await priceHistoryModel.findForSubscription(userId, s.id);
-    }
+    const historyResults = await Promise.all(
+      subs.map((s) => priceHistoryModel.findForSubscription(userId, s.id).catch(() => []))
+    );
+    subs.forEach((s, idx) => {
+      priceHistories[s.id] = historyResults[idx] || [];
+    });
 
     const today = new Date();
     const months = [];
