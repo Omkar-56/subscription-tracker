@@ -351,7 +351,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ROW 1: Overview (left) and Spend by Category (right) */}
+      {/* ROW 1: Overview (left) and Renewing soon (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Side: Overview Header & Stat Cards */}
         <section className="lg:col-span-6">
@@ -390,44 +390,8 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Right Side: Spend by category with Interactive Donut Chart */}
-        <section className="lg:col-span-6 pt-1 sm:pt-1.5">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-lg sm:text-xl font-semibold">Spend by category</h2>
-            <span className="text-xs text-ink/70">
-              {summary.categoryBreakdown.length} {summary.categoryBreakdown.length === 1 ? 'category' : 'categories'}
-            </span>
-          </div>
-          <div className="mt-3">
-            <CategoryBreakdown
-              categories={summary.categoryBreakdown}
-              totalMonthly={summary.totalMonthly}
-              currency={baseCurrency}
-            />
-          </div>
-        </section>
-      </div>
-
-      {/* ROW 2: 12-month forecast (left) and Renewing soon (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-        {/* Left Side: 12-month forecast */}
-        <section className="lg:col-span-6">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-lg sm:text-xl font-semibold">12-month forecast</h2>
-            <span className="text-xs text-ink/70">Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong></span>
-          </div>
-          {forecast ? (
-            <ForecastChart months={forecast.months || forecast.forecast} currency={baseCurrency} />
-          ) : (
-            <div className="mt-3 border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
-              Add subscriptions to see your projected 12-month spend.
-            </div>
-          )}
-        </section>
-
         {/* Right Side: Renewing soon */}
-        <section className="lg:col-span-6">
+        <section className="lg:col-span-6 pt-1 sm:pt-1.5">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-lg sm:text-xl font-semibold">Renewing soon</h2>
             <Link href="/subscriptions" className="text-xs sm:text-sm text-ledger hover:underline font-medium">
@@ -477,6 +441,42 @@ export default function Dashboard() {
                 </div>
               );
             })}
+          </div>
+        </section>
+      </div>
+
+      {/* ROW 2: 12-month forecast (left) and Spend by category (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        {/* Left Side: 12-month forecast */}
+        <section className="lg:col-span-6">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-lg sm:text-xl font-semibold">12-month forecast</h2>
+            <span className="text-xs text-ink/70">Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong></span>
+          </div>
+          {forecast ? (
+            <ForecastChart months={forecast.months || forecast.forecast} currency={baseCurrency} />
+          ) : (
+            <div className="mt-3 border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
+              Add subscriptions to see your projected 12-month spend.
+            </div>
+          )}
+        </section>
+
+        {/* Right Side: Spend by category with Interactive Donut Chart */}
+        <section className="lg:col-span-6">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-lg sm:text-xl font-semibold">Spend by category</h2>
+            <span className="text-xs text-ink/70">
+              {summary.categoryBreakdown.length} {summary.categoryBreakdown.length === 1 ? 'category' : 'categories'}
+            </span>
+          </div>
+          <div className="mt-3">
+            <CategoryBreakdown
+              categories={summary.categoryBreakdown}
+              totalMonthly={summary.totalMonthly}
+              currency={baseCurrency}
+            />
           </div>
         </section>
       </div>

@@ -54,7 +54,7 @@ export const subscriptionModel = {
 
   async findAllForUser(userId) {
     const { rows } = await query(
-      `SELECT ${COLUMNS} FROM subscriptions WHERE user_id = $1 ORDER BY next_renewal_date ASC`,
+      `SELECT ${COLUMNS} FROM subscriptions WHERE user_id = $1 ORDER BY created_at DESC`,
       [userId]
     );
     return rows;

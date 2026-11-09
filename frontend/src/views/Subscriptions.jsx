@@ -42,6 +42,18 @@ function monthlyEquivalent(sub) {
   return amt / months;
 }
 
+function getSubscriptionCreationTime(sub) {
+  if (sub?.createdAt) {
+    const t = new Date(sub.createdAt).getTime();
+    if (!isNaN(t) && t > 0) return t;
+  }
+  if (typeof sub?.id === 'string' && sub.id.startsWith('guest-')) {
+    const ts = Number(sub.id.replace('guest-', ''));
+    if (!isNaN(ts) && ts > 0) return ts;
+  }
+  return 0;
+}
+
 function getGuestSubs() {
   const stored = localStorage.getItem('subtrack_guest_subs');
   if (stored) {
@@ -55,7 +67,13 @@ function getGuestSubs() {
             const clean = s.status === 'paused' ? { ...s, status: 'cancelled' } : s;
             if (clean.name) {
               const trimmed = clean.name.trim();
-              return { ...clean, name: trimmed.charAt(0).toUpperCase() + trimmed.slice(1) };
+              clean.name = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+            }
+            if (!clean.createdAt && typeof clean.id === 'string' && clean.id.startsWith('guest-')) {
+              const ts = Number(clean.id.replace('guest-', ''));
+              if (!isNaN(ts) && ts > 0) {
+                clean.createdAt = new Date(ts).toISOString();
+              }
             }
             return clean;
           });
@@ -231,6 +249,7 @@ export default function Subscriptions() {
         amount: Number(formattedData.amount),
         status: formattedData.status || 'active',
         convertedAmount: Number(formattedData.amount),
+        createdAt: new Date().toISOString(),
       };
       saveGuestSubs([newSub, ...guestSubs]);
       setSubscriptions((prev) => [newSub, ...prev]);
@@ -417,7 +436,12 @@ export default function Subscriptions() {
         const getRenewalDate = (sub) =>
           sub.isFreeTrial && sub.cancellationDeadline ? sub.cancellationDeadline : sub.nextRenewalDate;
 
-        if (sortBy === 'default' || sortBy === 'renewal_asc') {
+        if (sortBy === 'default' || sortBy === 'created_desc') {
+          const diff = getSubscriptionCreationTime(b) - getSubscriptionCreationTime(a);
+          if (diff !== 0) return diff;
+          return new Date(getRenewalDate(a)) - new Date(getRenewalDate(b));
+        }
+        if (sortBy === 'renewal_asc') {
           return new Date(getRenewalDate(a)) - new Date(getRenewalDate(b));
         }
         if (sortBy === 'renewal_desc') {
@@ -427,7 +451,6 @@ export default function Subscriptions() {
         if (sortBy === 'cost_asc')     return monthlyEquivalent(a) - monthlyEquivalent(b);
         if (sortBy === 'name_asc')     return a.name.localeCompare(b.name);
         if (sortBy === 'name_desc')    return b.name.localeCompare(a.name);
-        if (sortBy === 'created_desc') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         return 0;
       });
   }, [subscriptions, statusFilter, categoryFilter, cycleFilter, searchTerm, sortBy]);

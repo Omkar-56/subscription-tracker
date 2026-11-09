@@ -133,11 +133,7 @@ export default function SubscriptionCard({
                 )}
               </>
             ) : (
-              <>
-                <span className="capitalize">{subscription.billingCycle}</span>
-                <span className="mx-1">•</span>
-                <span>Next: {formatDate(subscription.nextRenewalDate)}</span>
-              </>
+              <span>Next: {formatDate(subscription.nextRenewalDate)}</span>
             )}
             {subscription.notes && (
               <>
