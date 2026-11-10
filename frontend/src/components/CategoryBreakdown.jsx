@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { formatMoney } from '../utils/date';
 import { getCategoryChartColor, formatCategoryLabel } from '../utils/brands';
 
-export default function CategoryBreakdown({ categories = [], totalMonthly = 0, currency = 'USD' }) {
+export default function CategoryBreakdown({ categories = [], totalMonthly = 0, currency = 'INR' }) {
   const [activeIndex, setActiveIndex] = useState(null);
 
   if (!categories || categories.length === 0) {

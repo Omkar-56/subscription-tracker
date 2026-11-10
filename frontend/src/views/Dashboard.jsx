@@ -111,25 +111,38 @@ export default function Dashboard() {
   const [guideSub, setGuideSub] = useState(null);
   const [error, setError] = useState('');
 
-  const currentCurrency = user?.baseCurrency || ctxBaseCurrency || 'USD';
+  const currentCurrency = user?.baseCurrency || ctxBaseCurrency || 'INR';
 
   function refresh() {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('subtrack_token') : null;
+    if (!token && !user) {
+      setSummary(computeGuestSummary(currentCurrency));
+      setForecast(computeGuestForecast(currentCurrency));
+      return;
+    }
+
     api.dashboardSummary(14, currentCurrency)
       .then((data) => {
         setSummary(data);
         setError('');
       })
-      .catch(() => {
-        setSummary(computeGuestSummary(currentCurrency));
-        setError('');
+      .catch((err) => {
+        if (err?.status === 401) {
+          setSummary(computeGuestSummary(currentCurrency));
+        } else {
+          console.error('Failed to load dashboard summary:', err);
+          setError(err?.message || 'Failed to load overview data');
+        }
       });
 
     api.dashboardForecast(12, currentCurrency)
       .then((data) => {
         setForecast(data);
       })
-      .catch(() => {
-        setForecast(computeGuestForecast(currentCurrency));
+      .catch((err) => {
+        if (err?.status === 401) {
+          setForecast(computeGuestForecast(currentCurrency));
+        }
       });
   }
 
@@ -167,7 +180,7 @@ export default function Dashboard() {
         name: subscription.name,
         category: subscription.category || 'other',
         amount: Number(subscription.amount),
-        currency: subscription.currency || 'USD',
+        currency: subscription.currency || 'INR',
         billingCycle: subscription.billingCycle || 'monthly',
         nextRenewalDate: String(subscription.nextRenewalDate).slice(0, 10),
         status: newStatus,
@@ -181,9 +194,23 @@ export default function Dashboard() {
   }
 
   if (error) return <p className="text-sm text-rust">{error}</p>;
-  if (!summary) return <p className="text-sm text-ink/50">Loading…</p>;
+  if (!summary) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-28 rounded-xl bg-ink/5 border border-ink/10" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-64 rounded-xl bg-ink/5 border border-ink/10" />
+          <div className="h-64 rounded-xl bg-ink/5 border border-ink/10" />
+        </div>
+      </div>
+    );
+  }
 
-  const baseCurrency = summary.baseCurrency || currentCurrency;
+    const baseCurrency = summary.baseCurrency || currentCurrency;
   const pendingReminders = summary.pendingReminders || [];
   const activeTrials = summary.activeTrials || [];
   const savings = summary.savings || {
@@ -241,7 +268,7 @@ export default function Dashboard() {
                     <BrandLogo name={t.name} category={t.category} size="sm" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <p className="font-semibold text-xs text-ink truncate">{t.name}</p>
+                        <p className="font-semibold text-xs text-ink truncate">{t.name ? t.name.charAt(0).toUpperCase() + t.name.slice(1) : ''}</p>
                         <span
                           className={`rounded px-1.5 py-0.2 text-[10px] font-bold ${
                             isUrgent ? 'bg-rust text-white animate-pulse' : 'bg-amber-light text-amber-dark'
@@ -422,7 +449,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3 min-w-0">
                     <BrandLogo name={s.name} category={s.category} size="sm" />
                     <div className="min-w-0">
-                      <p className="font-medium text-xs sm:text-sm truncate">{s.name}</p>
+                      <p className="font-medium text-xs sm:text-sm truncate">{s.name ? s.name.charAt(0).toUpperCase() + s.name.slice(1) : ''}</p>
                       <p className="text-[11px] sm:text-xs text-ink/70">
                         {formatDate(s.nextRenewalDate)} · in {days}d
                       </p>

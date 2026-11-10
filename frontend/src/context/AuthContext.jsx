@@ -8,7 +8,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [guestCurrency, setGuestCurrency] = useState('USD');
+  const [guestCurrency, setGuestCurrency] = useState('INR');
   const [authModal, setAuthModal] = useState(null); // null | 'login' | 'register' | 'forgot'
 
   useEffect(() => {
@@ -32,7 +32,14 @@ export function AuthProvider({ children }) {
     api
       .me()
       .then(({ user }) => setUser(user))
-      .catch(() => localStorage.removeItem('subtrack_token'))
+      .catch((err) => {
+        // ONLY invalidate token if server explicitly returned 401 Unauthorized
+        // Never wipe credentials on network errors, timeouts, or 5xx server cold starts
+        if (err?.status === 401) {
+          localStorage.removeItem('subtrack_token');
+          setUser(null);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -76,7 +83,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const isPro = Boolean(user && (user.plan === 'pro' || user.plan === 'lifetime'));
-  const baseCurrency = user?.baseCurrency || guestCurrency || 'USD';
+  const baseCurrency = user?.baseCurrency || guestCurrency || 'INR';
 
   return (
     <AuthContext.Provider

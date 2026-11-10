@@ -7,31 +7,31 @@ import { VALID_CATEGORIES, formatCategoryLabel, normalizeCategory } from '../uti
 
 const CATEGORIES = VALID_CATEGORIES;
 const CYCLES = ['weekly', 'monthly', 'quarterly', 'yearly'];
-const COMMON_CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'CAD', 'AUD', 'JPY', 'CHF', 'SGD', 'BRL'];
+const COMMON_CURRENCIES = ['INR', 'USD', 'EUR', 'CAD', 'AED', 'JPY', 'SGD', 'AUD'];
 
 const emptyForm = {
   name: '',
   category: 'other',
   amount: '',
-  currency: 'USD',
+  currency: 'INR',
   billingCycle: 'monthly',
   nextRenewalDate: '',
   status: 'active',
   notes: '',
-  reminderDaysBefore: 3,
+  reminderDaysBefore: 2,
   // Free Trial Sentinel fields
   isFreeTrial: false,
   trialEndDate: '',
   postTrialAmount: '',
 };
 
-export default function SubscriptionForm({ initial, defaultCurrency = 'USD', onSubmit, onCancel }) {
+export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onSubmit, onCancel }) {
   const { user, openRegister } = useAuth();
   const [form, setForm] = useState(() => {
     if (!initial) {
       return {
         ...emptyForm,
-        currency: defaultCurrency || 'USD',
+        currency: defaultCurrency || 'INR',
       };
     }
     return {
@@ -39,8 +39,8 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'USD', onS
       ...initial,
       category: initial.category ? normalizeCategory(initial.category) : 'other',
       amount: initial.amount !== undefined ? initial.amount : '',
-      currency: initial.currency || defaultCurrency || 'USD',
-      reminderDaysBefore: initial.reminderDaysBefore || 3,
+      currency: initial.currency || defaultCurrency || 'INR',
+      reminderDaysBefore: initial.reminderDaysBefore || 2,
       postTrialAmount: initial.postTrialAmount !== undefined && initial.postTrialAmount !== null ? initial.postTrialAmount : '',
       trialEndDate: initial.trialEndDate ? String(initial.trialEndDate).slice(0, 10) : initial.nextRenewalDate ? String(initial.nextRenewalDate).slice(0, 10) : '',
       nextRenewalDate: initial.nextRenewalDate ? String(initial.nextRenewalDate).slice(0, 10) : '',
@@ -72,13 +72,16 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'USD', onS
       if (!finalCurrency) throw new Error('Please select or specify a 3-letter currency code.');
 
       const trialEnd = form.isFreeTrial && form.trialEndDate ? form.trialEndDate : null;
+      const rawName = (form.name || '').trim();
+      const capitalizedName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : '';
 
       const payload = {
         ...form,
+        name: capitalizedName,
         category: normalizeCategory(form.category),
         currency: finalCurrency,
         amount: form.isFreeTrial ? (Number(form.amount) || 0) : (Number(form.amount) || 0),
-        reminderDaysBefore: form.reminderDaysBefore ? Number(form.reminderDaysBefore) : 3,
+        reminderDaysBefore: form.reminderDaysBefore ? Number(form.reminderDaysBefore) : 2,
         isFreeTrial: Boolean(form.isFreeTrial),
         trialEndDate: trialEnd,
         cancellationDeadline: trialEnd,
@@ -312,7 +315,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'USD', onS
                 Email Reminder
               </label>
               <select
-                value={form.reminderDaysBefore || 3}
+                value={form.reminderDaysBefore || 2}
                 onChange={(e) => update('reminderDaysBefore', Number(e.target.value))}
                 className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
               >

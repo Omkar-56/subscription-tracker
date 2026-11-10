@@ -1,5 +1,4 @@
 import { subscriptionService } from '../services/subscriptionService.js';
-import { reminderService } from '../services/reminderService.js';
 import { geminiService } from '../services/geminiService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
@@ -19,7 +18,7 @@ export const subscriptionController = {
 
   parseReceipt: asyncHandler(async (req, res) => {
     const { text, fileBase64, mimeType } = req.body;
-    const defaultCurrency = req.user.baseCurrency || 'USD';
+    const defaultCurrency = req.user.baseCurrency || 'INR';
 
     // 1. Ask Gemini to extract structured subscriptions
     const extracted = await geminiService.parseReceiptOrDoc({
@@ -33,16 +32,27 @@ export const subscriptionController = {
     const createdSubscriptions = [];
     for (const item of extracted) {
       const created = await subscriptionService.create(req.user.id, {
-        ...item,
-        status: item.status || 'active',
+        name: item.name,
+        category: item.category,
+        amount: item.amount,
+        currency: item.currency,
+        billingCycle: item.billingCycle,
+        nextRenewalDate: item.nextRenewalDate,
+        notes: item.notes,
+        isFreeTrial: item.isFreeTrial,
+        trialEndDate: item.trialEndDate,
+        cancellationDeadline: item.cancellationDeadline,
+        postTrialAmount: item.postTrialAmount,
+        postTrialCurrency: item.postTrialCurrency,
+        status: 'active',
       });
       createdSubscriptions.push(created);
     }
 
-    res.json({
-      success: true,
-      extractedCount: extracted.length,
+    res.status(201).json({
       subscriptions: createdSubscriptions,
+      count: createdSubscriptions.length,
+      parsedItems: extracted,
     });
   }),
 
@@ -52,39 +62,35 @@ export const subscriptionController = {
   }),
 
   update: asyncHandler(async (req, res) => {
-    const subscription = await subscriptionService.update(req.user.id, req.params.id, req.body);
+    const subscription = await subscriptionService.update(req.user.id, req.params.id, {
+      ...req.body,
+      status: req.body.status || 'active',
+    });
     res.json({ subscription });
   }),
 
   convertTrial: asyncHandler(async (req, res) => {
-    const subscription = await subscriptionService.convertTrial(
-      req.user.id,
-      req.params.id,
-      req.body.customRenewalDate
-    );
+    const { nextRenewalDate } = req.body || {};
+    const subscription = await subscriptionService.convertTrial(req.user.id, req.params.id, nextRenewalDate);
     res.json({ subscription });
   }),
 
-  advanceCycle: asyncHandler(async (req, res) => {
+  advance: asyncHandler(async (req, res) => {
     const subscription = await subscriptionService.advanceCycle(req.user.id, req.params.id);
     res.json({ subscription });
   }),
 
   confirmPayment: asyncHandler(async (req, res) => {
-    const result = await subscriptionService.confirmPayment(
-      req.user.id,
-      req.params.id,
-      req.body
-    );
-    res.json({ success: true, ...result });
+    const result = await subscriptionService.confirmPayment(req.user.id, req.params.id, req.body);
+    res.json(result);
   }),
 
-  payments: asyncHandler(async (req, res) => {
+  getPayments: asyncHandler(async (req, res) => {
     const payments = await subscriptionService.getPayments(req.user.id, req.params.id);
     res.json({ payments });
   }),
 
-  allPayments: asyncHandler(async (req, res) => {
+  getAllPayments: asyncHandler(async (req, res) => {
     const limit = Number(req.query.limit) || 50;
     const payments = await subscriptionService.getAllPayments(req.user.id, limit);
     res.json({ payments });
@@ -95,23 +101,8 @@ export const subscriptionController = {
     res.json({ history });
   }),
 
-  reminders: asyncHandler(async (req, res) => {
-    const reminders = await reminderService.getPendingReminders(req.user.id);
-    res.json({ reminders });
-  }),
-
-  dismissReminder: asyncHandler(async (req, res) => {
-    await reminderService.dismiss(req.user.id, req.params.id);
-    res.json({ success: true });
-  }),
-
-  triggerReminder: asyncHandler(async (req, res) => {
-    const reminder = await reminderService.triggerImmediateReminder(req.user.id, req.params.id);
-    res.json({ success: true, reminder });
-  }),
-
-  remove: asyncHandler(async (req, res) => {
+  delete: asyncHandler(async (req, res) => {
     await subscriptionService.delete(req.user.id, req.params.id);
-    res.status(204).end();
+    res.status(204).send();
   }),
 };

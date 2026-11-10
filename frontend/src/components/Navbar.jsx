@@ -10,16 +10,14 @@ import CancellationGuideModal from './CancellationGuideModal';
 import { api } from '../api/client';
 
 const CURRENCIES = [
+  { code: 'INR', label: '₹ INR' },
   { code: 'USD', label: '$ USD' },
   { code: 'EUR', label: '€ EUR' },
-  { code: 'GBP', label: '£ GBP' },
-  { code: 'INR', label: '₹ INR' },
   { code: 'CAD', label: 'CA$ CAD' },
-  { code: 'AUD', label: 'A$ AUD' },
+  { code: 'AED', label: 'AED AED' },
   { code: 'JPY', label: '¥ JPY' },
-  { code: 'CHF', label: 'CHF' },
   { code: 'SGD', label: 'SG$ SGD' },
-  { code: 'BRL', label: 'R$ BRL' },
+  { code: 'AUD', label: 'A$ AUD' },
 ];
 
 export default function Navbar() {
@@ -109,7 +107,7 @@ export default function Navbar() {
         name: subscription.name,
         category: subscription.category || 'other',
         amount: Number(subscription.amount),
-        currency: subscription.currency || 'USD',
+        currency: subscription.currency || 'INR',
         billingCycle: subscription.billingCycle || 'monthly',
         nextRenewalDate: String(subscription.nextRenewalDate).slice(0, 10),
         status: newStatus,
@@ -175,7 +173,7 @@ export default function Navbar() {
                 {/* Currency Selector */}
                 <div className="relative flex items-center">
                   <select
-                    value={user.baseCurrency || baseCurrency || 'USD'}
+                    value={user.baseCurrency || baseCurrency || 'INR'}
                     onChange={(e) => setBaseCurrency(e.target.value)}
                     className="appearance-none rounded border border-line/80 bg-paper/50 pl-2 pr-5 py-0.5 text-[11px] font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
                     title="Change default display currency for totals and analytics"
@@ -217,7 +215,7 @@ export default function Navbar() {
                 {/* Currency Selector for guest/unlogged users */}
                 <div className="relative flex items-center">
                   <select
-                    value={baseCurrency || 'USD'}
+                    value={baseCurrency || 'INR'}
                     onChange={(e) => setBaseCurrency(e.target.value)}
                     className="appearance-none rounded border border-line/80 bg-paper/50 pl-2 pr-5 py-0.5 text-[11px] font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
                     title="Change default display currency for totals and analytics"
@@ -297,7 +295,7 @@ export default function Navbar() {
               <span className="text-xs font-medium text-ink/50 uppercase tracking-wider">Currency</span>
               <div className="relative flex items-center">
                 <select
-                  value={user?.baseCurrency || baseCurrency || 'USD'}
+                  value={user?.baseCurrency || baseCurrency || 'INR'}
                   onChange={(e) => setBaseCurrency(e.target.value)}
                   className="appearance-none rounded border border-line/80 bg-paper/60 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 cursor-pointer transition-colors"
                   title="Change default display currency for totals and analytics"

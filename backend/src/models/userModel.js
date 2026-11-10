@@ -1,9 +1,9 @@
 import { query } from '../config/db.js';
 
-const USER_COLUMNS = 'id, name, email, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, \'USD\') AS "baseCurrency", created_at AS "createdAt"';
+const USER_COLUMNS = 'id, name, email, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, \'INR\') AS "baseCurrency", created_at AS "createdAt"';
 
 export const userModel = {
-  async create({ name, email, passwordHash = null, googleId = null, avatarUrl = null, baseCurrency = 'USD' }) {
+  async create({ name, email, passwordHash = null, googleId = null, avatarUrl = null, baseCurrency = 'INR' }) {
     const { rows } = await query(
       `INSERT INTO users (name, email, password_hash, google_id, avatar_url, base_currency)
        VALUES ($1, $2, $3, $4, $5, $6)
@@ -15,7 +15,7 @@ export const userModel = {
 
   async findByEmail(email) {
     const { rows } = await query(
-      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'USD') AS "baseCurrency", created_at AS "createdAt" FROM users WHERE LOWER(email) = LOWER($1)`,
+      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'INR') AS "baseCurrency", created_at AS "createdAt" FROM users WHERE LOWER(email) = LOWER($1)`,
       [email]
     );
     return rows[0] || null;
@@ -23,7 +23,7 @@ export const userModel = {
 
   async findByGoogleId(googleId) {
     const { rows } = await query(
-      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'USD') AS "baseCurrency", created_at AS "createdAt" FROM users WHERE google_id = $1`,
+      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'INR') AS "baseCurrency", created_at AS "createdAt" FROM users WHERE google_id = $1`,
       [googleId]
     );
     return rows[0] || null;

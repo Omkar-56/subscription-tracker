@@ -7,7 +7,7 @@ import { env } from '../config/env.js';
 
 export const reminderService = {
   /**
-   * Scans active subscriptions due within the reminder window (default 1 to 3 days before renewal)
+   * Scans active subscriptions due within the reminder window (default 2 days before renewal)
    * and sends an email reminder to the user.
    *
    * Can be run for a single user (e.g. manual trigger) or for all users (e.g. Cloudflare Cron Trigger).
@@ -47,8 +47,8 @@ export const reminderService = {
         const targetDate = parseDateParts(deadlineDateStr);
         const diffDays = Math.round((targetDate.getTime() - todayStart.getTime()) / (24 * 60 * 60 * 1000));
 
-        // Send reminder if due in 0 to 3 days (or custom reminderDaysBefore, e.g. 1, 2, or 3 days)
-        const reminderDays = sub.reminderDaysBefore || 3;
+        // Send reminder if due in 0 to 2 days (or custom reminderDaysBefore, default 2)
+        const reminderDays = sub.reminderDaysBefore || 2;
         const isWithinWindow = diffDays <= reminderDays && diffDays >= 0;
 
         if (!isWithinWindow && !force) {
@@ -106,40 +106,40 @@ export const reminderService = {
           appUrl,
         });
 
-        const sendResult = await sendEmail({
+        // 1. Send the email notification
+        const emailResult = await sendEmail({
           to: sub.userEmail,
           subject,
           html,
           text,
         });
 
-        const reminderMsg = isTrial
-          ? `Trial Alert: ${sub.name} deadline is ${formattedDueDate} (${daysText}).`
-          : `Renewal Reminder: ${sub.name} is ${daysText} (${sub.currency} ${Number(sub.amount).toFixed(2)}).`;
-
-        await reminderModel.create({
+        // 2. Record notification in in-app reminders table
+        const reminderRecord = await reminderModel.create({
           userId: sub.userId,
           subscriptionId: sub.id,
           dueDate: formattedDueDate,
           status: 'pending',
           sentAt: new Date(),
           channel: 'email',
-          message: reminderMsg,
+          message: isTrial
+            ? `${sub.name} free trial ends ${daysText} (${formattedDueDate}).`
+            : `${sub.name} renewal of ${sub.currency} ${Number(sub.amount).toFixed(2)} is ${daysText}.`,
         });
 
+        // 3. Mark subscription's last reminder timestamp
         await subscriptionModel.updateReminderSentAt(sub.userId, sub.id, new Date());
 
         sentResults.push({
           subscriptionId: sub.id,
-          subscriptionName: sub.name,
-          userEmail: sub.userEmail,
+          name: sub.name,
+          to: sub.userEmail,
           daysLeft: diffDays,
-          dueDate: formattedDueDate,
-          provider: sendResult.provider,
-          simulated: sendResult.provider === 'simulated',
+          provider: emailResult.provider,
+          reminderId: reminderRecord.id,
         });
-      } catch (subErr) {
-        console.error(`[Reminder Error for Sub ${sub.name}]`, subErr.message);
+      } catch (err) {
+        console.error(`[Reminder Error] Failed to process subscription ${sub.id}:`, err.message);
       }
     }
 
@@ -151,9 +151,9 @@ export const reminderService = {
   },
 
   /**
-   * Send an immediate test reminder email to a user's registered email
+   * Send a test reminder email to the authenticated user for verification
    */
-  async sendTestEmail(userId) {
+  async sendTestReminderEmail(userId) {
     const user = await userModel.findById(userId);
     if (!user) throw new Error('User not found');
 
@@ -162,7 +162,7 @@ export const reminderService = {
       name: 'Sample Subscription (Netflix)',
       category: 'entertainment',
       amount: '15.99',
-      currency: user.baseCurrency || 'USD',
+      currency: user.baseCurrency || 'INR',
       billingCycle: 'monthly',
       nextRenewalDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
       isFreeTrial: false,
@@ -176,7 +176,7 @@ export const reminderService = {
       subscriptionName: sampleSub.name,
       category: sampleSub.category || 'entertainment',
       amount: sampleSub.amount,
-      currency: sampleSub.currency || user.baseCurrency || 'USD',
+      currency: sampleSub.currency || user.baseCurrency || 'INR',
       billingCycle: sampleSub.billingCycle || 'monthly',
       dueDateFormatted,
       daysLeft: 2,
@@ -188,7 +188,7 @@ export const reminderService = {
       userName: user.name,
       subscriptionName: sampleSub.name,
       amount: sampleSub.amount,
-      currency: sampleSub.currency || user.baseCurrency || 'USD',
+      currency: sampleSub.currency || user.baseCurrency || 'INR',
       billingCycle: sampleSub.billingCycle || 'monthly',
       dueDateFormatted,
       daysLeft: 2,

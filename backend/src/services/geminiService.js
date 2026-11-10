@@ -105,10 +105,10 @@ export const geminiService = {
    * @param {string} [input.text] - Raw text extracted or pasted by the user
    * @param {string} [input.fileBase64] - Base64 encoded file payload
    * @param {string} [input.mimeType] - MIME type of the file (e.g., application/pdf, image/png)
-   * @param {string} [input.defaultCurrency='USD'] - Fallback currency if not detected
+   * @param {string} [input.defaultCurrency='INR'] - Fallback currency if not detected
    * @returns {Promise<Array<Object>>} - Extracted subscription candidates
    */
-  async parseReceiptOrDoc({ text, fileBase64, mimeType, defaultCurrency = 'USD' }) {
+  async parseReceiptOrDoc({ text, fileBase64, mimeType, defaultCurrency = 'INR' }) {
     const apiKey = env.geminiApiKey;
     if (!apiKey) {
       throw new ApiError(
@@ -140,7 +140,7 @@ Instructions:
    - "name": Service/Company name (e.g. "Netflix", "ChatGPT Plus")
    - "category": MUST be one of the 7 allowed values: "entertainment", "software / AI", "gaming", "news and media", "education", "health & fitness", "other".
    - "amount": The recurring price as a positive number (float). If free trial, amount is 0 or trial charge.
-   - "currency": ISO 3-letter currency (e.g. "USD", "EUR", "INR", "GBP"). Default to "${defaultCurrency}" if not explicitly stated.
+   - "currency": ISO 3-letter currency (e.g. "INR", "USD", "EUR"). Default to "${defaultCurrency}" if not explicitly stated.
    - "billingCycle": One of "weekly", "monthly", "quarterly", "yearly". Default to "monthly" if unknown.
    - "nextRenewalDate": Expected next renewal date in YYYY-MM-DD format. If exact date not found, estimate 1 billing cycle from receipt/today (${todayStr}).
    - "isFreeTrial": Boolean, true if document mentions free trial, beta, or trial period.
@@ -158,45 +158,45 @@ Example output format:
     "name": "Netflix",
     "category": "entertainment",
     "amount": 15.49,
-    "currency": "USD",
+    "currency": "INR",
     "billingCycle": "monthly",
     "nextRenewalDate": "2026-10-25",
     "isFreeTrial": false,
     "trialEndDate": null,
     "cancellationDeadline": null,
     "postTrialAmount": null,
-    "notes": "Parsed from subscription receipt"
+    "notes": "Monthly standard subscription"
   }
 ]`;
 
-    const userContentParts = [];
+    const userParts = [];
 
-    // Add multimodal file part if provided
+    // Attach inline data if base64 file is present
     if (fileBase64 && mimeType) {
-      userContentParts.push({
+      userParts.push({
         inlineData: {
           mimeType,
           data: fileBase64,
         },
       });
-      userContentParts.push({
-        text: `Please parse this receipt/document image or file into subscriptions JSON according to the instructions.${
+      userParts.push({
+        text: `Please analyze this attached document/receipt image and extract all recurring subscriptions according to the system instructions.${
           text ? `\nAdditional user notes or context: ${text}` : ''
         }`,
       });
     } else if (text) {
-      userContentParts.push({
-        text: `Please parse the following receipt/invoice text snippet into subscriptions JSON:\n\n${text}`,
+      userParts.push({
+        text: `Please parse the following receipt/subscription text and extract all subscriptions:\n\n${text}`,
       });
     } else {
-      throw new ApiError(400, 'Please provide receipt text or upload a document/image file.');
+      throw new ApiError(400, 'Either a document image/PDF or text snippet must be provided for parsing.');
     }
 
     const payload = {
       contents: [
         {
           role: 'user',
-          parts: userContentParts,
+          parts: userParts,
         },
       ],
       systemInstruction: {
@@ -271,7 +271,7 @@ Example output format:
           name: item.name ? String(item.name).trim() : 'Unnamed Subscription',
           category: normalizeCategory(item.category),
           amount: Math.max(0, Number(item.amount) || 0),
-          currency: (item.currency || defaultCurrency || 'USD').toUpperCase().slice(0, 3),
+          currency: (item.currency || defaultCurrency || 'INR').toUpperCase().slice(0, 3),
           billingCycle: ['weekly', 'monthly', 'quarterly', 'yearly'].includes(item.billingCycle)
             ? item.billingCycle
             : 'monthly',

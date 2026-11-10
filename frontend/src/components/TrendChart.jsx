@@ -14,7 +14,7 @@ const COLORS = {
   average: '#C77D2B',
 };
 
-function TrendTooltip({ active, payload, label, currency = 'USD' }) {
+function TrendTooltip({ active, payload, label, currency = 'INR' }) {
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
 
@@ -40,7 +40,7 @@ function TrendTooltip({ active, payload, label, currency = 'USD' }) {
 export default function TrendChart({
   months = [],
   summary = null,
-  currency = 'USD',
+  currency = 'INR',
   timeframe = 12,
   onTimeframeChange = null,
 }) {
