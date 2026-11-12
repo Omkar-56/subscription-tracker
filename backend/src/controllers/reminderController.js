@@ -1,4 +1,5 @@
 import { reminderService } from '../services/reminderService.js';
+import { subscriptionService } from '../services/subscriptionService.js';
 import { env } from '../config/env.js';
 
 export const reminderController = {
@@ -16,11 +17,17 @@ export const reminderController = {
         }
       }
 
-      const outcome = await reminderService.sendDueReminders();
+      // 1. Auto-renew any subscriptions that reached their renewal date
+      const renewals = await subscriptionService.autoRenewDueSubscriptions();
+
+      // 2. Send due reminders for upcoming renewals
+      const reminders = await reminderService.sendDueReminders();
+
       return res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        ...outcome,
+        renewals,
+        reminders,
       });
     } catch (err) {
       next(err);
@@ -32,6 +39,8 @@ export const reminderController = {
    */
   async sendDueForUser(req, res, next) {
     try {
+      // First ensure any due subscriptions are renewed
+      await subscriptionService.autoRenewDueSubscriptions({ userId: req.user.id });
       const outcome = await reminderService.sendDueReminders({ userId: req.user.id });
       return res.json({
         status: 'ok',

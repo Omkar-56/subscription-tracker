@@ -54,7 +54,7 @@ export const subscriptionModel = {
 
   async findAllForUser(userId) {
     const { rows } = await query(
-      `SELECT ${COLUMNS} FROM subscriptions WHERE user_id = $1 ORDER BY created_at DESC`,
+      `SELECT ${COLUMNS} FROM subscriptions WHERE user_id = $1 ORDER BY next_renewal_date ASC`,
       [userId]
     );
     return rows;
@@ -167,6 +167,31 @@ export const subscriptionModel = {
        JOIN users u ON u.id = s.user_id
        WHERE s.status = 'active'
        ORDER BY COALESCE(s.cancellation_deadline, s.trial_end_date, s.next_renewal_date) ASC`
+    );
+    return rows;
+  },
+
+  async findDueForRenewal(userId = null) {
+    if (userId) {
+      const { rows } = await query(
+        `SELECT ${COLUMNS}
+         FROM subscriptions
+         WHERE user_id = $1
+           AND status = 'active'
+           AND is_free_trial = FALSE
+           AND next_renewal_date <= CURRENT_DATE
+         ORDER BY next_renewal_date ASC`,
+        [userId]
+      );
+      return rows;
+    }
+    const { rows } = await query(
+      `SELECT ${COLUMNS}
+       FROM subscriptions
+       WHERE status = 'active'
+         AND is_free_trial = FALSE
+         AND next_renewal_date <= CURRENT_DATE
+       ORDER BY next_renewal_date ASC`
     );
     return rows;
   },

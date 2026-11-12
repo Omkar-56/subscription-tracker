@@ -10,18 +10,11 @@ import CategoryBreakdown from '../components/CategoryBreakdown';
 import BrandLogo from '../components/BrandLogo';
 import PaymentConfirmModal from '../components/PaymentConfirmModal';
 import CancellationGuideModal from '../components/CancellationGuideModal';
-import { formatDate, formatMoney, daysUntil } from '../utils/date';
+import { formatDate, formatMoney, daysUntil, addCycleToDate, formatDateIso } from '../utils/date';
+import { getGuestSubs, saveGuestSubs } from '../utils/guestSubs';
 
 function computeGuestSummary(currency) {
-  let subs = [];
-  try {
-    const parsed = JSON.parse(localStorage.getItem('subtrack_guest_subs') || '[]');
-    if (Array.isArray(parsed)) {
-      subs = parsed.filter((s) => !(typeof s.id === 'string' && s.id.startsWith('demo-')));
-    }
-  } catch {
-    subs = [];
-  }
+  const subs = getGuestSubs();
 
   const activeSubs = subs.filter((s) => s.status === 'active' && !s.isFreeTrial);
   const monthlyTotal = activeSubs.reduce((acc, s) => {
@@ -33,7 +26,7 @@ function computeGuestSummary(currency) {
   const activeTrials = subs.filter((s) => s.isFreeTrial && s.status === 'active').map((t) => ({
     ...t,
     effectiveDeadline: t.cancellationDeadline || t.trialEndDate || t.nextRenewalDate,
-    daysLeft: 0,
+    daysLeft: daysUntil(t.cancellationDeadline || t.trialEndDate || t.nextRenewalDate),
   }));
 
   const byCategory = {};
@@ -50,14 +43,17 @@ function computeGuestSummary(currency) {
   return {
     baseCurrency: currency,
     monthlyCommitment: monthlyTotal,
+    totalMonthly: monthlyTotal,
+    totalYearly: monthlyTotal * 12,
     yearlyRunRate: monthlyTotal * 12,
     activeCount: activeSubs.length,
+    trialsCount: activeTrials.length,
     activeTrials,
     pendingReminders: [],
     recentPriceIncreases: [],
     upcomingRenewals: activeSubs.slice(0, 3).map((s) => ({
       ...s,
-      daysLeft: 0,
+      daysLeft: daysUntil(s.nextRenewalDate),
       convertedAmount: Number(s.amount),
     })),
     categoryBreakdown,
@@ -70,15 +66,7 @@ function computeGuestSummary(currency) {
 }
 
 function computeGuestForecast(currency) {
-  let subs = [];
-  try {
-    const parsed = JSON.parse(localStorage.getItem('subtrack_guest_subs') || '[]');
-    if (Array.isArray(parsed)) {
-      subs = parsed.filter((s) => !(typeof s.id === 'string' && s.id.startsWith('demo-')));
-    }
-  } catch {
-    subs = [];
-  }
+  const subs = getGuestSubs();
   const activeSubs = subs.filter((s) => s.status === 'active' && !s.isFreeTrial);
   const monthlyTotal = activeSubs.reduce((acc, s) => {
     const cycle = s.billingCycle || 'monthly';
@@ -160,7 +148,18 @@ export default function Dashboard() {
 
   async function handleConfirmPayment(paymentData) {
     if (!payingSub) return;
-    await api.confirmPayment(payingSub.id, paymentData);
+    try {
+      await api.confirmPayment(payingSub.id, paymentData);
+    } catch {
+      const guestSubs = getGuestSubs().map((s) => {
+        if (s.id === payingSub.id) {
+          const nextDateStr = formatDateIso(addCycleToDate(s.nextRenewalDate, s.billingCycle || 'monthly'));
+          return { ...s, nextRenewalDate: nextDateStr };
+        }
+        return s;
+      });
+      saveGuestSubs(guestSubs);
+    }
     setPayingSub(null);
     refresh();
   }
@@ -170,7 +169,11 @@ export default function Dashboard() {
       await api.convertTrial(sub.id);
       refresh();
     } catch (err) {
-      setError(err.message);
+      const guestSubs = getGuestSubs().map((s) =>
+        s.id === sub.id ? { ...s, isFreeTrial: false } : s
+      );
+      saveGuestSubs(guestSubs);
+      refresh();
     }
   }
 
@@ -188,8 +191,13 @@ export default function Dashboard() {
       });
       setGuideSub(null);
       refresh();
-    } catch (err) {
-      setError(err.message);
+    } catch {
+      const guestSubs = getGuestSubs().map((s) =>
+        s.id === subscription.id ? { ...s, status: newStatus } : s
+      );
+      saveGuestSubs(guestSubs);
+      setGuideSub(null);
+      refresh();
     }
   }
 
@@ -210,7 +218,7 @@ export default function Dashboard() {
     );
   }
 
-    const baseCurrency = summary.baseCurrency || currentCurrency;
+  const baseCurrency = summary.baseCurrency || currentCurrency;
   const pendingReminders = summary.pendingReminders || [];
   const activeTrials = summary.activeTrials || [];
   const savings = summary.savings || {
@@ -351,7 +359,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ROW 1: Overview (left) and Renewing soon (right) */}
+      {/* ROW 1: Overview (left) and Spend by Category (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Side: Overview Header & Stat Cards */}
         <section className="lg:col-span-6">
@@ -390,8 +398,44 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Right Side: Renewing soon */}
+        {/* Right Side: Spend by category with Interactive Donut Chart */}
         <section className="lg:col-span-6 pt-1 sm:pt-1.5">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-lg sm:text-xl font-semibold">Spend by category</h2>
+            <span className="text-xs text-ink/70">
+              {summary.categoryBreakdown.length} {summary.categoryBreakdown.length === 1 ? 'category' : 'categories'}
+            </span>
+          </div>
+          <div className="mt-3">
+            <CategoryBreakdown
+              categories={summary.categoryBreakdown}
+              totalMonthly={summary.totalMonthly}
+              currency={baseCurrency}
+            />
+          </div>
+        </section>
+      </div>
+
+      {/* ROW 2: 12-month forecast (left) and Renewing soon (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        {/* Left Side: 12-month forecast */}
+        <section className="lg:col-span-6">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-lg sm:text-xl font-semibold">12-month forecast</h2>
+            <span className="text-xs text-ink/70">Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong></span>
+          </div>
+          {forecast ? (
+            <ForecastChart months={forecast.months || forecast.forecast} currency={baseCurrency} />
+          ) : (
+            <div className="mt-3 border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
+              Add subscriptions to see your projected 12-month spend.
+            </div>
+          )}
+        </section>
+
+        {/* Right Side: Renewing soon */}
+        <section className="lg:col-span-6">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-lg sm:text-xl font-semibold">Renewing soon</h2>
             <Link href="/subscriptions" className="text-xs sm:text-sm text-ledger hover:underline font-medium">
@@ -441,42 +485,6 @@ export default function Dashboard() {
                 </div>
               );
             })}
-          </div>
-        </section>
-      </div>
-
-      {/* ROW 2: 12-month forecast (left) and Spend by category (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-        {/* Left Side: 12-month forecast */}
-        <section className="lg:col-span-6">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-lg sm:text-xl font-semibold">12-month forecast</h2>
-            <span className="text-xs text-ink/70">Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong></span>
-          </div>
-          {forecast ? (
-            <ForecastChart months={forecast.months || forecast.forecast} currency={baseCurrency} />
-          ) : (
-            <div className="mt-3 border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
-              Add subscriptions to see your projected 12-month spend.
-            </div>
-          )}
-        </section>
-
-        {/* Right Side: Spend by category with Interactive Donut Chart */}
-        <section className="lg:col-span-6">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-lg sm:text-xl font-semibold">Spend by category</h2>
-            <span className="text-xs text-ink/70">
-              {summary.categoryBreakdown.length} {summary.categoryBreakdown.length === 1 ? 'category' : 'categories'}
-            </span>
-          </div>
-          <div className="mt-3">
-            <CategoryBreakdown
-              categories={summary.categoryBreakdown}
-              totalMonthly={summary.totalMonthly}
-              currency={baseCurrency}
-            />
           </div>
         </section>
       </div>

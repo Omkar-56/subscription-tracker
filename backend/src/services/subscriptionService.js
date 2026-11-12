@@ -5,6 +5,7 @@ import { reminderModel } from '../models/reminderModel.js';
 import { userModel } from '../models/userModel.js';
 import { currencyService } from './currencyService.js';
 import { ApiError } from '../utils/ApiError.js';
+import { runBackground } from '../utils/runBackground.js';
 
 const CYCLE_TO_MONTHS = {
   weekly: 12 / 52,
@@ -49,7 +50,7 @@ export function getNextActiveRenewalDate(renewalDateInput, cycle, today = new Da
   let current = parseDateParts(renewalDateInput);
 
   let guard = 0;
-  while (current < todayStart && guard < 500) {
+  while (current <= todayStart && guard < 500) {
     current = addCycle(current, cycle);
     guard += 1;
   }
@@ -58,32 +59,27 @@ export function getNextActiveRenewalDate(renewalDateInput, cycle, today = new Da
 
 /**
  * Calculates in-memory projected renewal dates for overdue subscriptions.
- * Updates the database in the background without blocking the GET response.
+ * Triggers background database auto-renewal without blocking the GET response.
  */
 function syncOverdueSubscriptions(userId, subscriptions) {
   if (!Array.isArray(subscriptions)) return [];
   const today = new Date();
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const backgroundUpdates = [];
+  let hasDueSubs = false;
 
   for (const sub of subscriptions) {
     if (sub.status === 'active' && !sub.isFreeTrial) {
       const subDate = parseDateParts(sub.nextRenewalDate);
-      if (subDate < todayStart) {
-        const nextDateStr = getNextActiveRenewalDate(sub.nextRenewalDate, sub.billingCycle, today);
-        if (nextDateStr !== formatDateString(subDate)) {
-          sub.nextRenewalDate = nextDateStr;
-          backgroundUpdates.push(
-            subscriptionModel.updateRenewalDate(userId, sub.id, nextDateStr).catch(() => {})
-          );
-        }
+      if (subDate <= todayStart) {
+        hasDueSubs = true;
+        sub.nextRenewalDate = getNextActiveRenewalDate(sub.nextRenewalDate, sub.billingCycle, today);
       }
     }
   }
 
-  // Non-blocking background sync
-  if (backgroundUpdates.length > 0) {
-    Promise.all(backgroundUpdates).catch(() => {});
+  // Trigger non-blocking database auto-renewal if any subscriptions reached their renewal date
+  if (hasDueSubs && userId) {
+    runBackground(() => subscriptionService.autoRenewDueSubscriptions({ userId }));
   }
 
   return subscriptions;
@@ -137,10 +133,9 @@ export const subscriptionService = {
     if (sub.status === 'active' && !sub.isFreeTrial) {
       const today = new Date();
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      if (parseDateParts(sub.nextRenewalDate) < todayStart) {
-        const nextDateStr = getNextActiveRenewalDate(sub.nextRenewalDate, sub.billingCycle, today);
-        sub.nextRenewalDate = nextDateStr;
-        subscriptionModel.updateRenewalDate(userId, sub.id, nextDateStr).catch(() => {});
+      if (parseDateParts(sub.nextRenewalDate) <= todayStart) {
+        sub.nextRenewalDate = getNextActiveRenewalDate(sub.nextRenewalDate, sub.billingCycle, today);
+        runBackground(() => subscriptionService.autoRenewDueSubscriptions({ userId }));
       }
     }
 
@@ -209,6 +204,75 @@ export const subscriptionService = {
     return {
       subscription: updatedSub,
       payment,
+    };
+  },
+
+  /**
+   * Automatically renews any active recurring subscriptions that have reached their renewal date.
+   * - Records payment history for each reached renewal date (idempotent).
+   * - Advances next_renewal_date to the future.
+   * - Marks overdue pending reminders as 'paid'.
+   */
+  async autoRenewDueSubscriptions({ userId = null } = {}) {
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dueSubs = await subscriptionModel.findDueForRenewal(userId);
+
+    const renewed = [];
+
+    for (const sub of dueSubs) {
+      try {
+        let currentRenewal = parseDateParts(sub.nextRenewalDate);
+        const originalRenewalStr = formatDateString(currentRenewal);
+
+        if (currentRenewal > todayStart) continue;
+
+        const paymentsToRecord = [];
+        let guard = 0;
+
+        while (currentRenewal <= todayStart && guard < 60) {
+          const paidDateStr = formatDateString(currentRenewal);
+          paymentsToRecord.push(paidDateStr);
+          currentRenewal = addCycle(currentRenewal, sub.billingCycle);
+          guard += 1;
+        }
+
+        const newRenewalDateStr = formatDateString(currentRenewal);
+
+        // 1. Record payment history for each reached renewal date (idempotent)
+        for (const paidDate of paymentsToRecord) {
+          await paymentModel.recordPaymentIfNotExists({
+            userId: sub.userId,
+            subscriptionId: sub.id,
+            amount: sub.amount,
+            currency: sub.currency,
+            paidDate,
+            billingCycle: sub.billingCycle,
+          });
+        }
+
+        // 2. Advance next_renewal_date in subscriptions table
+        await subscriptionModel.updateRenewalDate(sub.userId, sub.id, newRenewalDateStr);
+
+        // 3. Mark pending reminders prior to the new renewal date as paid
+        await reminderModel.markPaidForSubscriptionBeforeDate(sub.userId, sub.id, newRenewalDateStr);
+
+        renewed.push({
+          subscriptionId: sub.id,
+          name: sub.name,
+          oldRenewalDate: originalRenewalStr,
+          newRenewalDate: newRenewalDateStr,
+          cyclesRenewed: paymentsToRecord.length,
+        });
+      } catch (err) {
+        console.error(`[autoRenewDueSubscriptions] Error renewing subscription ${sub.id}:`, err.message);
+      }
+    }
+
+    return {
+      totalChecked: dueSubs.length,
+      renewedCount: renewed.length,
+      renewed,
     };
   },
 
