@@ -68,6 +68,20 @@ export const reminderModel = {
     return rows;
   },
 
+  async markPaidForSubscriptionBeforeDate(userId, subscriptionId, beforeDate) {
+    const { rows } = await query(
+      `UPDATE reminders
+       SET status = 'paid'
+       WHERE user_id = $1
+         AND subscription_id = $2
+         AND status = 'pending'
+         AND (due_date IS NULL OR due_date < $3)
+       RETURNING id`,
+      [userId, subscriptionId, beforeDate]
+    );
+    return rows;
+  },
+
   async dismiss(userId, id) {
     const { rows } = await query(
       `UPDATE reminders

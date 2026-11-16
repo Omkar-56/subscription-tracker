@@ -3,6 +3,7 @@ import { createApp } from '../backend/src/app.js';
 import { ensureSchema } from '../backend/src/config/db.js';
 import { env as configEnv } from '../backend/src/config/env.js';
 import { reminderService } from '../backend/src/services/reminderService.js';
+import { subscriptionService } from '../backend/src/services/subscriptionService.js';
 
 let appInstance = null;
 let initPromise = null;
@@ -71,6 +72,7 @@ export default {
     if (url.pathname.startsWith('/api')) {
       try {
         await getOrCreateApp(env);
+        globalThis.__cf_ctx = ctx;
         return await handleAsNodeRequest(INTERNAL_PORT, request);
       } catch (err) {
         console.error('[Worker fetch error]:', err);
@@ -93,15 +95,22 @@ export default {
    * Cloudflare Cron Trigger handler (invoked on schedule, e.g. 0 9 * * *)
    */
   async scheduled(event, env, ctx) {
-    console.log('[Cloudflare Worker] Executing scheduled cron reminder trigger:', event.cron);
+    console.log('[Cloudflare Worker] Executing scheduled cron trigger:', event.cron);
     ctx.waitUntil(
       (async () => {
         try {
           await getOrCreateApp(env);
-          const outcome = await reminderService.sendDueReminders();
-          console.log('[Cloudflare Worker] Scheduled reminder run complete:', JSON.stringify(outcome));
+          globalThis.__cf_ctx = ctx;
+
+          // 1. Auto-renew subscriptions that reached their renewal date
+          const renewOutcome = await subscriptionService.autoRenewDueSubscriptions();
+          console.log('[Cloudflare Worker] Scheduled auto-renewal complete:', JSON.stringify(renewOutcome));
+
+          // 2. Send due reminders for upcoming renewals
+          const reminderOutcome = await reminderService.sendDueReminders();
+          console.log('[Cloudflare Worker] Scheduled reminder run complete:', JSON.stringify(reminderOutcome));
         } catch (err) {
-          console.error('[Cloudflare Worker] Scheduled reminder cron error:', err);
+          console.error('[Cloudflare Worker] Scheduled cron error:', err);
         }
       })()
     );

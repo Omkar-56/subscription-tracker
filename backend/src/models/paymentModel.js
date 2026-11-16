@@ -18,6 +18,20 @@ export const paymentModel = {
     return rows[0];
   },
 
+  async recordPaymentIfNotExists({ userId, subscriptionId, amount, currency, paidDate, billingCycle }) {
+    const { rows } = await query(
+      `INSERT INTO payments
+        (user_id, subscription_id, amount, currency, paid_date, billing_cycle)
+       SELECT $1, $2, $3, $4, $5, $6
+       WHERE NOT EXISTS (
+         SELECT 1 FROM payments WHERE subscription_id = $2 AND paid_date = $5
+       )
+       RETURNING ${PAYMENT_COLUMNS}`,
+      [userId, subscriptionId, amount, currency, paidDate, billingCycle]
+    );
+    return rows[0] || null;
+  },
+
   async findBySubscriptionId(userId, subscriptionId) {
     const { rows } = await query(
       `SELECT ${PAYMENT_COLUMNS}
@@ -34,11 +48,11 @@ export const paymentModel = {
       `SELECT p.id, p.user_id AS "userId", p.subscription_id AS "subscriptionId",
               p.amount, p.currency, p.paid_date AS "paidDate", p.billing_cycle AS "billingCycle",
               p.created_at AS "createdAt", s.name AS "subscriptionName", s.category
-       FROM payments p
-       JOIN subscriptions s ON s.id = p.subscription_id
-       WHERE p.user_id = $1
-       ORDER BY p.paid_date DESC, p.created_at DESC
-       LIMIT $2`,
+             FROM payments p
+             JOIN subscriptions s ON s.id = p.subscription_id
+             WHERE p.user_id = $1
+             ORDER BY p.paid_date DESC, p.created_at DESC
+             LIMIT $2`,
       [userId, limit]
     );
     return rows;
