@@ -1,6 +1,6 @@
-# Subtrack
+# Subspens
 
-Subtrack is a modern, personal subscription and recurring-bill tracker that helps you stay on top of recurring expenses, detect silent price hikes, track free trial deadlines, and forecast your monthly commitments.
+Subspens is a modern, personal subscription and recurring-bill tracker that helps you stay on top of recurring expenses, detect silent price hikes, track free trial deadlines, and forecast your monthly commitments.
 
 ---
 

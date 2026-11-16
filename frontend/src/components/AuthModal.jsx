@@ -125,17 +125,17 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
 
       {/* Modal Dialog Card */}
       <div className="relative w-full max-w-sm rounded-lg border border-line bg-paper p-6 sm:p-7 shadow-xl z-10 animate-in fade-in zoom-in-95 duration-150">
-        {/* 1. SubTrack Logo and Cross (X) Button */}
+        {/* 1. Subspens Logo and Cross (X) Button */}
         <div className="flex items-center justify-between pb-4 border-b border-line/60">
           <div className="flex items-center gap-2">
             <img
               src="/logo/logo.svg"
-              alt="SubTrack"
+              alt="Subspens"
               className="h-6 w-auto object-contain"
             />
             <img
               src="/logo/logo-t.svg"
-              alt="SubTrack"
+              alt="Subspens"
               className="h-6 w-auto object-contain"
             />
           </div>

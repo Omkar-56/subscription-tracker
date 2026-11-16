@@ -24,7 +24,7 @@ function getSmtpTransporter() {
  * or log cleanly to console if SMTP credentials haven't been provided yet.
  */
 export async function sendEmail({ to, subject, html, text }) {
-  const from = env.emailFrom || (env.smtpUser ? `SubTrack <${env.smtpUser}>` : 'SubTrack <notifications@gmail.com>');
+  const from = env.emailFrom || (env.smtpUser ? `Subspens <${env.smtpUser}>` : 'Subspens <notifications@gmail.com>');
 
   // 1. Send via Nodemailer SMTP (Gmail)
   const transporter = getSmtpTransporter();
@@ -76,7 +76,7 @@ export function buildReminderEmailHtml({
   isTrial = false,
   postTrialAmount = null,
   postTrialCurrency = null,
-  appUrl = 'https://subtrack.app',
+  appUrl = 'https://subspens.app',
 }) {
   const isUrgent = daysLeft <= 1;
   const daysText =
@@ -90,7 +90,7 @@ export function buildReminderEmailHtml({
     ? '#EA580C' // Warm Orange / Alert
     : isUrgent
     ? '#DC2626' // Red
-    : '#1F6F54'; // SubTrack Forest Green
+    : '#1F6F54'; // Subspens Forest Green
 
   const chargeAmountStr = isTrial && postTrialAmount !== null
     ? `${postTrialCurrency || currency} ${Number(postTrialAmount).toFixed(2)} / ${billingCycle}`
@@ -102,7 +102,7 @@ export function buildReminderEmailHtml({
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SubTrack Reminder</title>
+  <title>Subspens Reminder</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1E293B;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8F9FA; padding: 32px 16px;">
@@ -163,14 +163,14 @@ export function buildReminderEmailHtml({
                 <tr>
                   <td align="center" style="border-radius: 6px; background-color: #1F6F54;">
                     <a href="${appUrl}/subscriptions" target="_blank" style="font-size: 14px; font-weight: 600; color: #FFFFFF; text-decoration: none; padding: 11px 22px; display: inline-block; border-radius: 6px;">
-                      View in SubTrack &rarr;
+                      View in Subspens &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
 
               <p style="margin: 0; font-size: 12px; color: #94A3B8; line-height: 1.5;">
-                Tip: You can customize advance reminder windows or record manual payments from your SubTrack dashboard anytime.
+                Tip: You can customize advance reminder windows or record manual payments from your Subspens dashboard anytime.
               </p>
             </td>
           </tr>
@@ -179,7 +179,7 @@ export function buildReminderEmailHtml({
           <tr>
             <td style="background-color: #F8FAFC; padding: 18px 28px; border-top: 1px solid #E2E8F0; text-align: center;">
               <p style="margin: 0; font-size: 12px; color: #64748B;">
-                Sent with care by <strong style="color: #0F172A;">SubTrack</strong> &bull; Minimalist Subscription Ledger
+                Sent with care by <strong style="color: #0F172A;">Subspens</strong> &bull; Minimalist Subscription Ledger
               </p>
             </td>
           </tr>
@@ -206,7 +206,7 @@ export function buildReminderEmailText({
   isTrial = false,
   postTrialAmount = null,
   postTrialCurrency = null,
-  appUrl = 'https://subtrack.app',
+  appUrl = 'https://subspens.app',
 }) {
   const daysText =
     daysLeft === 0
@@ -218,7 +218,7 @@ export function buildReminderEmailText({
   const subjectPrefix = isTrial ? 'Trial Expiry Alert' : 'Renewal Reminder';
 
   return `
-SubTrack ${subjectPrefix}: ${subscriptionName} (${daysText})
+Subspens ${subjectPrefix}: ${subscriptionName} (${daysText})
 
 Hi ${userName || 'there'},
 
@@ -237,7 +237,7 @@ Subscription Details:
 Manage your subscriptions at: ${appUrl}/subscriptions
 
 --
-SubTrack · Minimalist Recurring Bill & Subscription Tracker
+Subspens · Minimalist Recurring Bill & Subscription Tracker
 `.trim();
 }
 
@@ -251,7 +251,7 @@ export function buildPasswordResetEmailHtml({ userName = 'there', resetUrl }) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reset Your SubTrack Password</title>
+  <title>Reset Your Subspens Password</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1E293B;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8F9FA; padding: 36px 16px;">
@@ -262,7 +262,7 @@ export function buildPasswordResetEmailHtml({ userName = 'there', resetUrl }) {
           <tr>
             <td style="background-color: #1F6F54; padding: 18px 28px; text-align: left;">
               <span style="color: #FFFFFF; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
-                SubTrack &bull; Account Security
+                Subspens &bull; Account Security
               </span>
             </td>
           </tr>
@@ -277,7 +277,7 @@ export function buildPasswordResetEmailHtml({ userName = 'there', resetUrl }) {
                 Hi ${userName || 'there'},
               </p>
               <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
-                We received a request to reset the password for your SubTrack account. Click the button below to choose a new password:
+                We received a request to reset the password for your Subspens account. Click the button below to choose a new password:
               </p>
 
               <!-- Call to Action Button -->
@@ -312,7 +312,7 @@ export function buildPasswordResetEmailHtml({ userName = 'there', resetUrl }) {
           <tr>
             <td style="background-color: #F8FAFC; padding: 16px 28px; border-top: 1px solid #E2E8F0; text-align: center;">
               <p style="margin: 0; font-size: 12px; color: #64748B;">
-                SubTrack &bull; Minimalist Subscription Ledger &bull; <a href="https://subtrack.app" style="color: #64748B; text-decoration: underline;">subtrack.app</a>
+                Subspens &bull; Minimalist Subscription Ledger &bull; <a href="https://subspens.app" style="color: #64748B; text-decoration: underline;">subspens.app</a>
               </p>
             </td>
           </tr>
@@ -330,11 +330,11 @@ export function buildPasswordResetEmailHtml({ userName = 'there', resetUrl }) {
  */
 export function buildPasswordResetEmailText({ userName = 'there', resetUrl }) {
   return `
-Reset Your SubTrack Password
+Reset Your Subspens Password
 
 Hi ${userName || 'there'},
 
-We received a request to reset the password for your SubTrack account.
+We received a request to reset the password for your Subspens account.
 To reset your password, visit the following link:
 
 ${resetUrl}
@@ -344,6 +344,6 @@ This link is valid for 1 hour.
 If you didn't request a password reset, you can safely ignore this email — your password will remain unchanged.
 
 --
-SubTrack · Minimalist Recurring Bill & Subscription Tracker
+Subspens · Minimalist Recurring Bill & Subscription Tracker
 `.trim();
 }

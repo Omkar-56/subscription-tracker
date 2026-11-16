@@ -30,7 +30,7 @@ export function createApp() {
   app.use(express.json({ limit: '20mb' }));
   app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-  app.get('/api', (req, res) => res.json({ status: 'ok', name: 'SubTrack API' }));
+  app.get('/api', (req, res) => res.json({ status: 'ok', name: 'Subspens API' }));
   app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
   app.use('/api/auth', authRoutes);

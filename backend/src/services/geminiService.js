@@ -119,7 +119,7 @@ export const geminiService = {
 
     const todayStr = new Date().toISOString().slice(0, 10);
 
-    const systemPrompt = `You are an expert subscription and receipt parser for "SubTrack".
+    const systemPrompt = `You are an expert subscription and receipt parser for "Subspens".
 Your task is to analyze the provided document, invoice, receipt image, screenshot, or text snippet and extract one or more recurring subscriptions or memberships.
 
 Current Date: ${todayStr}

@@ -100,10 +100,10 @@ export default function CancellationGuideModal({ subscription, onClose, onStatus
           </ol>
         </div>
 
-        {/* Action Footer: Mark Cancelled in SubTrack */}
+        {/* Action Footer: Mark Cancelled in Subspens */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
           <p className="text-[11px] text-ink/50">
-            Already cancelled with the provider? Update SubTrack:
+            Already cancelled with the provider? Update Subspens:
           </p>
 
           <div className="flex items-center gap-2">

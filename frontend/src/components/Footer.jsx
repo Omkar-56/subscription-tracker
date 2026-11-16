@@ -1,10 +1,9 @@
 import Link from 'next/link';
 
 const PRODUCT_LINKS = [
-  { label: 'Overview' },
-  { label: 'Features' },
-  { label: 'Changelog' },
-  { label: 'Roadmap' },
+  { label: 'Subscriptions', href: '/subscriptions' },
+  { label: 'Overview', href: '/dashboard' },
+  { label: 'Track for Free', href: '/subscriptions' },
 ];
 
 const LEGAL_LINKS = [
@@ -14,29 +13,28 @@ const LEGAL_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-ledger-dark border-t border-white/10">
+    <footer className="w-full bg-ledger-dark border-t border-white/10 overflow-hidden">
       {/* Main footer body */}
-      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 pt-14 pb-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 pt-12 sm:pt-14 pb-8 sm:pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8">
 
           {/* Brand column */}
           <div className="lg:col-span-5 space-y-4">
-            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90">
+            <Link href="/" className="inline-flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90">
               {/* Invert logos so they show white on the dark green bg */}
               <img
                 src="/logo/logo.svg"
-                alt="SubTrack"
+                alt="Subspens - Free Online Subscription Tracker"
                 className="h-7 w-auto object-contain brightness-0 invert opacity-90"
               />
               <img
                 src="/logo/logo-t.svg"
-                alt="SubTrack"
+                alt="Subspens"
                 className="h-7 w-auto object-contain brightness-0 invert opacity-90"
               />
             </Link>
-            <p className="text-sm text-white/55 leading-relaxed max-w-xs">
-              The intentional, high-clarity subscription ledger. Track recurring services, get
-              alerted before renewals, and keep what you love.
+            <p className="text-sm text-white/60 leading-relaxed max-w-sm">
+              <strong>Subspens</strong> — Track subscriptions for free online. The high-clarity subscription tracker to monitor recurring services, catch trial expirations, and eliminate wasted spend.
             </p>
           </div>
 
@@ -50,10 +48,12 @@ export default function Footer() {
               <ul className="space-y-3">
                 {PRODUCT_LINKS.map((item) => (
                   <li key={item.label}>
-                    {/* Non-clickable placeholders — cursor-default + muted style */}
-                    <span className="text-sm text-white/45 cursor-default select-none">
+                    <Link
+                      href={item.href}
+                      className="text-sm text-white/55 hover:text-white transition-colors duration-150"
+                    >
                       {item.label}
-                    </span>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -62,7 +62,7 @@ export default function Footer() {
             {/* Legal column */}
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-white/90 mb-5">
-                Legal
+                Legal & Trust
               </h4>
               <ul className="space-y-3">
                 {LEGAL_LINKS.map((item) => (
@@ -83,9 +83,12 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 py-4">
-          <p className="text-xs text-white/35">
-            © {new Date().getFullYear()} SubTrack. All rights reserved.
+        <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-left">
+          <p className="text-xs text-white/40">
+            © {new Date().getFullYear()} Subspens. All rights reserved.
+          </p>
+          <p className="text-xs text-white/40">
+            Track subscriptions for free online. Privacy-first, zero bank linking.
           </p>
         </div>
       </div>

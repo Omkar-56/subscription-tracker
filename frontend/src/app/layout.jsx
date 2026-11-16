@@ -1,14 +1,83 @@
 import '../index.css';
 import Providers from './providers';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://subtrack.subtrackweb.workers.dev';
+
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#064e3b',
 };
 
 export const metadata = {
-  title: 'Subtrack',
-  description: 'Track subscriptions. Stay in control.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Track Subscriptions for Free Online | Subspens — Subscription Tracker',
+    template: '%s | Subspens',
+  },
+  description:
+    'Track subscriptions for free online with Subspens. The fast, privacy-first online subscription tracker to monitor recurring expenses, catch free trial deadlines, get renewal reminders, and save money.',
+  keywords: [
+    'Subscription Tracker online',
+    'subscription tracker',
+    'track subscriptions',
+    'track subscriptions for free online',
+    'free subscription tracker',
+    'best subscription tracker online',
+    'track recurring expenses',
+    'manage subscriptions online',
+    'subspens',
+    'subspens tracker',
+    'free trial tracker',
+    'cancel subscriptions',
+    'subscription management software',
+    'recurring bill tracker',
+  ],
+  authors: [{ name: 'Subspens' }],
+  creator: 'Subspens',
+  publisher: 'Subspens',
+  applicationName: 'Subspens',
+  category: 'Finance',
+  classification: 'Subscription Tracker and Personal Finance Management Tool',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: SITE_URL,
+    siteName: 'Subspens',
+    title: 'Track Subscriptions for Free Online | Subspens — Subscription Tracker',
+    description:
+      'Track subscriptions for free online with Subspens. Monitor recurring bills, avoid surprise free-trial renewals, and take complete control of your subscription expenses with zero banking logins required.',
+    images: [
+      {
+        url: '/Images/hero-bg.png',
+        width: 1200,
+        height: 630,
+        alt: 'Subspens - Free Online Subscription Tracker Dashboard Preview',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Track Subscriptions for Free Online | Subspens — Subscription Tracker',
+    description:
+      'Track subscriptions for free online with Subspens. Monitor recurring bills, stop trial auto-conversions & save money.',
+    images: ['/Images/hero-bg.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },

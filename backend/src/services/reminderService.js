@@ -72,8 +72,8 @@ export const reminderService = {
             : `due in ${diffDays} days`;
 
         const subject = isTrial
-          ? `SubTrack Alert: ${sub.name} trial ends ${daysText}!`
-          : `SubTrack Reminder: ${sub.name} is ${daysText} (${sub.currency} ${Number(sub.amount).toFixed(2)})`;
+          ? `Subspens Alert: ${sub.name} trial ends ${daysText}!`
+          : `Subspens Reminder: ${sub.name} is ${daysText} (${sub.currency} ${Number(sub.amount).toFixed(2)})`;
 
         const appUrl = env.clientOrigin || 'http://localhost:3000';
 
@@ -198,7 +198,7 @@ export const reminderService = {
 
     const result = await sendEmail({
       to: user.email,
-      subject: `[Test] SubTrack Reminder: ${sampleSub.name} is due in 2 days`,
+      subject: `[Test] Subspens Reminder: ${sampleSub.name} is due in 2 days`,
       html,
       text,
     });

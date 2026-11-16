@@ -171,7 +171,7 @@ export const authService = {
     try {
       await sendEmail({
         to: user.email,
-        subject: 'Reset your SubTrack password',
+        subject: 'Reset your Subspens password',
         html,
         text,
       });

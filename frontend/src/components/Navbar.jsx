@@ -138,15 +138,16 @@ export default function Navbar() {
               href="/"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90"
+              title="Subspens - Track subscriptions for free online"
             >
               <img
                 src="/logo/logo.svg"
-                alt="SubTrack"
+                alt="Subspens - Free Online Subscription Tracker"
                 className="h-7 w-auto object-contain"
               />
               <img
                 src="/logo/logo-t.svg"
-                alt="SubTrack"
+                alt="Subspens"
                 className="h-7 w-auto object-contain"
               />
             </Link>

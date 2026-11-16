@@ -12,7 +12,7 @@ async function startServer() {
   }
 
   app.listen(env.port, () => {
-    console.log(`SubTrack API listening on port ${env.port} (${env.nodeEnv})`);
+    console.log(`Subspens API listening on port ${env.port} (${env.nodeEnv})`);
   });
 }
 
