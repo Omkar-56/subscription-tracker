@@ -1,7 +1,7 @@
 import '../index.css';
 import Providers from './providers';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://subtrack.subtrackweb.workers.dev';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://subspens.com';
 
 export const viewport = {
   width: 'device-width',

@@ -1,5 +1,5 @@
 # Subspens Robots.txt
-# https://subtrack.subtrackweb.workers.dev
+# https://subspens.com
 
 User-agent: *
 Allow: /
@@ -31,4 +31,4 @@ User-agent: meta-externalagent
 Allow: /
 
 # Sitemap
-Sitemap: https://subtrack.subtrackweb.workers.dev/sitemap.xml
+Sitemap: https://subspens.com/sitemap.xml
