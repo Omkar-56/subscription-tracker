@@ -17,13 +17,23 @@ function getEnv(name, fallback = '') {
   return process.env[name] ?? fallback;
 }
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+const jwtSecret = getEnv('JWT_SECRET', nodeEnv === 'production' ? '' : 'fallback_dev_secret_only_for_local_testing');
+
+// Production secret enforcement check
+if (nodeEnv === 'production') {
+  if (!jwtSecret || jwtSecret === 'fallback_dev_secret_only_for_local_testing' || jwtSecret.length < 32) {
+    console.error('CRITICAL SECURITY WARNING: JWT_SECRET must be configured with at least 32 cryptographically random characters in production.');
+  }
+}
+
 export const env = {
   port: Number(process.env.PORT || 4000),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
   databaseUrl: getEnv('DATABASE_URL'),
-  jwtSecret: getEnv('JWT_SECRET', 'fallback_secret_for_dev'),
+  jwtSecret,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+  clientOrigin: process.env.CLIENT_ORIGIN || 'https://subspens.com',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   // Standard Gmail SMTP configuration via Nodemailer

@@ -4,17 +4,19 @@ import { env } from '../config/env.js';
 
 export const reminderController = {
   /**
-   * Cron handler (invoked automatically via Cloudflare Workers Cron Trigger or manual endpoint)
+   * Protected cron handler (invoked via Cloudflare Cron Trigger or authenticated endpoint with CRON_SECRET)
    */
   async handleCron(req, res, next) {
     try {
-      // Optional security: if CRON_SECRET is configured, require Bearer token
-      if (env.cronSecret) {
-        const authHeader = req.headers.authorization || '';
-        const token = authHeader.replace(/^Bearer\s+/i, '');
-        if (token !== env.cronSecret) {
-          return res.status(401).json({ error: 'Unauthorized cron request' });
-        }
+      // Require CRON_SECRET authorization for external HTTP requests
+      const authHeader = req.headers.authorization || '';
+      const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+
+      if (!env.cronSecret || token !== env.cronSecret) {
+        console.warn(`[Security Alert] Unauthorized cron request attempt from IP: ${req.headers['cf-connecting-ip'] || req.ip}`);
+        return res.status(401).json({
+          error: 'Unauthorized. A valid CRON_SECRET bearer token is required to invoke this endpoint.',
+        });
       }
 
       // 1. Auto-renew any subscriptions that reached their renewal date

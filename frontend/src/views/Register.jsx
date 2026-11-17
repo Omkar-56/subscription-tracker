@@ -8,8 +8,8 @@ import { api } from '../api/client';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export default function Register() {
-  const { register } = useAuth();
   const router = useRouter();
+  const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,10 +23,13 @@ export default function Register() {
     try {
       await register(name, email, password);
 
-      const pending = typeof window !== 'undefined' ? sessionStorage.getItem('subtrack_pending_subscription') : null;
+      const pending = typeof window !== 'undefined'
+        ? sessionStorage.getItem('subspens_pending_subscription') || sessionStorage.getItem('subtrack_pending_subscription')
+        : null;
       if (pending) {
         try {
           await api.createSubscription(JSON.parse(pending));
+          sessionStorage.removeItem('subspens_pending_subscription');
           sessionStorage.removeItem('subtrack_pending_subscription');
         } catch (subErr) {
           console.error('Failed to auto-create pending subscription:', subErr);
@@ -43,84 +46,114 @@ export default function Register() {
 
   return (
     <div className="mx-auto max-w-sm">
-      {/* Mode switcher tabs */}
-      <div className="flex rounded-sm bg-stone-100 p-1 mb-6 text-xs font-semibold">
-        <Link
-          href="/login"
-          className="flex-1 rounded-xs py-1.5 text-ink/50 hover:text-ink text-center transition-colors"
-        >
-          Log In
-        </Link>
-        <button
-          type="button"
-          className="flex-1 rounded-xs py-1.5 bg-white text-ink shadow-2xs text-center cursor-default"
-        >
-          Sign Up
-        </button>
-      </div>
-
-      <h1 className="font-display text-2xl font-semibold">Create your account</h1>
-      <p className="mt-1 text-sm text-ink/60">Start tracking what you pay for, monthly.</p>
-
-      {/* Google OAuth Button */}
-      <div className="mt-6">
-        <GoogleSignInButton text="signup_with" onError={(err) => setError(err)} />
-      </div>
-
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-line" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-paper px-2 text-ink/40 font-medium">Or continue with email</span>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="card space-y-6">
         <div>
-          <label className="text-sm font-medium">Name</label>
-          <input
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-sm border border-line bg-white px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
-          />
+          <h1 className="text-xl font-semibold text-neutral-900">Create an account</h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            Start tracking and saving on subscriptions
+          </p>
         </div>
-        <div>
-          <label className="text-sm font-medium">Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-sm border border-line bg-white px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Password</label>
-          <input
-            type="password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-sm border border-line bg-white px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
-          />
-          <p className="mt-1 text-xs text-ink/40">At least 8 characters.</p>
-        </div>
-        {error && <p className="text-sm text-rust">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-sm bg-ledger py-2 text-sm font-medium text-white transition-colors hover:bg-ledger-dark disabled:opacity-60 cursor-pointer"
-        >
-          {submitting ? 'Creating account…' : 'Create account'}
-        </button>
-      </form>
 
-      <p className="mt-6 text-sm text-ink/60">
-        Already have an account? <Link href="/login" className="text-ledger hover:underline">Sign in</Link>
-      </p>
+        {error && (
+          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        <GoogleSignInButton
+          onSuccess={async () => {
+            const pending = typeof window !== 'undefined'
+              ? sessionStorage.getItem('subspens_pending_subscription') || sessionStorage.getItem('subtrack_pending_subscription')
+              : null;
+            if (pending) {
+              try {
+                await api.createSubscription(JSON.parse(pending));
+                sessionStorage.removeItem('subspens_pending_subscription');
+                sessionStorage.removeItem('subtrack_pending_subscription');
+              } catch (subErr) {
+                console.error('Failed to auto-create pending subscription:', subErr);
+              }
+            }
+            router.push('/subscriptions');
+          }}
+          onError={(err) => setError(err.message || 'Google sign-in failed')}
+        />
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-neutral-200" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-neutral-400">or sign up with email</span>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="label" htmlFor="name">
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              className="input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Alex Smith"
+              autoComplete="name"
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              className="input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              minLength={8}
+              className="input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn btn-primary w-full"
+          >
+            {submitting ? 'Creating account...' : 'Create account'}
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-neutral-500">
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-neutral-900 hover:underline">
+            Sign in
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

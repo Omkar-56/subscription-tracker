@@ -2,7 +2,7 @@ const BASE_URL = '/api';
 
 function getToken() {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('subtrack_token');
+  return localStorage.getItem('subspens_token') || localStorage.getItem('subtrack_token');
 }
 
 async function request(path, { method = 'GET', body, auth = true } = {}) {
@@ -49,7 +49,7 @@ export const api = {
   deleteSubscription: (id) => request(`/subscriptions/${id}`, { method: 'DELETE' }),
   priceHistory: (id) => request(`/subscriptions/${id}/price-history`),
   getPayments: (id) => request(`/subscriptions/${id}/payments`),
-  getAllPayments: (limit = 50) => request(`/subscriptions/payments/recent?limit=${limit}`),
+  getAllPayments: (limit = 50) => request(`/subscriptions/payments/recent?limit=${limit}` ),
 
   getReminders: () => request('/reminders'),
   dismissReminder: (id) => request(`/reminders/${id}/dismiss`, { method: 'PATCH' }),

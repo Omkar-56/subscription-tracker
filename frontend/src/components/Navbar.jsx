@@ -89,13 +89,15 @@ export default function Navbar() {
     if (!payingSub) return;
     await api.confirmPayment(payingSub.id, paymentData);
     setPayingSub(null);
+    window.dispatchEvent(new CustomEvent('subspens:refresh'));
     window.dispatchEvent(new CustomEvent('subtrack:refresh'));
   }
 
   async function handleConvertTrial(sub) {
     try {
       await api.convertTrial(sub.id);
-      window.dispatchEvent(new CustomEvent('subtrack:refresh'));
+      window.dispatchEvent(new CustomEvent('subspens:refresh'));
+    window.dispatchEvent(new CustomEvent('subtrack:refresh'));
     } catch (err) {
       alert(err.message);
     }
@@ -113,7 +115,8 @@ export default function Navbar() {
         status: newStatus,
         notes: subscription.notes || '',
       });
-      window.dispatchEvent(new CustomEvent('subtrack:refresh'));
+      window.dispatchEvent(new CustomEvent('subspens:refresh'));
+    window.dispatchEvent(new CustomEvent('subtrack:refresh'));
     } catch (err) {
       alert(err.message);
     }

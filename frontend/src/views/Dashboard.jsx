@@ -102,7 +102,7 @@ export default function Dashboard() {
   const currentCurrency = user?.baseCurrency || ctxBaseCurrency || 'INR';
 
   function refresh() {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('subtrack_token') : null;
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('subspens_token') || localStorage.getItem('subtrack_token')) : null;
     if (!token && !user) {
       setSummary(computeGuestSummary(currentCurrency));
       setForecast(computeGuestForecast(currentCurrency));
@@ -142,8 +142,12 @@ export default function Dashboard() {
     function onExternalRefresh() {
       refresh();
     }
+    window.addEventListener('subspens:refresh', onExternalRefresh);
     window.addEventListener('subtrack:refresh', onExternalRefresh);
-    return () => window.removeEventListener('subtrack:refresh', onExternalRefresh);
+    return () => {
+      window.removeEventListener('subspens:refresh', onExternalRefresh);
+      window.removeEventListener('subtrack:refresh', onExternalRefresh);
+    };
   }, [user, currentCurrency]);
 
   async function handleConfirmPayment(paymentData) {

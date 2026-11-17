@@ -29,8 +29,12 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
     function onExternalRefresh() {
       loadReminders();
     }
+    window.addEventListener('subspens:refresh', onExternalRefresh);
     window.addEventListener('subtrack:refresh', onExternalRefresh);
-    return () => window.removeEventListener('subtrack:refresh', onExternalRefresh);
+    return () => {
+      window.removeEventListener('subspens:refresh', onExternalRefresh);
+      window.removeEventListener('subtrack:refresh', onExternalRefresh);
+    };
   }, []);
 
   useEffect(() => {

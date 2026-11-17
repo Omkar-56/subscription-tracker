@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedCurrency = localStorage.getItem('subtrack_base_currency');
+      const savedCurrency = localStorage.getItem('subspens_base_currency') || localStorage.getItem('subtrack_base_currency');
       if (savedCurrency) setGuestCurrency(savedCurrency);
     }
   }, []);
@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
   const closeAuthModal = useCallback(() => setAuthModal(null), []);
 
   useEffect(() => {
-    const token = localStorage.getItem('subtrack_token');
+    const token = localStorage.getItem('subspens_token') || localStorage.getItem('subtrack_token');
     if (!token) {
       setLoading(false);
       return;
@@ -36,6 +36,7 @@ export function AuthProvider({ children }) {
         // ONLY invalidate token if server explicitly returned 401 Unauthorized
         // Never wipe credentials on network errors, timeouts, or 5xx server cold starts
         if (err?.status === 401) {
+          localStorage.removeItem('subspens_token');
           localStorage.removeItem('subtrack_token');
           setUser(null);
         }
@@ -45,27 +46,27 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const { user, token } = await api.login({ email, password });
-    localStorage.setItem('subtrack_token', token);
+    localStorage.setItem('subspens_token', token);
     setUser(user);
     setAuthModal(null);
   }, []);
 
   const register = useCallback(async (name, email, password) => {
     const { user, token } = await api.register({ name, email, password });
-    localStorage.setItem('subtrack_token', token);
+    localStorage.setItem('subspens_token', token);
     setUser(user);
     setAuthModal(null);
   }, []);
 
   const loginWithGoogle = useCallback(async (credential) => {
     const { user, token } = await api.googleAuth(credential);
-    localStorage.setItem('subtrack_token', token);
+    localStorage.setItem('subspens_token', token);
     setUser(user);
     setAuthModal(null);
   }, []);
 
   const setBaseCurrency = useCallback(async (currency) => {
-    localStorage.setItem('subtrack_base_currency', currency);
+    localStorage.setItem('subspens_base_currency', currency);
     setGuestCurrency(currency);
     if (user) {
       try {
@@ -78,6 +79,7 @@ export function AuthProvider({ children }) {
   }, [user]);
 
   const logout = useCallback(() => {
+    localStorage.removeItem('subspens_token');
     localStorage.removeItem('subtrack_token');
     setUser(null);
   }, []);
@@ -101,8 +103,8 @@ export function AuthProvider({ children }) {
         login,
         register,
         loginWithGoogle,
-        setBaseCurrency,
         logout,
+        setBaseCurrency,
       }}
     >
       {children}
@@ -112,6 +114,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
   return ctx;
 }

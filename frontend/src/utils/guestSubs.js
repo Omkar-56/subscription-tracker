@@ -2,7 +2,7 @@ import { parseLocalDate, getNextActiveRenewalDate } from './date';
 
 export function getGuestSubs() {
   if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem('subtrack_guest_subs');
+  const stored = localStorage.getItem('subspens_guest_subs') || localStorage.getItem('subtrack_guest_subs');
   if (stored) {
     try {
       const parsed = JSON.parse(stored);
@@ -40,7 +40,7 @@ export function getGuestSubs() {
           });
 
         if (changed || realSubs.length !== parsed.length) {
-          localStorage.setItem('subtrack_guest_subs', JSON.stringify(realSubs));
+          localStorage.setItem('subspens_guest_subs', JSON.stringify(realSubs));
         }
         return realSubs;
       }
@@ -53,5 +53,5 @@ export function getGuestSubs() {
 
 export function saveGuestSubs(subs) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('subtrack_guest_subs', JSON.stringify(subs));
+  localStorage.setItem('subspens_guest_subs', JSON.stringify(subs));
 }

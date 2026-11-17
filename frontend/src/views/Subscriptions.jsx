@@ -95,7 +95,7 @@ export default function Subscriptions() {
   const legendRef = useRef(null);
 
   async function refresh() {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('subtrack_token') : null;
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('subspens_token') || localStorage.getItem('subtrack_token')) : null;
     if (!token && !user) {
       setSubscriptions(getGuestSubs());
       return;
@@ -137,8 +137,12 @@ export default function Subscriptions() {
 
   useEffect(() => {
     function onExternalRefresh() { refresh(); }
+    window.addEventListener('subspens:refresh', onExternalRefresh);
     window.addEventListener('subtrack:refresh', onExternalRefresh);
-    return () => window.removeEventListener('subtrack:refresh', onExternalRefresh);
+    return () => {
+      window.removeEventListener('subspens:refresh', onExternalRefresh);
+      window.removeEventListener('subtrack:refresh', onExternalRefresh);
+    };
   }, [user, baseCurrency]);
 
   // Close panels on outside click

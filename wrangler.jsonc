@@ -16,20 +16,46 @@
   "triggers": {
     "crons": ["0 9 * * *"],
   },
+  "ratelimits": [
+    {
+      "name": "AUTH_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 10,
+        "period": 60,
+      },
+    },
+    {
+      "name": "AI_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": {
+        "limit": 15,
+        "period": 60,
+      },
+    },
+    {
+      "name": "API_RATE_LIMITER",
+      "namespace_id": "1003",
+      "simple": {
+        "limit": 120,
+        "period": 60,
+      },
+    },
+  ],
   "vars": {
     "NODE_ENV": "production",
-    "CLIENT_ORIGIN": "https://subtrack.subtrackweb.workers.dev",
+    "CLIENT_ORIGIN": "https://subspens.com",
     "SMTP_HOST": "smtp.gmail.com",
     "SMTP_PORT": "465",
     "SMTP_SECURE": "true",
     "JWT_EXPIRES_IN": "7d",
     "SMTP_USER": "unalone.app@gmail.com",
     "EMAIL_FROM": "Subspens <unalone.app@gmail.com>",
-    "GOOGLE_CLIENT_ID": "716397457965-fu0mp9f7h1j0djfds3clff0psvad46do.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_ID": "344939829448-qfvrfn4p17dkhv2h5q0citsp6kaj5kan.apps.googleusercontent.com",
   },
   "previews": {
     "vars": {
-      "CLIENT_ORIGIN": "https://subtrack.subtrackweb.workers.dev",
+      "CLIENT_ORIGIN": "https://subspens.com",
       "EMAIL_FROM": "Subspens <unalone.app@gmail.com>",
       "GOOGLE_CLIENT_ID": "716397457965-fu0mp9f7h1j0djfds3clff0psvad46do.apps.googleusercontent.com",
       "JWT_EXPIRES_IN": "7d",
