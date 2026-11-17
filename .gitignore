@@ -7,3 +7,4 @@ dist/
 .dev.vars
 frontend/out/
 frontend/.next/
+frontend/.env.production
