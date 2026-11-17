@@ -4,6 +4,9 @@
  *    distributed edge RateLimit bindings (AUTH_RATE_LIMITER, AI_RATE_LIMITER, API_RATE_LIMITER).
  * 2. Sliding Window In-Memory Fallback: Operates when running in local Node development,
  *    testing suites, or environments without Cloudflare bindings.
+ *
+ * NOTE: Cloudflare Workers forbids calling setInterval / setTimeout in global module scope.
+ * Cleanup is performed lazily inside request handling to avoid startup validation errors.
  */
 
 class HybridRateLimiter {
@@ -18,9 +21,6 @@ class HybridRateLimiter {
     this.max = max;
     this.message = message;
     this.hits = new Map();
-
-    // Clean up expired buckets periodically in Node environments
-    setInterval(() => this.cleanup(), Math.min(windowMs, 5 * 60 * 1000)).unref?.();
   }
 
   getClientKey(req) {
@@ -35,8 +35,10 @@ class HybridRateLimiter {
     return req.ip || req.socket?.remoteAddress || 'unknown-client';
   }
 
-  cleanup() {
-    const now = Date.now();
+  cleanup(now) {
+    // Only prune when cache grows large to keep operations fast
+    if (this.hits.size < 500) return;
+
     for (const [key, timestamps] of this.hits.entries()) {
       const valid = timestamps.filter((t) => now - t < this.windowMs);
       if (valid.length === 0) {
@@ -78,6 +80,8 @@ class HybridRateLimiter {
 
       // In-Memory sliding window fallback for local testing / development
       const now = Date.now();
+      this.cleanup(now);
+
       const clientTimestamps = this.hits.get(key) || [];
       const validTimestamps = clientTimestamps.filter((t) => now - t < this.windowMs);
 
