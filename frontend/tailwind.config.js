@@ -9,6 +9,7 @@ export default {
         paper: '#fcf7ed',
         ink: '#353535',
         line: '#e8e2d5',
+        card: '#ffffff',
         ledger: {
           DEFAULT: '#064e3b',
           dark: '#043c2e',
@@ -17,10 +18,12 @@ export default {
         amber: {
           DEFAULT: '#C77D2B',
           light: '#F6E9D8',
+          dark: '#92400e',
         },
         rust: {
           DEFAULT: '#B4462F',
           light: '#F5E3DE',
+          dark: '#8c2c1a',
         },
       },
       fontFamily: {

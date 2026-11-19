@@ -102,10 +102,10 @@ export default function Dashboard() {
   const currentCurrency = user?.baseCurrency || ctxBaseCurrency || 'INR';
 
   function refresh() {
-    const token = typeof window !== 'undefined' ? (localStorage.getItem('subspens_token') || localStorage.getItem('subtrack_token')) : null;
-    if (!token && !user) {
+    if (!user) {
       setSummary(computeGuestSummary(currentCurrency));
       setForecast(computeGuestForecast(currentCurrency));
+      setError('');
       return;
     }
 
@@ -117,9 +117,11 @@ export default function Dashboard() {
       .catch((err) => {
         if (err?.status === 401) {
           setSummary(computeGuestSummary(currentCurrency));
+          setError('');
         } else {
-          console.error('Failed to load dashboard summary:', err);
-          setError(err?.message || 'Failed to load overview data');
+          console.warn('Failed to load dashboard summary from server:', err);
+          setSummary(computeGuestSummary(currentCurrency));
+          setError('');
         }
       });
 
@@ -128,9 +130,7 @@ export default function Dashboard() {
         setForecast(data);
       })
       .catch((err) => {
-        if (err?.status === 401) {
-          setForecast(computeGuestForecast(currentCurrency));
-        }
+        setForecast(computeGuestForecast(currentCurrency));
       });
   }
 

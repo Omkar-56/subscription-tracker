@@ -1,20 +1,24 @@
-import crypto from 'crypto';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { userModel } from '../models/userModel.js';
-import { env } from '../config/env.js';
-import { ApiError } from '../utils/ApiError.js';
-import { sendEmail, buildPasswordResetEmailHtml, buildPasswordResetEmailText } from './emailService.js';
-import { ALLOWED_CURRENCY_CODES } from './currencyService.js';
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { userModel } from "../models/userModel.js";
+import { env } from "../config/env.js";
+import { ApiError } from "../utils/ApiError.js";
+import {
+  sendEmail,
+  buildPasswordResetEmailHtml,
+  buildPasswordResetEmailText,
+} from "./emailService.js";
+import { ALLOWED_CURRENCY_CODES } from "./currencyService.js";
 
 const SALT_ROUNDS = 10;
 const RESET_TOKEN_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes for security
 
 // Whitelist of trusted production & development hostnames for reset password links
 const TRUSTED_DOMAINS = [
-  'subspens.com',
-  'www.subspens.com',
-  'subtrack.subtrackweb.workers.dev',
+  "subspens.com",
+  "www.subspens.com",
+  "subtrack.subtrackweb.workers.dev",
 ];
 
 function signToken(user) {
@@ -24,18 +28,26 @@ function signToken(user) {
 }
 
 export const authService = {
-  async register({ name, email, password, baseCurrency = 'INR' }) {
+  async register({ name, email, password, baseCurrency = "INR" }) {
     const cleanEmail = email.trim().toLowerCase();
     const existing = await userModel.findByEmail(cleanEmail);
     if (existing) {
-      throw new ApiError(409, 'An account with this email already exists');
+      throw new ApiError(409, "An account with this email already exists");
     }
-    const cleanCurrency = (baseCurrency || 'INR').toUpperCase();
+    const cleanCurrency = (baseCurrency || "INR").toUpperCase();
     if (!ALLOWED_CURRENCY_CODES.includes(cleanCurrency)) {
-      throw new ApiError(400, `Unsupported currency. Allowed: ${ALLOWED_CURRENCY_CODES.join(', ')}`);
+      throw new ApiError(
+        400,
+        `Unsupported currency. Allowed: ${ALLOWED_CURRENCY_CODES.join(", ")}`,
+      );
     }
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const user = await userModel.create({ name: name.trim(), email: cleanEmail, passwordHash, baseCurrency: cleanCurrency });
+    const user = await userModel.create({
+      name: name.trim(),
+      email: cleanEmail,
+      passwordHash,
+      baseCurrency: cleanCurrency,
+    });
     return { user, token: signToken(user) };
   },
 
@@ -43,14 +55,17 @@ export const authService = {
     const cleanEmail = email.trim().toLowerCase();
     const user = await userModel.findByEmail(cleanEmail);
     if (!user) {
-      throw new ApiError(401, 'Invalid email or password');
+      throw new ApiError(401, "Invalid email or password");
     }
     if (!user.password_hash) {
-      throw new ApiError(400, 'This account was created with Google. Please use "Sign in with Google" or reset your password to set a manual password.');
+      throw new ApiError(
+        400,
+        'This account was created with Google. Please use "Sign in with Google" or reset your password to set a manual password.',
+      );
     }
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
-      throw new ApiError(401, 'Invalid email or password');
+      throw new ApiError(401, "Invalid email or password");
     }
     const safeUser = {
       id: user.id,
@@ -58,43 +73,54 @@ export const authService = {
       email: user.email,
       googleId: user.googleId,
       avatarUrl: user.avatarUrl,
-      baseCurrency: user.baseCurrency || 'INR',
+      baseCurrency: user.baseCurrency || "INR",
     };
     return { user: safeUser, token: signToken(safeUser) };
   },
 
   async googleAuth(credential) {
     if (!credential) {
-      throw new ApiError(400, 'Google credential token is required');
+      throw new ApiError(400, "Google credential token is required");
     }
 
     // Verify token using Google's public tokeninfo endpoint
     let payload;
     try {
-      const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+      const res = await fetch(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`,
+      );
       if (!res.ok) {
-        throw new Error('Google token validation failed');
+        throw new Error("Google token validation failed");
       }
       payload = await res.json();
     } catch (err) {
-      throw new ApiError(401, 'Invalid Google token: ' + err.message);
+      throw new ApiError(401, "Invalid Google token: " + err.message);
     }
 
     // Verify audience matches configured Google Client ID to prevent token reuse across other apps
     const configuredClientIds = [
       env.googleClientId,
-      '716397457965-fu0mp9f7h1j0djfds3clff0psvad46do.apps.googleusercontent.com',
-      '344939829448-qfvrfn4p17dkhv2h5q0citsp6kaj5kan.apps.googleusercontent.com',
+      "716397457965-fu0mp9f7h1j0djfds3clff0psvad46do.apps.googleusercontent.com",
+      "344939829448-qfvrfn4p17dkhv2h5q0citsp6kaj5kan.apps.googleusercontent.com",
     ].filter(Boolean);
 
-    if (configuredClientIds.length > 0 && payload.aud && !configuredClientIds.includes(payload.aud)) {
-      console.warn(`[Google OAuth Security Alert] Token audience mismatch: ${payload.aud}`);
-      throw new ApiError(401, 'Unauthorized Google credential: audience mismatch');
+    if (
+      configuredClientIds.length > 0 &&
+      payload.aud &&
+      !configuredClientIds.includes(payload.aud)
+    ) {
+      console.warn(
+        `[Google OAuth Security Alert] Token audience mismatch: ${payload.aud}`,
+      );
+      throw new ApiError(
+        401,
+        "Unauthorized Google credential: audience mismatch",
+      );
     }
 
     const { sub: googleId, email, name, picture: avatarUrl } = payload;
     if (!email) {
-      throw new ApiError(400, 'Google account has no associated email address');
+      throw new ApiError(400, "Google account has no associated email address");
     }
 
     const cleanEmail = email.trim().toLowerCase();
@@ -107,16 +133,19 @@ export const authService = {
       user = await userModel.findByEmail(cleanEmail);
       if (user) {
         // Link google account to existing email user
-        user = await userModel.linkGoogleAccount(user.id, { googleId, avatarUrl });
+        user = await userModel.linkGoogleAccount(user.id, {
+          googleId,
+          avatarUrl,
+        });
       } else {
         // Create brand new user
         user = await userModel.create({
-          name: name || cleanEmail.split('@')[0],
+          name: name || cleanEmail.split("@")[0],
           email: cleanEmail,
           googleId,
           avatarUrl,
           passwordHash: null,
-          baseCurrency: 'INR',
+          baseCurrency: "INR",
         });
       }
     }
@@ -127,19 +156,20 @@ export const authService = {
       email: user.email,
       googleId: user.googleId,
       avatarUrl: user.avatarUrl,
-      baseCurrency: user.baseCurrency || 'INR',
+      baseCurrency: user.baseCurrency || "INR",
     };
 
     return { user: safeUser, token: signToken(safeUser) };
   },
 
   async forgotPassword(email, requestOrigin = null) {
-    const normalizedEmail = (email || '').trim().toLowerCase();
+    const normalizedEmail = (email || "").trim().toLowerCase();
     const user = await userModel.findByEmail(normalizedEmail);
 
     // Standard security: Always return the exact same response to prevent user enumeration
     const genericSuccess = {
-      message: 'If an account exists with this email address, you will receive password reset instructions.',
+      message:
+        "If an account exists with this email address, you will receive password reset instructions.",
     };
 
     if (!user) {
@@ -147,15 +177,18 @@ export const authService = {
     }
 
     // Generate cryptographically secure random token
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
     const expiresAt = new Date(Date.now() + RESET_TOKEN_EXPIRY_MS);
 
     await userModel.setResetPasswordToken(user.id, tokenHash, expiresAt);
 
-    // Securely determine appUrl — strictly enforce known whitelist to prevent Host Header / Origin Poisoning
-    let appUrl = 'https://subspens.com';
-    const isDev = (env.nodeEnv || process.env.NODE_ENV) !== 'production';
+    // Securely determine appUrl - strictly enforce known whitelist to prevent Host Header / Origin Poisoning
+    let appUrl = "https://subspens.com";
+    const isDev = (env.nodeEnv || process.env.NODE_ENV) !== "production";
 
     if (requestOrigin) {
       try {
@@ -164,7 +197,7 @@ export const authService = {
 
         const isTrusted =
           TRUSTED_DOMAINS.includes(host) ||
-          (isDev && (host === 'localhost' || host === '127.0.0.1')) ||
+          (isDev && (host === "localhost" || host === "127.0.0.1")) ||
           (env.clientOrigin && env.clientOrigin.includes(host));
 
         if (isTrusted) {
@@ -173,8 +206,8 @@ export const authService = {
       } catch {
         // Fallback to https://subspens.com on invalid origin
       }
-    } else if (env.clientOrigin && !env.clientOrigin.includes('*')) {
-      appUrl = env.clientOrigin.split(',')[0].trim().replace(/\/$/, '');
+    } else if (env.clientOrigin && !env.clientOrigin.includes("*")) {
+      appUrl = env.clientOrigin.split(",")[0].trim().replace(/\/$/, "");
     }
 
     const resetUrl = `${appUrl}/reset-password?token=${rawToken}`;
@@ -192,12 +225,12 @@ export const authService = {
     try {
       await sendEmail({
         to: user.email,
-        subject: 'Reset your Subspens password',
+        subject: "Reset your Subspens password",
         html,
         text,
       });
     } catch (err) {
-      console.error('[forgotPassword email send error]:', err.message);
+      console.error("[forgotPassword email send error]:", err.message);
     }
 
     return genericSuccess;
@@ -205,34 +238,44 @@ export const authService = {
 
   async resetPassword({ token, newPassword }) {
     if (!token) {
-      throw new ApiError(400, 'Password reset token is required');
+      throw new ApiError(400, "Password reset token is required");
     }
 
-    const tokenHash = crypto.createHash('sha256').update(token.trim()).digest('hex');
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(token.trim())
+      .digest("hex");
     const user = await userModel.findByValidResetToken(tokenHash);
 
     if (!user) {
-      throw new ApiError(400, 'Invalid or expired password reset link. Please request a new link.');
+      throw new ApiError(
+        400,
+        "Invalid or expired password reset link. Please request a new link.",
+      );
     }
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
     await userModel.updatePasswordAndClearResetToken(user.id, passwordHash);
 
     return {
-      message: 'Your password has been reset successfully. You can now log in with your new password.',
+      message:
+        "Your password has been reset successfully. You can now log in with your new password.",
     };
   },
 
   async me(userId) {
     const user = await userModel.findById(userId);
-    if (!user) throw new ApiError(404, 'User not found');
+    if (!user) throw new ApiError(404, "User not found");
     return user;
   },
 
   async updateCurrency(userId, currency) {
-    const validCurrency = (currency || 'INR').toUpperCase();
+    const validCurrency = (currency || "INR").toUpperCase();
     if (!ALLOWED_CURRENCY_CODES.includes(validCurrency)) {
-      throw new ApiError(400, `Unsupported currency. Allowed: ${ALLOWED_CURRENCY_CODES.join(', ')}`);
+      throw new ApiError(
+        400,
+        `Unsupported currency. Allowed: ${ALLOWED_CURRENCY_CODES.join(", ")}`,
+      );
     }
     const updated = await userModel.updateBaseCurrency(userId, validCurrency);
     return updated;

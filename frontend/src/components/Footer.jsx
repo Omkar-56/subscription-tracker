@@ -1,14 +1,14 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 const PRODUCT_LINKS = [
-  { label: 'Subscriptions', href: '/subscriptions' },
-  { label: 'Overview', href: '/dashboard' },
-  { label: 'Track for Free', href: '/subscriptions' },
+  { label: "Subscriptions", href: "/subscriptions" },
+  { label: "Overview", href: "/dashboard" },
+  { label: "Track for Free", href: "/subscriptions" },
 ];
 
 const LEGAL_LINKS = [
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms of Service', href: '/terms-of-service' },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Service", href: "/terms-of-service" },
 ];
 
 export default function Footer() {
@@ -17,24 +17,28 @@ export default function Footer() {
       {/* Main footer body */}
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 pt-12 sm:pt-14 pb-8 sm:pb-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8">
-
           {/* Brand column */}
           <div className="lg:col-span-5 space-y-4">
-            <Link href="/" className="inline-flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90"
+            >
               {/* Invert logos so they show white on the dark green bg */}
               <img
                 src="/logo/logo.svg"
                 alt="Subspens - Free Online Subscription Tracker"
-                className="h-7 w-auto object-contain brightness-0 invert opacity-90"
+                className="h-7 w-auto object-contain brightness-0 invert opacity-90 shrink-0"
               />
               <img
                 src="/logo/logo-t.svg"
                 alt="Subspens"
-                className="h-7 w-auto object-contain brightness-0 invert opacity-90"
+                className="h-7 w-auto object-contain brightness-0 invert opacity-90 shrink-0"
               />
             </Link>
             <p className="text-sm text-white/60 leading-relaxed max-w-sm">
-              <strong>Subspens</strong> — Track subscriptions for free online. The high-clarity subscription tracker to monitor recurring services, catch trial expirations, and eliminate wasted spend.
+              <strong>Subspens</strong> - Track subscriptions for free online.
+              The high-clarity subscription tracker to monitor recurring
+              services, catch trial expirations, and eliminate wasted spend.
             </p>
           </div>
 
@@ -88,7 +92,8 @@ export default function Footer() {
             © {new Date().getFullYear()} Subspens. All rights reserved.
           </p>
           <p className="text-xs text-white/40">
-            Track subscriptions for free online. Privacy-first, zero bank linking.
+            Track subscriptions for free online. Privacy-first, zero bank
+            linking.
           </p>
         </div>
       </div>
