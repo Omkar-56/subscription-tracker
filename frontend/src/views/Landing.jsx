@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useAuth } from "../context/AuthContext";
 import {
   LuShieldCheck,
   LuBellRing,
@@ -10,9 +10,9 @@ import {
   LuChartPie,
   LuScissors,
   LuTrendingDown,
-} from 'react-icons/lu';
+} from "react-icons/lu";
 
-function Reveal({ children, delay = 0, className = '' }) {
+function Reveal({ children, delay = 0, className = "" }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef(null);
 
@@ -24,7 +24,7 @@ function Reveal({ children, delay = 0, className = '' }) {
           observer.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: '-40px' }
+      { threshold: 0.1, rootMargin: "-40px" },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -35,11 +35,11 @@ function Reveal({ children, delay = 0, className = '' }) {
       ref={ref}
       style={{
         transitionDelay: `${delay}s`,
-        transitionDuration: '0.8s',
-        transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        transitionDuration: "0.8s",
+        transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
       }}
       className={`transition-all ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       } ${className}`}
     >
       {children}
@@ -49,32 +49,32 @@ function Reveal({ children, delay = 0, className = '' }) {
 
 const HERO_SUBS = [
   {
-    name: 'Netflix',
-    cat: 'Streaming',
-    price: '₹649',
-    due: 'in 2 days',
-    tone: 'rust',
+    name: "Netflix",
+    cat: "Streaming",
+    price: "₹649",
+    due: "in 2 days",
+    tone: "rust",
   },
   {
-    name: 'ChatGPT Plus',
-    cat: 'AI',
-    price: '$20.00',
-    due: 'in 6 days',
-    tone: 'amber',
+    name: "ChatGPT Plus",
+    cat: "AI",
+    price: "$20.00",
+    due: "in 6 days",
+    tone: "amber",
   },
   {
-    name: 'Figma',
-    cat: 'Software',
-    price: '€15.00',
-    due: 'Trial ends in 3 days',
-    tone: 'rust',
+    name: "Figma",
+    cat: "Software",
+    price: "€15.00",
+    due: "Trial ends in 3 days",
+    tone: "rust",
   },
   {
-    name: 'Spotify',
-    cat: 'Streaming',
-    price: '₹119',
-    due: 'in 12 days',
-    tone: 'ledger',
+    name: "Spotify",
+    cat: "Streaming",
+    price: "₹119",
+    due: "in 12 days",
+    tone: "ledger",
   },
 ];
 
@@ -91,7 +91,7 @@ function Hero() {
   return (
     <section
       className="relative overflow-hidden"
-      style={{ minHeight: '100vh', maxHeight: '1080px' }}
+      style={{ minHeight: "100vh", maxHeight: "1080px" }}
     >
       {/* Background video */}
       <video
@@ -105,11 +105,9 @@ function Hero() {
         <source src="/Images/hero-bg.mp4" type="video/mp4" />
       </video>
 
-
-
       <div
         className="relative flex flex-col justify-center"
-        style={{ zIndex: 3, minHeight: '100vh', maxHeight: '1080px' }}
+        style={{ zIndex: 3, minHeight: "100vh", maxHeight: "1080px" }}
       >
         <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 py-8">
           {/* Hero text */}
@@ -127,9 +125,9 @@ function Hero() {
 
             <Reveal delay={0.2}>
               <p className="mx-auto mt-5 max-w-xl font-secondary text-base leading-relaxed text-ink/70">
-                Take complete control of recurring expenses, get alerted before free
-                trials expire, normalize multi-currency spending, and cancel
-                unwanted bills with 1-click guides.
+                Take complete control of recurring expenses, get alerted before
+                free trials expire, normalize multi-currency spending, and
+                cancel unwanted bills with 1-click guides.
               </p>
             </Reveal>
 
@@ -141,7 +139,7 @@ function Hero() {
                 href="/subscriptions"
                 className="group inline-flex items-center gap-2 rounded-full bg-ledger px-6 py-3 text-sm font-medium text-paper shadow-lg shadow-ledger/20 transition-all hover:bg-ledger-dark hover:-translate-y-0.5 active:scale-[0.97]"
               >
-                Track subscriptions free{' '}
+                Track subscriptions free{" "}
                 <span className="transition-transform group-hover:translate-x-1">
                   →
                 </span>
@@ -165,7 +163,7 @@ function Hero() {
             </Reveal>
           </div>
 
-          {/* Floating Mockup Card — scaled down to fit viewport */}
+          {/* Floating Mockup Card - scaled down to fit viewport */}
           <Reveal delay={0.3} className="relative mx-auto mt-8 max-w-3xl">
             <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-2.5 shadow-2xl shadow-black/30">
               <div className="grid gap-2.5 rounded-xl bg-paper/95 p-4 md:grid-cols-[1fr_1.4fr] md:p-5">
@@ -190,7 +188,7 @@ function Hero() {
                         key={i}
                         className="flex-1 rounded-t bg-paper/25 transition-all duration-700"
                         style={{
-                          height: barsLoaded ? `${h}%` : '6%',
+                          height: barsLoaded ? `${h}%` : "6%",
                           transitionDelay: `${i * 40}ms`,
                         }}
                         title={`Month ${i + 1}`}
@@ -219,19 +217,23 @@ function Hero() {
                           {s.name[0]}
                         </span>
                         <div>
-                          <p className="text-sm font-medium text-ink">{s.name}</p>
+                          <p className="text-sm font-medium text-ink">
+                            {s.name}
+                          </p>
                           <p className="text-xs text-ink/50">{s.cat}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-ink">{s.price}</p>
+                        <p className="text-sm font-medium text-ink">
+                          {s.price}
+                        </p>
                         <p
                           className={`text-xs ${
-                            s.tone === 'rust'
-                              ? 'text-rust'
-                              : s.tone === 'amber'
-                              ? 'text-amber'
-                              : 'text-ledger'
+                            s.tone === "rust"
+                              ? "text-rust"
+                              : s.tone === "amber"
+                                ? "text-amber"
+                                : "text-ledger"
                           }`}
                         >
                           {s.due}
@@ -250,18 +252,18 @@ function Hero() {
 }
 
 const BRANDS = [
-  'Netflix',
-  'ChatGPT',
-  'Spotify',
-  'GitHub',
-  'Disney+',
-  'Figma',
-  'Notion',
-  'Apple',
-  'Adobe',
-  'Slack',
-  'YouTube',
-  'Discord',
+  "Netflix",
+  "ChatGPT",
+  "Spotify",
+  "GitHub",
+  "Disney+",
+  "Figma",
+  "Notion",
+  "Apple",
+  "Adobe",
+  "Slack",
+  "YouTube",
+  "Discord",
 ];
 
 function Logos() {
@@ -290,16 +292,16 @@ function Logos() {
 
 const PILLARS = [
   {
-    t: '100% free to use',
-    d: 'No credit cards, subscription fees, or hidden trial paywalls.',
+    t: "100% free to use",
+    d: "No credit cards, subscription fees, or hidden trial paywalls.",
   },
   {
-    t: 'Zero bank linking',
-    d: 'Complete financial privacy without Plaid, Yodlee, or account scraping.',
+    t: "Zero bank linking",
+    d: "Complete financial privacy without Plaid, Yodlee, or account scraping.",
   },
   {
-    t: 'Auto-renewal intelligence',
-    d: 'Calculates billing cycles, records payment history, prevents surprises.',
+    t: "Auto-renewal intelligence",
+    d: "Calculates billing cycles, records payment history, prevents surprises.",
   },
 ];
 
@@ -310,10 +312,10 @@ function About() {
         <div className="grid gap-16 md:grid-cols-2">
           <Reveal>
             <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
-              The{' '}
+              The{" "}
               <em className="text-ledger not-italic font-semibold">
                 intentional
-              </em>{' '}
+              </em>{" "}
               subscription tracker.
             </h2>
           </Reveal>
@@ -323,7 +325,7 @@ function About() {
               overhead. Unlike complex budgeting software that demands bank
               credentials, Subspens lets you track subscriptions, set renewal
               reminders, catch free-trial deadlines and normalize multi-currency
-              bills into your home currency — completely free.
+              bills into your home currency - completely free.
             </p>
           </Reveal>
         </div>
@@ -346,16 +348,16 @@ function About() {
 
 const STEPS = [
   {
-    t: 'Add subscriptions or scan invoices',
-    d: 'Log Netflix, Spotify, ChatGPT or AWS manually — or upload PDF receipts for instant parsing with built-in Google Gemini AI.',
+    t: "Add subscriptions or scan invoices",
+    d: "Log Netflix, Spotify, ChatGPT or AWS manually - or upload PDF receipts for instant parsing with built-in Google Gemini AI.",
   },
   {
-    t: 'Set renewal alerts & trial cutoffs',
-    d: 'Configure notification windows (default 2 days before) and trial cutoff dates. The Free-Trial Sentinel counts down so you cancel in time.',
+    t: "Set renewal alerts & trial cutoffs",
+    d: "Configure notification windows (default 2 days before) and trial cutoff dates. The Free-Trial Sentinel counts down so you cancel in time.",
   },
   {
-    t: 'Audit spend & stop leaks',
-    d: 'Review 12-month projected spend, inspect category charts, and cancel unused subscriptions with 1-click guides while tracking savings.',
+    t: "Audit spend & stop leaks",
+    d: "Review 12-month projected spend, inspect category charts, and cancel unused subscriptions with 1-click guides while tracking savings.",
   },
 ];
 
@@ -368,7 +370,7 @@ function Steps() {
             Simple 3-step setup
           </span>
           <h2 className="mt-5 font-display font-medium tracking-tight text-5xl leading-[1.05] md:text-6xl">
-            Set up in under{' '}
+            Set up in under{" "}
             <em className="text-amber-light not-italic font-semibold">
               60 seconds.
             </em>
@@ -401,33 +403,33 @@ function Steps() {
 const FEATURES = [
   {
     icon: LuShieldCheck,
-    t: 'Free-Trial Expiry Sentinel',
-    d: 'Set exact cancellation deadlines and countdown alerts, then cancel with direct links before your card is billed.',
+    t: "Free-Trial Expiry Sentinel",
+    d: "Set exact cancellation deadlines and countdown alerts, then cancel with direct links before your card is billed.",
   },
   {
     icon: LuBellRing,
-    t: 'Smart renewal reminders',
-    d: 'Proactive alerts before bills hit. Billing cycles roll over cleanly and log full payment histories.',
+    t: "Smart renewal reminders",
+    d: "Proactive alerts before bills hit. Billing cycles roll over cleanly and log full payment histories.",
   },
   {
     icon: LuRefreshCw,
-    t: 'Real-time currency normalization',
-    d: 'INR, USD, EUR, CAD, AED, JPY, SGD or AUD — unified with live European Central Bank rates.',
+    t: "Real-time currency normalization",
+    d: "INR, USD, EUR, CAD, AED, JPY, SGD or AUD - unified with live European Central Bank rates.",
   },
   {
     icon: LuChartPie,
-    t: 'Category breakdown & forecast',
-    d: 'Donut charts and 12-month projections across AI, Cloud, Streaming, Software and Apps.',
+    t: "Category breakdown & forecast",
+    d: "Donut charts and 12-month projections across AI, Cloud, Streaming, Software and Apps.",
   },
   {
     icon: LuScissors,
-    t: '1-click cancellation guides',
-    d: 'Skip obscure account settings. Direct links and step-by-step instructions for any provider.',
+    t: "1-click cancellation guides",
+    d: "Skip obscure account settings. Direct links and step-by-step instructions for any provider.",
   },
   {
     icon: LuTrendingDown,
-    t: 'Waste & savings meter',
-    d: 'Track monthly and annual money saved from cancellations as your leaks close in real time.',
+    t: "Waste & savings meter",
+    d: "Track monthly and annual money saved from cancellations as your leaks close in real time.",
   },
 ];
 
@@ -437,7 +439,7 @@ function Features() {
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
         <Reveal className="text-center">
           <h2 className="mx-auto max-w-3xl font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
-            Engineered for complete{' '}
+            Engineered for complete{" "}
             <em className="text-ledger not-italic font-semibold">
               subscription clarity.
             </em>
@@ -472,37 +474,37 @@ function Features() {
 }
 
 const ROWS = [
-  ['Cost', '100% free forever', '$4.99–$9.99/month', 'Free (manual)'],
+  ["Cost", "100% free forever", "$4.99–$9.99/month", "Free (manual)"],
   [
-    'Bank login / Plaid required',
-    'No — 100% private',
-    'Yes (security risk)',
-    'No',
+    "Bank login / Plaid required",
+    "No - 100% private",
+    "Yes (security risk)",
+    "No",
   ],
   [
-    'Free-Trial Expiry Sentinel',
-    'Included with cutoff alerts',
-    'Rare / paid',
-    'None',
+    "Free-Trial Expiry Sentinel",
+    "Included with cutoff alerts",
+    "Rare / paid",
+    "None",
   ],
   [
-    'Live multi-currency',
-    '8 currencies, live ECB rates',
-    'Single currency',
-    'Manual formulas',
+    "Live multi-currency",
+    "8 currencies, live ECB rates",
+    "Single currency",
+    "Manual formulas",
   ],
-  ['1-click cancellation guides', 'Direct links & guides', 'None', 'None'],
+  ["1-click cancellation guides", "Direct links & guides", "None", "None"],
   [
-    'Automatic cycle rollovers',
-    'Calculated live',
-    'Bank sync required',
-    'Manual updates',
+    "Automatic cycle rollovers",
+    "Calculated live",
+    "Bank sync required",
+    "Manual updates",
   ],
   [
-    'AI receipt & invoice parser',
-    'Google Gemini powered',
-    'Paid tier only',
-    'None',
+    "AI receipt & invoice parser",
+    "Google Gemini powered",
+    "Paid tier only",
+    "None",
   ],
 ];
 
@@ -512,7 +514,7 @@ function Compare() {
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
         <Reveal className="text-center">
           <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
-            Why Subspens is{' '}
+            Why Subspens is{" "}
             <em className="text-ledger not-italic font-semibold">#1.</em>
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-ink/60">
@@ -560,32 +562,32 @@ function Compare() {
 
 const FAQS = [
   [
-    'What is Subspens and why is it the best subscription tracker online?',
-    'Subspens is a privacy-first, free subscription tracker. It combines renewal reminders, free-trial deadlines, multi-currency normalization and cancellation guides — without ever asking for bank access.',
+    "What is Subspens and why is it the best subscription tracker online?",
+    "Subspens is a privacy-first, free subscription tracker. It combines renewal reminders, free-trial deadlines, multi-currency normalization and cancellation guides - without ever asking for bank access.",
   ],
   [
-    'How do I track subscriptions for free online with Subspens?',
-    'Add your services manually or upload a PDF receipt, set your alert windows, and Subspens handles billing cycles and spend forecasts for you.',
+    "How do I track subscriptions for free online with Subspens?",
+    "Add your services manually or upload a PDF receipt, set your alert windows, and Subspens handles billing cycles and spend forecasts for you.",
   ],
   [
-    'Do I need to connect my bank account or enter credit card details?',
-    'No. Subspens never requires bank linking, Plaid, or card details. Your financial data stays private.',
+    "Do I need to connect my bank account or enter credit card details?",
+    "No. Subspens never requires bank linking, Plaid, or card details. Your financial data stays private.",
   ],
   [
-    'How does the Free-Trial Expiry Sentinel prevent surprise charges?',
-    'You set the trial cutoff date and Subspens counts down with alerts, giving you a direct cancel link before the trial converts to paid.',
+    "How does the Free-Trial Expiry Sentinel prevent surprise charges?",
+    "You set the trial cutoff date and Subspens counts down with alerts, giving you a direct cancel link before the trial converts to paid.",
   ],
   [
-    'Can I track subscriptions in multiple global currencies?',
-    'Yes — INR, USD, EUR, CAD, AED, JPY, SGD and AUD, converted to your home currency using live European Central Bank rates.',
+    "Can I track subscriptions in multiple global currencies?",
+    "Yes - INR, USD, EUR, CAD, AED, JPY, SGD and AUD, converted to your home currency using live European Central Bank rates.",
   ],
   [
-    'How does Subspens compare to an Excel or Google Sheets tracker?',
-    'Spreadsheets need manual formulas and updates. Subspens rolls cycles over automatically, converts currencies live and alerts you before renewals.',
+    "How does Subspens compare to an Excel or Google Sheets tracker?",
+    "Spreadsheets need manual formulas and updates. Subspens rolls cycles over automatically, converts currencies live and alerts you before renewals.",
   ],
   [
-    'Is Subspens really 100% free to use?',
-    'Yes. No subscription fees, no credit card, no hidden paywalls.',
+    "Is Subspens really 100% free to use?",
+    "Yes. No subscription fees, no credit card, no hidden paywalls.",
   ],
 ];
 
@@ -598,8 +600,10 @@ function FAQ() {
         <div className="grid gap-14 md:grid-cols-[1fr_1.5fr]">
           <Reveal>
             <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink">
-              Common{' '}
-              <em className="text-ledger not-italic font-semibold">questions.</em>
+              Common{" "}
+              <em className="text-ledger not-italic font-semibold">
+                questions.
+              </em>
             </h2>
             <p className="mt-5 text-ink/60">
               Everything about our free tracker and privacy standards.
@@ -620,7 +624,7 @@ function FAQ() {
                     <span>{q}</span>
                     <span
                       className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line text-lg text-ledger transition-transform duration-300 ${
-                        isOpen ? 'rotate-45' : ''
+                        isOpen ? "rotate-45" : ""
                       }`}
                     >
                       +
@@ -629,8 +633,8 @@ function FAQ() {
                   <div
                     className={`grid transition-all duration-300 ease-in-out overflow-hidden ${
                       isOpen
-                        ? 'grid-rows-[1fr] opacity-100 pb-6'
-                        : 'grid-rows-[0fr] opacity-0'
+                        ? "grid-rows-[1fr] opacity-100 pb-6"
+                        : "grid-rows-[0fr] opacity-0"
                     }`}
                   >
                     <div className="overflow-hidden pr-12 text-sm leading-relaxed text-ink/60">
@@ -666,14 +670,14 @@ function FinalCTA() {
 
           <div className="relative z-10">
             <h2 className="mx-auto max-w-3xl font-display font-medium tracking-tight text-5xl leading-[1.05] md:text-7xl">
-              Ready to close your{' '}
+              Ready to close your{" "}
               <em className="text-amber-light not-italic font-semibold">
                 financial leaks?
               </em>
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-paper/70 text-base leading-relaxed">
-              Stop surprise renewals and audit every trial. Set up in less than 60
-              seconds — no credit card required.
+              Stop surprise renewals and audit every trial. Set up in less than
+              60 seconds - no credit card required.
             </p>
 
             <div className="mt-10 flex justify-center">
@@ -707,23 +711,26 @@ function Footer() {
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
         <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr]">
           <div>
-            <Link href="/" className="flex items-center gap-2 w-fit transition-opacity hover:opacity-80">
+            <Link
+              href="/"
+              className="flex items-center gap-2 w-fit transition-opacity hover:opacity-80"
+            >
               <img
                 src="/logo/logo.svg"
                 alt="Subspens"
                 className="h-8 w-auto object-contain shrink-0"
-                style={{ display: 'block' }}
+                style={{ display: "block" }}
               />
               <img
                 src="/logo/logo-t.svg"
                 alt="Subspens"
                 className="h-8 w-auto object-contain shrink-0"
-                style={{ display: 'block' }}
+                style={{ display: "block" }}
               />
             </Link>
             <p className="mt-3 max-w-sm text-sm text-ink/60 leading-relaxed">
-              The high-clarity subscription tracker to monitor recurring services,
-              catch trial expirations, and eliminate wasted spend.
+              The high-clarity subscription tracker to monitor recurring
+              services, catch trial expirations, and eliminate wasted spend.
             </p>
           </div>
           <div className="space-y-2 text-sm">
@@ -768,7 +775,9 @@ function Footer() {
           </div>
         </div>
         <div className="mt-12 flex flex-wrap justify-between gap-2 border-t border-line pt-6 text-xs text-ink/50">
-          <span>© {new Date().getFullYear()} Subspens. All rights reserved.</span>
+          <span>
+            © {new Date().getFullYear()} Subspens. All rights reserved.
+          </span>
           <span>Privacy-first, zero bank linking.</span>
         </div>
       </div>
