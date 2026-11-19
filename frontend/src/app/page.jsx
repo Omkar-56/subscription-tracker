@@ -19,12 +19,20 @@ export const metadata = {
     siteName: "Subspens",
     images: [
       {
-        url: `${SITE_URL}/Images/hero-bg.png`,
+        url: "/Images/og-image.png",
         width: 1200,
         height: 630,
         alt: "Subspens - Track Subscriptions for Free Online",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title:
+      "Track Subscriptions for Free Online | Subspens - Best Subscription Tracker",
+    description:
+      "Track subscriptions for free online with Subspens. The 100% free online subscription tracker to manage recurring expenses, monitor free trials, get renewal reminders, and save money.",
+    images: ["/Images/og-image.png"],
   },
 };
 

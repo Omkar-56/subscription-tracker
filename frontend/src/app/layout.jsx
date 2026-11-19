@@ -54,10 +54,10 @@ export const metadata = {
       "Track subscriptions for free online with Subspens. Monitor recurring bills, avoid surprise free-trial renewals, and take complete control of your subscription expenses with zero banking logins required.",
     images: [
       {
-        url: "/Images/hero-bg.png",
+        url: "/Images/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Subspens - Free Online Subscription Tracker Dashboard Preview",
+        alt: "Subspens - Free Online Subscription Tracker Preview",
       },
     ],
   },
@@ -67,7 +67,7 @@ export const metadata = {
       "Track Subscriptions for Free Online | Subspens - Subscription Tracker",
     description:
       "Track subscriptions for free online with Subspens. Monitor recurring bills, stop trial auto-conversions & save money.",
-    images: ["/Images/hero-bg.png"],
+    images: ["/Images/og-image.png"],
   },
   robots: {
     index: true,
