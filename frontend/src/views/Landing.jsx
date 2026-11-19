@@ -1,424 +1,803 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import BrandLogo from '../components/BrandLogo';
-import Footer from '../components/Footer';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useAuth } from "../context/AuthContext";
+import {
+  LuShieldCheck,
+  LuBellRing,
+  LuRefreshCw,
+  LuChartPie,
+  LuScissors,
+  LuTrendingDown,
+} from "react-icons/lu";
+
+function Reveal({ children, delay = 0, className = "" }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "-40px" },
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        transitionDelay: `${delay}s`,
+        transitionDuration: "0.8s",
+        transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+      }}
+      className={`transition-all ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+const HERO_SUBS = [
+  {
+    name: "Netflix",
+    cat: "Streaming",
+    price: "₹649",
+    due: "in 2 days",
+    tone: "rust",
+  },
+  {
+    name: "ChatGPT Plus",
+    cat: "AI",
+    price: "$20.00",
+    due: "in 6 days",
+    tone: "amber",
+  },
+  {
+    name: "Figma",
+    cat: "Software",
+    price: "€15.00",
+    due: "Trial ends in 3 days",
+    tone: "rust",
+  },
+  {
+    name: "Spotify",
+    cat: "Streaming",
+    price: "₹119",
+    due: "in 12 days",
+    tone: "ledger",
+  },
+];
+
+const BAR_HEIGHTS = [40, 55, 48, 70, 62, 80, 66, 74, 58, 90, 72, 64];
+
+function Hero() {
+  const [barsLoaded, setBarsLoaded] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setBarsLoaded(true), 250);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <section
+      className="relative overflow-hidden"
+      style={{ minHeight: "100vh", maxHeight: "1080px" }}
+    >
+      {/* Background video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ zIndex: 0 }}
+      >
+        <source src="/Images/hero-bg.mp4" type="video/mp4" />
+      </video>
+
+      <div
+        className="relative flex flex-col justify-center"
+        style={{ zIndex: 3, minHeight: "100vh", maxHeight: "1080px" }}
+      >
+        <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 py-8">
+          {/* Hero text */}
+          <div className="relative mx-auto max-w-3xl text-center">
+            <Reveal>
+              <h1 className="font-display font-normal text-4xl leading-[0.95] tracking-tight text-ink sm:text-5xl md:text-6xl">
+                <span className="mr-2 inline-block">Track</span>
+                <span className="mr-2 inline-block">subscriptions</span>
+                <br />
+                <span className="inline-block font-medium text-ledger">
+                  for free online.
+                </span>
+              </h1>
+            </Reveal>
+
+            <Reveal delay={0.2}>
+              <p className="mx-auto mt-5 max-w-xl font-secondary text-base leading-relaxed text-ink/70">
+                Take complete control of recurring expenses, get alerted before
+                free trials expire, normalize multi-currency spending, and
+                cancel unwanted bills with 1-click guides.
+              </p>
+            </Reveal>
+
+            <Reveal
+              delay={0.3}
+              className="mt-7 flex flex-wrap items-center justify-center gap-3"
+            >
+              <Link
+                href="/subscriptions"
+                className="group inline-flex items-center gap-2 rounded-full bg-ledger px-6 py-3 text-sm font-medium text-paper shadow-lg shadow-ledger/20 transition-all hover:bg-ledger-dark hover:-translate-y-0.5 active:scale-[0.97]"
+              >
+                Track subscriptions free{" "}
+                <span className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+              <a
+                href="#how"
+                className="rounded-full border border-line bg-card px-6 py-3 text-sm font-medium text-ink transition hover:border-ledger/40 hover:-translate-y-0.5"
+              >
+                See how it works
+              </a>
+            </Reveal>
+
+            <Reveal delay={0.4}>
+              <p className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-ink/55">
+                <span>No credit card required</span>
+                <span>·</span>
+                <span>Zero bank account access</span>
+                <span>·</span>
+                <span>Instant guest access</span>
+              </p>
+            </Reveal>
+          </div>
+
+          {/* Floating Mockup Card - scaled down to fit viewport */}
+          <Reveal delay={0.3} className="relative mx-auto mt-8 max-w-3xl">
+            <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-2.5 shadow-2xl shadow-black/30">
+              <div className="grid gap-2.5 rounded-xl bg-paper/95 p-4 md:grid-cols-[1fr_1.4fr] md:p-5">
+                {/* Left Ledger Card */}
+                <div className="rounded-xl bg-ledger p-4 text-paper flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.14em] text-paper/60">
+                      Monthly spend · INR
+                    </p>
+                    <p className="mt-2 font-display font-medium tracking-tight text-3xl">
+                      ₹4,862
+                    </p>
+                    <p className="mt-0.5 text-xs text-paper/70">
+                      12-month forecast ₹58,344
+                    </p>
+                  </div>
+
+                  {/* 12-month forecast bars */}
+                  <div className="mt-4 flex h-16 items-end gap-1">
+                    {BAR_HEIGHTS.map((h, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 rounded-t bg-paper/25 transition-all duration-700"
+                        style={{
+                          height: barsLoaded ? `${h}%` : "6%",
+                          transitionDelay: `${i * 40}ms`,
+                        }}
+                        title={`Month ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between rounded-lg bg-paper/10 px-3 py-2 text-xs">
+                    <span className="text-paper/70">Saved this year</span>
+                    <span className="font-medium text-amber-light">₹7,420</span>
+                  </div>
+                </div>
+
+                {/* Right Upcoming Renewals */}
+                <div className="space-y-1.5">
+                  <p className="px-1 pb-0.5 text-xs uppercase tracking-[0.14em] text-ink/50">
+                    Upcoming renewals
+                  </p>
+                  {HERO_SUBS.map((s) => (
+                    <div
+                      key={s.name}
+                      className="flex items-center justify-between rounded-xl border border-line bg-card px-3 py-2.5 hover:border-ledger/20 transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="grid h-8 w-8 place-items-center rounded-lg bg-ledger-light font-medium text-ledger text-sm">
+                          {s.name[0]}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-ink">
+                            {s.name}
+                          </p>
+                          <p className="text-xs text-ink/50">{s.cat}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-ink">
+                          {s.price}
+                        </p>
+                        <p
+                          className={`text-xs ${
+                            s.tone === "rust"
+                              ? "text-rust"
+                              : s.tone === "amber"
+                                ? "text-amber"
+                                : "text-ledger"
+                          }`}
+                        >
+                          {s.due}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const BRANDS = [
+  "Netflix",
+  "ChatGPT",
+  "Spotify",
+  "GitHub",
+  "Disney+",
+  "Figma",
+  "Notion",
+  "Apple",
+  "Adobe",
+  "Slack",
+  "YouTube",
+  "Discord",
+];
+
+function Logos() {
+  return (
+    <section className="border-y border-line py-10">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
+        <p className="text-center text-xs uppercase tracking-[0.18em] text-ink/50">
+          Works with all your favorite tools, media & platforms
+        </p>
+        <div className="relative mt-6 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_15%,black_85%,transparent)]">
+          <div className="marquee flex w-max gap-14 py-1">
+            {[...BRANDS, ...BRANDS].map((b, i) => (
+              <span
+                key={i}
+                className="font-display font-medium tracking-tight text-3xl text-ink/40 select-none"
+              >
+                {b}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const PILLARS = [
+  {
+    t: "100% free to use",
+    d: "No credit cards, subscription fees, or hidden trial paywalls.",
+  },
+  {
+    t: "Zero bank linking",
+    d: "Complete financial privacy without Plaid, Yodlee, or account scraping.",
+  },
+  {
+    t: "Auto-renewal intelligence",
+    d: "Calculates billing cycles, records payment history, prevents surprises.",
+  },
+];
+
+function About() {
+  return (
+    <section className="py-24 sm:py-28">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
+        <div className="grid gap-16 md:grid-cols-2">
+          <Reveal>
+            <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
+              The{" "}
+              <em className="text-ledger not-italic font-semibold">
+                intentional
+              </em>{" "}
+              subscription tracker.
+            </h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="font-secondary text-lg leading-relaxed text-ink/70">
+              Built for individuals and teams seeking clarity over recurring
+              overhead. Unlike complex budgeting software that demands bank
+              credentials, Subspens lets you track subscriptions, set renewal
+              reminders, catch free-trial deadlines and normalize multi-currency
+              bills into your home currency - completely free.
+            </p>
+          </Reveal>
+        </div>
+
+        <div className="mt-16 grid gap-px overflow-hidden rounded-3xl border border-line bg-line md:grid-cols-3">
+          {PILLARS.map((p, i) => (
+            <Reveal key={p.t} delay={i * 0.1} className="bg-card p-8">
+              <span className="font-display font-medium tracking-tight text-4xl text-amber">
+                0{i + 1}
+              </span>
+              <h3 className="mt-6 text-lg font-medium text-ink">{p.t}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink/60">{p.d}</p>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const STEPS = [
+  {
+    t: "Add subscriptions or scan invoices",
+    d: "Log Netflix, Spotify, ChatGPT or AWS manually - or upload PDF receipts for instant parsing with built-in Google Gemini AI.",
+  },
+  {
+    t: "Set renewal alerts & trial cutoffs",
+    d: "Configure notification windows (default 2 days before) and trial cutoff dates. The Free-Trial Sentinel counts down so you cancel in time.",
+  },
+  {
+    t: "Audit spend & stop leaks",
+    d: "Review 12-month projected spend, inspect category charts, and cancel unused subscriptions with 1-click guides while tracking savings.",
+  },
+];
+
+function Steps() {
+  return (
+    <section id="how" className="bg-ledger py-24 sm:py-28 text-paper">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
+        <Reveal className="max-w-2xl">
+          <span className="text-xs uppercase tracking-[0.18em] text-amber-light font-semibold">
+            Simple 3-step setup
+          </span>
+          <h2 className="mt-5 font-display font-medium tracking-tight text-5xl leading-[1.05] md:text-6xl">
+            Set up in under{" "}
+            <em className="text-amber-light not-italic font-semibold">
+              60 seconds.
+            </em>
+          </h2>
+          <p className="mt-5 text-paper/70 text-base">
+            No complex bank configurations. Just clarity.
+          </p>
+        </Reveal>
+
+        <div className="mt-16 grid gap-6 md:grid-cols-3">
+          {STEPS.map((s, i) => (
+            <Reveal key={s.t} delay={i * 0.12}>
+              <div className="h-full rounded-3xl border border-paper/15 bg-ledger-dark p-8 transition-transform duration-300 hover:-translate-y-1.5">
+                <span className="grid h-11 w-11 place-items-center rounded-full bg-amber-light font-display font-medium tracking-tight text-xl text-ledger-dark">
+                  {i + 1}
+                </span>
+                <h3 className="mt-8 text-xl font-medium text-paper">{s.t}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-paper/65">
+                  {s.d}
+                </p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const FEATURES = [
   {
-    icon: '🛡️',
-    title: 'Free-Trial Expiry Sentinel',
-    desc: 'Never get hit by surprise trial conversions. Set exact cancellation deadlines, countdown alerts, and cancel with direct links before your card gets billed.',
+    icon: LuShieldCheck,
+    t: "Free-Trial Expiry Sentinel",
+    d: "Set exact cancellation deadlines and countdown alerts, then cancel with direct links before your card is billed.",
   },
   {
-    icon: '🔔',
-    title: 'Smart Renewal Reminders',
-    desc: 'Proactive alerts before bills hit your card. Automated billing cycle rollovers advance dates cleanly and log full payment histories.',
+    icon: LuBellRing,
+    t: "Smart renewal reminders",
+    d: "Proactive alerts before bills hit. Billing cycles roll over cleanly and log full payment histories.",
   },
   {
-    icon: '💱',
-    title: 'Real-Time Currency Normalization',
-    desc: 'Pay across INR, USD, EUR, CAD, AED, JPY, SGD, or AUD. Subspens uses live European Central Bank exchange rates to give you a single unified view of your true global spend.',
+    icon: LuRefreshCw,
+    t: "Real-time currency normalization",
+    d: "INR, USD, EUR, CAD, AED, JPY, SGD or AUD - unified with live European Central Bank rates.",
   },
   {
-    icon: '📊',
-    title: 'Visual Category Breakdown & Forecast',
-    desc: 'Interactive Donut charts and 12-month projections reveal exactly where your budget flows between AI, Cloud, Streaming, Software, and Apps.',
+    icon: LuChartPie,
+    t: "Category breakdown & forecast",
+    d: "Donut charts and 12-month projections across AI, Cloud, Streaming, Software and Apps.",
   },
   {
-    icon: '✂️',
-    title: '1-Click Direct Cancellation Guides',
-    desc: 'Stop wasting time digging through obscure account settings. Get direct links and step-by-step instructions to cancel any provider in seconds.',
+    icon: LuScissors,
+    t: "1-click cancellation guides",
+    d: "Skip obscure account settings. Direct links and step-by-step instructions for any provider.",
   },
   {
-    icon: '📉',
-    title: 'Waste & Savings Meter',
-    desc: 'Track monthly and annual money saved from cancelled subscriptions. Watch your financial leaks close in real time as you optimize recurring charges.',
+    icon: LuTrendingDown,
+    t: "Waste & savings meter",
+    d: "Track monthly and annual money saved from cancellations as your leaks close in real time.",
   },
 ];
 
-const SAMPLE_COMPANIES = [
-  'Netflix', 'ChatGPT', 'Spotify', 'GitHub', 'Disney+', 'Figma', 'Notion', 'Apple', 'Adobe', 'Slack', 'YouTube', 'Discord'
+function Features() {
+  return (
+    <section id="features" className="py-24 sm:py-28">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
+        <Reveal className="text-center">
+          <h2 className="mx-auto max-w-3xl font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
+            Engineered for complete{" "}
+            <em className="text-ledger not-italic font-semibold">
+              subscription clarity.
+            </em>
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-ink/60">
+            Everything you need to audit, organize, and stop unintended
+            recurring leakage.
+          </p>
+        </Reveal>
+
+        <div className="mt-16 grid gap-4 md:grid-cols-3">
+          {FEATURES.map((f, i) => {
+            const Icon = f.icon;
+            return (
+              <Reveal key={f.t} delay={(i % 3) * 0.08}>
+                <div className="group h-full rounded-3xl border border-line bg-card p-8 transition-all duration-300 hover:shadow-xl hover:shadow-ink/5 hover:-translate-y-1">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-ledger-light text-ledger transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105">
+                    <Icon className="h-6 w-6 text-ledger" />
+                  </span>
+                  <h3 className="mt-6 text-lg font-medium text-ink">{f.t}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink/60">
+                    {f.d}
+                  </p>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const ROWS = [
+  ["Cost", "100% free forever", "$4.99–$9.99/month", "Free (manual)"],
+  [
+    "Bank login / Plaid required",
+    "No - 100% private",
+    "Yes (security risk)",
+    "No",
+  ],
+  [
+    "Free-Trial Expiry Sentinel",
+    "Included with cutoff alerts",
+    "Rare / paid",
+    "None",
+  ],
+  [
+    "Live multi-currency",
+    "8 currencies, live ECB rates",
+    "Single currency",
+    "Manual formulas",
+  ],
+  ["1-click cancellation guides", "Direct links & guides", "None", "None"],
+  [
+    "Automatic cycle rollovers",
+    "Calculated live",
+    "Bank sync required",
+    "Manual updates",
+  ],
+  [
+    "AI receipt & invoice parser",
+    "Google Gemini powered",
+    "Paid tier only",
+    "None",
+  ],
 ];
+
+function Compare() {
+  return (
+    <section id="compare" className="pb-24 sm:pb-28">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
+        <Reveal className="text-center">
+          <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
+            Why Subspens is{" "}
+            <em className="text-ledger not-italic font-semibold">#1.</em>
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-ink/60">
+            How we compare to expensive budgeting apps and tedious spreadsheets.
+          </p>
+        </Reveal>
+
+        <Reveal
+          delay={0.1}
+          className="mt-14 overflow-x-auto rounded-3xl border border-line bg-card shadow-2xs"
+        >
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead>
+              <tr className="border-b border-line text-ink/50">
+                <th className="p-5 font-medium">Feature</th>
+                <th className="bg-ledger-light p-5 font-medium text-ledger">
+                  Subspens
+                </th>
+                <th className="p-5 font-medium">Paid budgeting apps</th>
+                <th className="p-5 font-medium">Excel / Sheets</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ROWS.map((r) => (
+                <tr
+                  key={r[0]}
+                  className="border-b border-line last:border-0 hover:bg-paper/30 transition-colors"
+                >
+                  <td className="p-5 font-medium text-ink">{r[0]}</td>
+                  <td className="bg-ledger-light/60 p-5 font-medium text-ledger">
+                    <span className="mr-2 font-bold">✓</span>
+                    {r[1]}
+                  </td>
+                  <td className="p-5 text-ink/55">{r[2]}</td>
+                  <td className="p-5 text-ink/55">{r[3]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
 
 const FAQS = [
-  {
-    q: 'What is Subspens and why is it the best subscription tracker online?',
-    a: 'Subspens is a lightweight, privacy-first subscription tracker online that lets you track subscriptions for free without linking bank accounts. It tracks active recurring services, alerts you before free trials expire, normalizes multi-currency spending in real time, and gives you 1-click guides to cancel unwanted charges.',
-  },
-  {
-    q: 'How do I track subscriptions for free online with Subspens?',
-    a: 'Simply visit Subspens and click "+ Add subscription" or upload an invoice/receipt using our AI parser. Enter your service name, amount, billing cycle (weekly, monthly, quarterly, yearly), and next renewal date. Subspens immediately calculates your total monthly commitment, upcoming renewal dates, and 12-month spend forecast.',
-  },
-  {
-    q: 'Do I need to connect my bank account or enter credit card details?',
-    a: 'No! Unlike intrusive budgeting apps that require bank logins via Plaid or Yodlee, Subspens is completely private. You never have to share your bank account or credit card numbers. You can start instantly in guest mode or create a free account with email or Google sign-in.',
-  },
-  {
-    q: 'How does the Free-Trial Expiry Sentinel prevent surprise renewal charges?',
-    a: 'When you sign up for a free trial (e.g., streaming service, SaaS software, or gym trial), enter the cancellation cutoff in Subspens. The Free-Trial Expiry Sentinel places live countdown indicators on your dashboard and sends reminder alerts before the deadline so you can cancel before full-price recurring charges hit your card.',
-  },
-  {
-    q: 'Can I track subscriptions in multiple global currencies?',
-    a: 'Yes. Subspens supports real-time multi-currency normalization across INR, USD, EUR, CAD, AED, JPY, SGD, and AUD. Live exchange rates from the European Central Bank automatically convert all your foreign subscriptions into your chosen home currency.',
-  },
-  {
-    q: 'How does Subspens compare to using an Excel or Google Sheets subscription tracker?',
-    a: 'Spreadsheets are static, error-prone, and require tedious manual calculations. Subspens automatically advances renewal dates when cycles complete, triggers proactive reminder notifications, updates currency exchange rates live, and provides 1-click cancellation guides tailored to each service.',
-  },
-  {
-    q: 'Is Subspens really 100% free to use online?',
-    a: 'Yes, Subspens is 100% free forever. All core subscription tracking features—including automated renewal alerts, trial sentinels, 12-month forecasting, and cancellation guides—are completely free with no hidden paywalls or subscription fees.',
-  },
+  [
+    "What is Subspens and why is it the best subscription tracker online?",
+    "Subspens is a privacy-first, free subscription tracker. It combines renewal reminders, free-trial deadlines, multi-currency normalization and cancellation guides - without ever asking for bank access.",
+  ],
+  [
+    "How do I track subscriptions for free online with Subspens?",
+    "Add your services manually or upload a PDF receipt, set your alert windows, and Subspens handles billing cycles and spend forecasts for you.",
+  ],
+  [
+    "Do I need to connect my bank account or enter credit card details?",
+    "No. Subspens never requires bank linking, Plaid, or card details. Your financial data stays private.",
+  ],
+  [
+    "How does the Free-Trial Expiry Sentinel prevent surprise charges?",
+    "You set the trial cutoff date and Subspens counts down with alerts, giving you a direct cancel link before the trial converts to paid.",
+  ],
+  [
+    "Can I track subscriptions in multiple global currencies?",
+    "Yes - INR, USD, EUR, CAD, AED, JPY, SGD and AUD, converted to your home currency using live European Central Bank rates.",
+  ],
+  [
+    "How does Subspens compare to an Excel or Google Sheets tracker?",
+    "Spreadsheets need manual formulas and updates. Subspens rolls cycles over automatically, converts currencies live and alerts you before renewals.",
+  ],
+  [
+    "Is Subspens really 100% free to use?",
+    "Yes. No subscription fees, no credit card, no hidden paywalls.",
+  ],
 ];
 
-const COMPARISON_ROWS = [
-  { feature: 'Cost', subspens: '100% Free Forever', others: '$4.99–$9.99/month', sheets: 'Free (Manual)' },
-  { feature: 'Bank Login / Plaid Required?', subspens: 'No (100% Private)', others: 'Yes (Security Risk)', sheets: 'No' },
-  { feature: 'Free-Trial Expiry Sentinel', subspens: 'Included with Cutoff Alerts', others: 'Rare / Paid Feature', sheets: 'None' },
-  { feature: 'Live Multi-Currency Conversion', subspens: '8 Currencies (Live ECB Rates)', others: 'Single Currency Only', sheets: 'Manual formulas' },
-  { feature: '1-Click Direct Cancellation Guides', subspens: 'Direct links & guides', others: 'None', sheets: 'None' },
-  { feature: 'Automatic Cycle Rollovers', subspens: 'Yes (Calculated live)', others: 'Bank sync required', sheets: 'Manual updates' },
-  { feature: 'AI Receipt & Invoice Parser', subspens: 'Google Gemini Powered', others: 'Paid tier only', sheets: 'None' },
-];
-
-export default function Landing() {
-  const { user, openRegister } = useAuth();
-  const [openFaq, setOpenFaq] = useState(null);
-
-  const toggleFaq = (idx) => {
-    setOpenFaq(openFaq === idx ? null : idx);
-  };
+function FAQ() {
+  const [open, setOpen] = useState(0);
 
   return (
-    <div className="flex flex-col min-h-screen bg-paper text-ink selection:bg-ledger selection:text-white w-full overflow-x-hidden">
-      {/* 
-        HERO SECTION
-        Optimized for high visual impact, rapid conversion, and target keywords:
-        "Track subscriptions for free online" & "Subscription Tracker online"
-      */}
-      <section className="relative w-full bg-[#fcf7ed] overflow-hidden border-b border-line/60">
-        <div className="relative mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 py-8 sm:py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-10 lg:gap-8">
-            {/* Left Side: Headline, Subtitle, CTA & Trust Points */}
-            <div className="lg:col-span-6 space-y-6 text-left z-10">
-              {/* Main Headline */}
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-[54px] font-semibold tracking-tight text-ink leading-[1.12]">
-                Track subscriptions <br className="hidden sm:inline" />
-                <span className="text-ledger">for free online.</span>
-              </h1>
-
-              {/* Subtitle */}
-              <p className="max-w-xl text-base sm:text-lg text-ink/75 leading-relaxed">
-                <strong>Subspens</strong> is the high-clarity <strong>subscription tracker online</strong>.
-                Take complete control of recurring expenses, get alerted before free trials expire,
-                normalize multi-currency spending, and cancel unwanted bills with 1-click direct guides.
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="pt-2 flex flex-wrap items-center gap-4">
-                <Link
-                  href="/subscriptions"
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-ledger px-6 py-3.5 text-sm font-semibold text-white shadow-md hover:bg-ledger-dark transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                  title="Track subscriptions for free online"
-                >
-                  <span>Track Subscriptions Free</span>
-                  <span>→</span>
-                </Link>
-              </div>
-
-              {/* Trust points */}
-              <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-ink/70 font-medium">
-                <span className="flex items-center gap-1.5">
-                  <svg className="h-4 w-4 text-ledger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                  No credit card required
-                </span>
-                <span className="text-ink/30">•</span>
-                <span className="flex items-center gap-1.5">
-                  <svg className="h-4 w-4 text-ledger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  Zero bank account access
-                </span>
-                <span className="text-ink/30">•</span>
-                <span className="flex items-center gap-1.5">
-                  <svg className="h-4 w-4 text-ledger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Instant guest access
-                </span>
-              </div>
-            </div>
-
-            {/* Right Side: Old Dashboard Preview Image */}
-            <div className="lg:col-span-6 flex justify-center lg:justify-end items-center">
-              <div className="relative w-full max-w-[640px] lg:max-w-none">
-                <img
-                  src="/Images/hero-bg.png"
-                  alt="Subspens - Free online subscription tracker dashboard preview"
-                  className="w-full h-auto object-contain select-none pointer-events-none drop-shadow-sm"
-                  loading="eager"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content Container for Below-Hero Sections — aligned with navbar from both sides */}
-      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 space-y-14 sm:space-y-18 py-10 sm:py-14">
-        {/* Brand Compatibility Strip */}
-        <section className="text-center">
-          <p className="font-display text-xs font-semibold uppercase tracking-wider text-ink/40">
-            Works seamlessly with all your favorite tools, media & platforms
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4 opacity-90">
-            {SAMPLE_COMPANIES.map((name) => (
-              <div key={name} className="flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-1.5 shadow-2xs">
-                <BrandLogo name={name} category="software" size="sm" />
-                <span className="text-xs font-medium text-ink">{name}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* AISO Highlight Section: Direct Answer / Entity Definition */}
-        <section className="rounded-lg border border-ledger/25 bg-ledger/5 p-6 sm:p-8 shadow-2xs">
-          <div className="max-w-3xl mx-auto space-y-4">
-            <div className="inline-block rounded bg-ledger px-2.5 py-0.5 text-[11px] font-bold text-white uppercase tracking-wider">
-              AI & Search Overview
-            </div>
-            <h2 className="font-display text-2xl sm:text-3xl font-semibold text-ink">
-              What is Subspens? The intentional subscription tracker online
+    <section id="faq" className="border-t border-line py-24 sm:py-28">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
+        <div className="grid gap-14 md:grid-cols-[1fr_1.5fr]">
+          <Reveal>
+            <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink">
+              Common{" "}
+              <em className="text-ledger not-italic font-semibold">
+                questions.
+              </em>
             </h2>
-            <p className="text-sm sm:text-base text-ink/80 leading-relaxed">
-              <strong>Subspens</strong> is an intentional, privacy-first <strong>subscription tracker online</strong> built for individuals and teams seeking clarity over their recurring overhead.
-              Unlike complex budgeting software that demands sensitive bank credentials, Subspens lets you track recurring subscriptions, set proactive renewal reminders, catch free-trial expiry deadlines, and normalize multi-currency bills into your home currency—completely free.
+            <p className="mt-5 text-ink/60">
+              Everything about our free tracker and privacy standards.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-ledger/20 text-xs text-ink/75">
-              <div>
-                <strong className="block text-ink text-sm font-semibold">100% Free to Use</strong>
-                No credit cards, subscription fees, or hidden trial paywalls.
-              </div>
-              <div>
-                <strong className="block text-ink text-sm font-semibold">Zero Bank Linking</strong>
-                Complete financial privacy without Plaid, Yodlee, or account scraping.
-              </div>
-              <div>
-                <strong className="block text-ink text-sm font-semibold">Auto-Renewal Intelligence</strong>
-                Calculates billing cycles, records payment histories, and prevents surprises.
-              </div>
-            </div>
-          </div>
-        </section>
+          </Reveal>
 
-        {/* 3-Step Walkthrough: How to Track Subscriptions for Free Online */}
-        <section className="space-y-8 sm:space-y-10">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-ledger-dark">
-              Simple 3-Step Setup
-            </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-semibold text-ink">
-              How to track subscriptions for free online
-            </h2>
-            <p className="mx-auto max-w-xl text-sm text-ink/65">
-              Take control of your recurring commitments in under 60 seconds with no complex bank configurations.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-md border border-line bg-white p-6 shadow-2xs space-y-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ledger text-white font-display font-bold text-sm">
-                1
-              </div>
-              <h3 className="font-display text-base font-semibold text-ink">
-                1. Add Subscriptions or Scan Invoices
-              </h3>
-              <p className="text-xs sm:text-sm text-ink/70 leading-relaxed">
-                Log recurring services like Netflix, Spotify, ChatGPT, or AWS manually—or upload PDF receipts and invoices for instant parsing using built-in Google Gemini AI.
-              </p>
-            </div>
-
-            <div className="rounded-md border border-line bg-white p-6 shadow-2xs space-y-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ledger text-white font-display font-bold text-sm">
-                2
-              </div>
-              <h3 className="font-display text-base font-semibold text-ink">
-                2. Set Renewal Alerts & Trial Cutoffs
-              </h3>
-              <p className="text-xs sm:text-sm text-ink/70 leading-relaxed">
-                Configure notification windows (default 2 days before) and specify trial cutoff dates. The Free-Trial Expiry Sentinel counts down to ensure you cancel before auto-conversion.
-              </p>
-            </div>
-
-            <div className="rounded-md border border-line bg-white p-6 shadow-2xs space-y-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ledger text-white font-display font-bold text-sm">
-                3
-              </div>
-              <h3 className="font-display text-base font-semibold text-ink">
-                3. Audit Spend & Stop Subscription Leaks
-              </h3>
-              <p className="text-xs sm:text-sm text-ink/70 leading-relaxed">
-                Review your 12-month projected spend, inspect category charts, and use direct 1-click guides to cancel unused subscriptions while tracking your savings in real time.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Feature Grid */}
-        <section className="space-y-8 sm:space-y-10">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-ledger-dark">
-              Built for Purpose
-            </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-semibold text-ink">
-              Engineered for complete subscription clarity
-            </h2>
-            <p className="mx-auto max-w-xl text-sm text-ink/65">
-              Everything you need to audit, organize, and stop unintended recurring leakage online.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((f, idx) => (
-              <div
-                key={idx}
-                className="rounded-md border border-line bg-white p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-ledger-light text-xl">
-                    {f.icon}
-                  </div>
-                  <h3 className="mt-4 font-display text-base font-semibold text-ink">{f.title}</h3>
-                  <p className="mt-2 text-xs sm:text-sm text-ink/65 leading-relaxed">{f.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Comparison Matrix: Why Choose Subspens? */}
-        <section className="space-y-6">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-ledger-dark">
-              Feature Comparison
-            </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-semibold text-ink">
-              Why Subspens is the #1 online subscription tracker
-            </h2>
-            <p className="mx-auto max-w-xl text-sm text-ink/65">
-              See how Subspens outperforms expensive budgeting apps and tedious spreadsheet trackers.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto rounded-md border border-line bg-white shadow-2xs">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
-              <thead>
-                <tr className="border-b border-line bg-paper/60">
-                  <th className="py-3.5 px-4 font-semibold text-ink">Feature</th>
-                  <th className="py-3.5 px-4 font-bold text-ledger-dark bg-ledger/10">Subspens</th>
-                  <th className="py-3.5 px-4 font-medium text-ink/60">Paid Budgeting Apps</th>
-                  <th className="py-3.5 px-4 font-medium text-ink/60">Excel / Google Sheets</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line/60">
-                {COMPARISON_ROWS.map((row, i) => (
-                  <tr key={i} className="hover:bg-paper/30 transition-colors">
-                    <td className="py-3 px-4 font-medium text-ink">{row.feature}</td>
-                    <td className="py-3 px-4 font-semibold text-ledger-dark bg-ledger/5">
-                      ✓ {row.subspens}
-                    </td>
-                    <td className="py-3 px-4 text-ink/60">{row.others}</td>
-                    <td className="py-3 px-4 text-ink/60">{row.sheets}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* SEO & AISO FAQ Section */}
-        <section className="space-y-6">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-ledger-dark">
-              Frequently Asked Questions
-            </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-semibold text-ink">
-              Common questions about tracking subscriptions online
-            </h2>
-            <p className="mx-auto max-w-xl text-sm text-ink/65">
-              Everything you need to know about our free online subscription tracker and privacy standards.
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto space-y-3">
-            {FAQS.map((faq, idx) => {
-              const isOpen = openFaq === idx;
+          <div className="divide-y divide-line border-y border-line">
+            {FAQS.map(([q, a], i) => {
+              const isOpen = open === i;
               return (
-                <div
-                  key={idx}
-                  className="rounded-md border border-line bg-white shadow-2xs overflow-hidden transition-colors"
-                >
+                <div key={q}>
                   <button
                     type="button"
-                    onClick={() => toggleFaq(idx)}
-                    className="flex w-full items-center justify-between p-4 sm:p-5 text-left text-sm sm:text-base font-semibold text-ink hover:bg-paper/40 transition-colors cursor-pointer gap-4"
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    className="flex w-full items-center justify-between gap-6 py-6 text-left text-base font-medium text-ink hover:text-ledger transition-colors cursor-pointer"
                     aria-expanded={isOpen}
                   >
-                    <span>{faq.q}</span>
-                    <span className={`text-ledger font-bold text-lg shrink-0 transition-transform ${isOpen ? 'rotate-45' : ''}`}>
+                    <span>{q}</span>
+                    <span
+                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line text-lg text-ledger transition-transform duration-300 ${
+                        isOpen ? "rotate-45" : ""
+                      }`}
+                    >
                       +
                     </span>
                   </button>
-                  {isOpen && (
-                    <div className="px-4 pb-4 sm:px-5 sm:pb-5 text-xs sm:text-sm text-ink/75 leading-relaxed border-t border-line/40 pt-3 bg-paper/20">
-                      {faq.a}
+                  <div
+                    className={`grid transition-all duration-300 ease-in-out overflow-hidden ${
+                      isOpen
+                        ? "grid-rows-[1fr] opacity-100 pb-6"
+                        : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden pr-12 text-sm leading-relaxed text-ink/60">
+                      {a}
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}
           </div>
-        </section>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-        {/* Call to Action Footer Card */}
-        <section className="rounded-md border border-line bg-ink text-white p-6 sm:p-10 text-center shadow-lg relative overflow-hidden">
-          <div className="relative z-10 max-w-2xl mx-auto space-y-4">
-            <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-              Free Online Subscription Tracker
-            </span>
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-white">
-              Ready to track subscriptions for free online?
+function FinalCTA() {
+  const { user, openRegister } = useAuth();
+
+  return (
+    <section className="pb-20 sm:pb-24">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
+        <Reveal className="relative mx-auto w-full overflow-hidden rounded-[2.5rem] bg-ledger-dark px-8 py-20 sm:py-24 text-center text-paper shadow-2xl">
+          {/* Glowing floating decorative blobs */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-amber/25 blur-3xl animate-float-slow"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-24 right-0 h-80 w-80 rounded-full bg-ledger/80 blur-3xl animate-pulse-slow"
+          />
+
+          <div className="relative z-10">
+            <h2 className="mx-auto max-w-3xl font-display font-medium tracking-tight text-5xl leading-[1.05] md:text-7xl">
+              Ready to close your{" "}
+              <em className="text-amber-light not-italic font-semibold">
+                financial leaks?
+              </em>
             </h2>
-            <p className="text-sm sm:text-base text-white/75 leading-relaxed">
-              Stop surprise recurring renewals, audit every trial, and close financial leaks today with Subspens. Set up in less than 60 seconds with no credit card required.
+            <p className="mx-auto mt-6 max-w-xl text-paper/70 text-base leading-relaxed">
+              Stop surprise renewals and audit every trial. Set up in less than
+              60 seconds - no credit card required.
             </p>
-            <div className="pt-4 flex flex-wrap justify-center gap-4">
+
+            <div className="mt-10 flex justify-center">
               {user ? (
                 <Link
                   href="/subscriptions"
-                  className="inline-flex items-center justify-center rounded-sm bg-ledger px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-ledger-dark transition-all transform hover:-translate-y-0.5 max-w-full text-center"
+                  className="inline-flex items-center gap-2 rounded-full bg-paper px-7 py-4 text-sm font-medium text-ledger-dark transition-all hover:bg-white hover:-translate-y-0.5 active:scale-[0.98] shadow-md"
                 >
-                  Go to My Subscriptions →
+                  Track subscriptions free →
                 </Link>
               ) : (
                 <button
                   type="button"
                   onClick={openRegister}
-                  className="inline-flex items-center justify-center rounded-sm bg-ledger px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-ledger-dark transition-all transform hover:-translate-y-0.5 cursor-pointer max-w-full text-center"
+                  className="inline-flex items-center gap-2 rounded-full bg-paper px-7 py-4 text-sm font-medium text-ledger-dark transition-all hover:bg-white hover:-translate-y-0.5 active:scale-[0.98] shadow-md cursor-pointer"
                 >
-                  Track Subscriptions for Free Online →
+                  Track subscriptions free →
                 </button>
               )}
             </div>
           </div>
-        </section>
+        </Reveal>
       </div>
+    </section>
+  );
+}
 
+function Footer() {
+  return (
+    <footer className="border-t border-line py-12 sm:py-14">
+      <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
+        <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr]">
+          <div>
+            <Link
+              href="/"
+              className="flex items-center gap-2 w-fit transition-opacity hover:opacity-80"
+            >
+              <img
+                src="/logo/logo.svg"
+                alt="Subspens"
+                className="h-8 w-auto object-contain shrink-0"
+                style={{ display: "block" }}
+              />
+              <img
+                src="/logo/logo-t.svg"
+                alt="Subspens"
+                className="h-8 w-auto object-contain shrink-0"
+                style={{ display: "block" }}
+              />
+            </Link>
+            <p className="mt-3 max-w-sm text-sm text-ink/60 leading-relaxed">
+              The high-clarity subscription tracker to monitor recurring
+              services, catch trial expirations, and eliminate wasted spend.
+            </p>
+          </div>
+          <div className="space-y-2 text-sm">
+            <p className="text-xs uppercase tracking-[0.14em] text-ink/45 font-semibold">
+              Product
+            </p>
+            <Link
+              href="/subscriptions"
+              className="block text-ink/70 hover:text-ink transition-colors"
+            >
+              Subscriptions
+            </Link>
+            <Link
+              href="/dashboard"
+              className="block text-ink/70 hover:text-ink transition-colors"
+            >
+              Overview
+            </Link>
+            <Link
+              href="/subscriptions"
+              className="block text-ink/70 hover:text-ink transition-colors"
+            >
+              Track for free
+            </Link>
+          </div>
+          <div className="space-y-2 text-sm">
+            <p className="text-xs uppercase tracking-[0.14em] text-ink/45 font-semibold">
+              Legal & trust
+            </p>
+            <Link
+              href="/privacy-policy"
+              className="block text-ink/70 hover:text-ink transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms-of-service"
+              className="block text-ink/70 hover:text-ink transition-colors"
+            >
+              Terms of Service
+            </Link>
+          </div>
+        </div>
+        <div className="mt-12 flex flex-wrap justify-between gap-2 border-t border-line pt-6 text-xs text-ink/50">
+          <span>
+            © {new Date().getFullYear()} Subspens. All rights reserved.
+          </span>
+          <span>Privacy-first, zero bank linking.</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default function Landing() {
+  return (
+    <div className="min-h-screen bg-paper text-ink selection:bg-ledger selection:text-white w-full overflow-x-clip">
+      <main>
+        <Hero />
+        <Logos />
+        <About />
+        <Steps />
+        <Features />
+        <Compare />
+        <FAQ />
+        <FinalCTA />
+      </main>
       <Footer />
     </div>
   );
