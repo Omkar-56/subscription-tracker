@@ -1,9 +1,17 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Terms of Service | Subspens - Free Online Subscription Tracker",
+  title: "Terms of Service",
   description:
     "Terms and conditions for using Subspens to track subscriptions online.",
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
 };
 
 export default function TermsOfServicePage() {

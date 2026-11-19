@@ -1,9 +1,17 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy | Subspens - Free Online Subscription Tracker",
+  title: "Privacy Policy",
   description:
     "Learn how Subspens protects your privacy. We never link your bank accounts or sell personal data.",
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
 };
 
 export default function PrivacyPolicyPage() {
