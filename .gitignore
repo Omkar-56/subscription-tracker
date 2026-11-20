@@ -8,3 +8,4 @@ dist/
 frontend/out/
 frontend/.next/
 frontend/.env.production
+scripts/
