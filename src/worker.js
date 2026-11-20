@@ -31,12 +31,13 @@ function syncEnv(env) {
     if (env.CLIENT_ORIGIN) configEnv.clientOrigin = env.CLIENT_ORIGIN;
     if (env.GOOGLE_CLIENT_ID) configEnv.googleClientId = env.GOOGLE_CLIENT_ID;
     if (env.GEMINI_API_KEY) configEnv.geminiApiKey = env.GEMINI_API_KEY;
+    if (env.RESEND_API_KEY) configEnv.resendApiKey = env.RESEND_API_KEY;
+    if (env.EMAIL_FROM) configEnv.emailFrom = env.EMAIL_FROM;
     if (env.SMTP_HOST) configEnv.smtpHost = env.SMTP_HOST;
     if (env.SMTP_PORT) configEnv.smtpPort = Number(env.SMTP_PORT);
     if (env.SMTP_SECURE) configEnv.smtpSecure = env.SMTP_SECURE === 'true';
     if (env.SMTP_USER) configEnv.smtpUser = env.SMTP_USER;
     if (env.SMTP_PASS) configEnv.smtpPass = env.SMTP_PASS;
-    if (env.EMAIL_FROM) configEnv.emailFrom = env.EMAIL_FROM;
     if (env.CRON_SECRET) configEnv.cronSecret = env.CRON_SECRET;
   }
 }

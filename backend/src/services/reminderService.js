@@ -211,6 +211,13 @@ export const reminderService = {
     };
   },
 
+  /**
+   * Alias for sendTestReminderEmail
+   */
+  async sendTestEmail(userId) {
+    return this.sendTestReminderEmail(userId);
+  },
+
   async getPendingReminders(userId) {
     return reminderModel.findPendingForUser(userId);
   },
