@@ -24,7 +24,7 @@ function Reveal({ children, delay = 0, className = "" }) {
           observer.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: "-40px" },
+      { threshold: 0.05, rootMargin: "0px" },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -39,7 +39,7 @@ function Reveal({ children, delay = 0, className = "" }) {
         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
       }}
       className={`transition-all ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       } ${className}`}
     >
       {children}
@@ -90,8 +90,8 @@ function Hero() {
 
   return (
     <section
-      className="relative overflow-hidden"
-      style={{ minHeight: "100vh", maxHeight: "1080px" }}
+      className="relative overflow-hidden min-h-screen min-h-dvh flex flex-col justify-center"
+      style={{ minHeight: "100dvh" }}
     >
       {/* Background video */}
       <video
@@ -106,14 +106,14 @@ function Hero() {
       </video>
 
       <div
-        className="relative flex flex-col justify-center"
-        style={{ zIndex: 3, minHeight: "100vh", maxHeight: "1080px" }}
+        className="relative flex flex-1 flex-col justify-center items-center w-full pt-20 sm:pt-24 pb-6 sm:pb-8 px-4 sm:px-6 lg:px-8"
+        style={{ zIndex: 3 }}
       >
-        <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 py-8">
+        <div className="mx-auto max-w-[1440px] w-full flex flex-col justify-center my-auto">
           {/* Hero text */}
           <div className="relative mx-auto max-w-3xl text-center">
             <Reveal>
-              <h1 className="font-display font-normal text-4xl leading-[0.95] tracking-tight text-ink sm:text-5xl md:text-6xl">
+              <h1 className="font-display font-normal text-3xl sm:text-5xl lg:text-[54px] leading-[1.02] tracking-tight text-ink">
                 <span className="mr-2 inline-block">Track</span>
                 <span className="mr-2 inline-block">subscriptions</span>
                 <br />
@@ -124,7 +124,7 @@ function Hero() {
             </Reveal>
 
             <Reveal delay={0.2}>
-              <p className="mx-auto mt-5 max-w-xl font-secondary text-base leading-relaxed text-ink/70">
+              <p className="mx-auto mt-3 sm:mt-4 max-w-xl font-secondary text-sm sm:text-base leading-relaxed text-ink/70">
                 Take complete control of recurring expenses, get alerted before
                 free trials expire, normalize multi-currency spending, and
                 cancel unwanted bills with 1-click guides.
@@ -133,11 +133,11 @@ function Hero() {
 
             <Reveal
               delay={0.3}
-              className="mt-7 flex flex-wrap items-center justify-center gap-3"
+              className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3"
             >
               <Link
                 href="/subscriptions"
-                className="group inline-flex items-center gap-2 rounded-full bg-ledger px-6 py-3 text-sm font-medium text-paper shadow-lg shadow-ledger/20 transition-all hover:bg-ledger-dark hover:-translate-y-0.5 active:scale-[0.97]"
+                className="group inline-flex items-center gap-2 rounded-full bg-ledger px-6 py-2.5 sm:py-3 text-sm font-medium text-paper shadow-lg shadow-ledger/20 transition-all hover:bg-ledger-dark hover:-translate-y-0.5 active:scale-[0.97]"
               >
                 Track subscriptions free{" "}
                 <span className="transition-transform group-hover:translate-x-1">
@@ -146,14 +146,14 @@ function Hero() {
               </Link>
               <a
                 href="#how"
-                className="rounded-full border border-line bg-card px-6 py-3 text-sm font-medium text-ink transition hover:border-ledger/40 hover:-translate-y-0.5"
+                className="rounded-full border border-line bg-card px-6 py-2.5 sm:py-3 text-sm font-medium text-ink transition hover:border-ledger/40 hover:-translate-y-0.5"
               >
                 See how it works
               </a>
             </Reveal>
 
             <Reveal delay={0.4}>
-              <p className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-ink/55">
+              <p className="mt-3 sm:mt-3.5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-ink/55">
                 <span>No credit card required</span>
                 <span>·</span>
                 <span>Zero bank account access</span>
@@ -163,17 +163,17 @@ function Hero() {
             </Reveal>
           </div>
 
-          {/* Floating Mockup Card - scaled down to fit viewport */}
-          <Reveal delay={0.3} className="relative mx-auto mt-8 max-w-3xl">
-            <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-2.5 shadow-2xl shadow-black/30">
-              <div className="grid gap-2.5 rounded-xl bg-paper/95 p-4 md:grid-cols-[1fr_1.4fr] md:p-5">
+          {/* Floating Mockup Card - scaled to fit viewport gracefully */}
+          <Reveal delay={0.3} className="relative mx-auto mt-5 sm:mt-6 max-w-3xl w-full">
+            <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 shadow-2xl shadow-black/30">
+              <div className="grid gap-2.5 rounded-xl bg-paper/95 p-3.5 sm:p-4 md:grid-cols-[1fr_1.35fr] md:p-4.5">
                 {/* Left Ledger Card */}
-                <div className="rounded-xl bg-ledger p-4 text-paper flex flex-col justify-between">
+                <div className="rounded-xl bg-ledger p-3.5 sm:p-4 text-paper flex flex-col justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.14em] text-paper/60">
                       Monthly spend · INR
                     </p>
-                    <p className="mt-2 font-display font-medium tracking-tight text-3xl">
+                    <p className="mt-1.5 font-display font-medium tracking-tight text-2xl sm:text-3xl">
                       ₹4,862
                     </p>
                     <p className="mt-0.5 text-xs text-paper/70">
@@ -182,7 +182,7 @@ function Hero() {
                   </div>
 
                   {/* 12-month forecast bars */}
-                  <div className="mt-4 flex h-16 items-end gap-1">
+                  <div className="mt-3 sm:mt-4 flex h-12 sm:h-14 md:h-16 items-end gap-1">
                     {BAR_HEIGHTS.map((h, i) => (
                       <div
                         key={i}
@@ -196,39 +196,39 @@ function Hero() {
                     ))}
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between rounded-lg bg-paper/10 px-3 py-2 text-xs">
+                  <div className="mt-2.5 sm:mt-3 flex items-center justify-between rounded-lg bg-paper/10 px-3 py-1.5 sm:py-2 text-xs">
                     <span className="text-paper/70">Saved this year</span>
                     <span className="font-medium text-amber-light">₹7,420</span>
                   </div>
                 </div>
 
                 {/* Right Upcoming Renewals */}
-                <div className="space-y-1.5">
+                <div className="space-y-1 sm:space-y-1.5">
                   <p className="px-1 pb-0.5 text-xs uppercase tracking-[0.14em] text-ink/50">
                     Upcoming renewals
                   </p>
                   {HERO_SUBS.map((s) => (
                     <div
                       key={s.name}
-                      className="flex items-center justify-between rounded-xl border border-line bg-card px-3 py-2.5 hover:border-ledger/20 transition-colors"
+                      className="flex items-center justify-between rounded-xl border border-line bg-card px-3 py-1.5 sm:py-2 hover:border-ledger/20 transition-colors"
                     >
                       <div className="flex items-center gap-2.5">
-                        <span className="grid h-8 w-8 place-items-center rounded-lg bg-ledger-light font-medium text-ledger text-sm">
+                        <span className="grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-lg bg-ledger-light font-medium text-ledger text-xs sm:text-sm">
                           {s.name[0]}
                         </span>
                         <div>
-                          <p className="text-sm font-medium text-ink">
+                          <p className="text-xs sm:text-sm font-medium text-ink">
                             {s.name}
                           </p>
-                          <p className="text-xs text-ink/50">{s.cat}</p>
+                          <p className="text-[11px] sm:text-xs text-ink/50">{s.cat}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-ink">
+                        <p className="text-xs sm:text-sm font-medium text-ink">
                           {s.price}
                         </p>
                         <p
-                          className={`text-xs ${
+                          className={`text-[11px] sm:text-xs ${
                             s.tone === "rust"
                               ? "text-rust"
                               : s.tone === "amber"
