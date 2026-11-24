@@ -12,7 +12,7 @@ JWT_SECRET=change_this_to_a_long_random_string
 JWT_EXPIRES_IN=7d
 
 # CORS / Allowed Origin
-CLIENT_ORIGIN=*
+CLIENT_ORIGIN=https://subspens.com
 
 # Google OAuth (Optional)
 GOOGLE_CLIENT_ID=your_google_client_id_here.apps.googleusercontent.com
@@ -20,13 +20,17 @@ GOOGLE_CLIENT_ID=your_google_client_id_here.apps.googleusercontent.com
 # Gemini LLM Receipt Parser API Key
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# SMTP Email Configuration (e.g. Gmail App Password)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=465
-SMTP_SECURE=true
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_16_digit_gmail_app_password
-EMAIL_FROM=SubTrack <your_email@gmail.com>
+# Resend API Key (Transactional Email Provider)
+# Set your API key from https://resend.com/api-keys
+RESEND_API_KEY=re_your_resend_api_key_here
+EMAIL_FROM=Subspens <reminder@subspens.com>
+
+# Optional SMTP fallback configuration
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=465
+# SMTP_SECURE=true
+# SMTP_USER=your_email@gmail.com
+# SMTP_PASS=your_16_digit_gmail_app_password
 
 # Cron Secret (Optional, for protecting manual /api/reminders/cron HTTP triggers)
 CRON_SECRET=your_random_cron_secret

@@ -1,13 +1,12 @@
-import nodemailer from "nodemailer";
-import { env } from "../config/env.js";
+import nodemailer from 'nodemailer';
+import { env } from '../config/env.js';
 
 let smtpTransporter = null;
 
 function getSmtpTransporter() {
   if (!smtpTransporter && env.smtpUser && env.smtpPass) {
     smtpTransporter = nodemailer.createTransport({
-      service: "gmail", // optimized predefined settings for Gmail
-      host: env.smtpHost || "smtp.gmail.com",
+      host: env.smtpHost || 'smtp.gmail.com',
       port: env.smtpPort || 465,
       secure: env.smtpSecure ?? env.smtpPort === 465,
       auth: {
@@ -20,52 +19,111 @@ function getSmtpTransporter() {
 }
 
 /**
- * Send an email via Standard SMTP via Nodemailer (Gmail App Password, etc.),
- * or log cleanly to console if SMTP credentials haven't been provided yet.
+ * Sanitize email subject to prevent header injection
  */
-export async function sendEmail({ to, subject, html, text }) {
-  const from =
-    env.emailFrom ||
-    (env.smtpUser
-      ? `Subspens <${env.smtpUser}>`
-      : "Subspens <notifications@gmail.com>");
+function sanitizeSubject(subject = '') {
+  return String(subject).replace(/[\r\n]+/g, ' ').trim();
+}
 
-  // 1. Send via Nodemailer SMTP (Gmail)
+/**
+ * Send an email via Resend REST API (preferred, fast, cloud-native).
+ * Works across both Node.js and Cloudflare Workers runtime.
+ */
+async function sendViaResend({ apiKey, from, to, subject, html, text }) {
+  const recipients = Array.isArray(to) ? to.map((e) => String(e).trim()) : [String(to).trim()];
+  const cleanSubject = sanitizeSubject(subject);
+
+  const payload = {
+    from,
+    to: recipients,
+    subject: cleanSubject,
+    ...(html ? { html } : {}),
+    ...(text ? { text } : {}),
+  };
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey.trim()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(10000), // 10s request timeout
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const errorMsg = data?.message || data?.error || `HTTP ${response.status} ${response.statusText}`;
+    console.error(`[Resend Error] Status: ${response.status} | Details: ${errorMsg}`);
+    throw new Error(`Resend email delivery failed: ${errorMsg}`);
+  }
+
+  console.log(`[Email Sent via Resend] To: ${recipients.join(', ')} | Id: ${data.id}`);
+  return { success: true, provider: 'resend', id: data.id };
+}
+
+/**
+ * Send an email using Resend (Primary), Nodemailer SMTP (Fallback),
+ * or log simulated output if credentials are not yet configured.
+ */
+export async function sendEmail({ to, subject, html, text, from: customFrom }) {
+  const from = customFrom || env.emailFrom || 'Subspens <reminder@subspens.com>';
+  const cleanSubject = sanitizeSubject(subject);
+
+  // 1. Primary: Send via Resend HTTP API
+  if (env.resendApiKey) {
+    try {
+      return await sendViaResend({
+        apiKey: env.resendApiKey,
+        from,
+        to,
+        subject: cleanSubject,
+        html,
+        text,
+      });
+    } catch (err) {
+      console.error('[Email Delivery Error - Resend]:', err.message);
+      // If SMTP is also configured, attempt fallback; otherwise rethrow
+      if (!env.smtpUser || !env.smtpPass) {
+        throw err;
+      }
+      console.warn('[Email Fallback] Attempting secondary delivery via SMTP...');
+    }
+  }
+
+  // 2. Secondary Fallback: Send via Nodemailer SMTP (if configured)
   const transporter = getSmtpTransporter();
   if (transporter) {
     try {
       const info = await transporter.sendMail({
         from,
         to,
-        subject,
+        subject: cleanSubject,
         html,
         text,
       });
-      console.log(
-        `[Email Sent via Gmail SMTP] To: ${to} | MessageId: ${info.messageId}`,
-      );
-      return { success: true, provider: "smtp", id: info.messageId };
+      console.log(`[Email Sent via SMTP] To: ${to} | MessageId: ${info.messageId}`);
+      return { success: true, provider: 'smtp', id: info.messageId };
     } catch (err) {
-      console.error("[Gmail SMTP Error]", err.message);
+      console.error('[SMTP Delivery Error]:', err.message);
       throw err;
     }
   }
 
-  // 2. Simulated Fallback (when SMTP_USER / SMTP_PASS are not yet set)
-  console.log("----------------------------------------------------");
-  console.log("[EMAIL REMINDER SIMULATED]");
+  // 3. Development / Simulation Mode (when neither RESEND_API_KEY nor SMTP credentials are set)
+  console.log('----------------------------------------------------');
+  console.log('[EMAIL REMINDER SIMULATED]');
   console.log(`To: ${to}`);
-  console.log(`Subject: ${subject}`);
+  console.log(`Subject: ${cleanSubject}`);
   console.log(`From: ${from}`);
-  console.log(
-    "[Note: Set SMTP_USER and SMTP_PASS in .env to deliver real Gmail emails]",
-  );
-  console.log("----------------------------------------------------");
+  console.log('[Note: Configure RESEND_API_KEY in environment to send live emails from reminder@subspens.com]');
+  console.log('----------------------------------------------------');
 
   return {
     success: true,
-    provider: "simulated",
-    note: "Email simulated in server logs. Configure SMTP_USER and SMTP_PASS in .env for real Gmail delivery.",
+    provider: 'simulated',
+    note: 'Email simulated in server logs. Set RESEND_API_KEY in environment variables for live delivery.',
   };
 }
 
@@ -73,32 +131,32 @@ export async function sendEmail({ to, subject, html, text }) {
  * Format a clean HTML reminder email
  */
 export function buildReminderEmailHtml({
-  userName = "there",
+  userName = 'there',
   subscriptionName,
-  category = "other",
+  category = 'other',
   amount,
-  currency = "INR",
-  billingCycle = "monthly",
+  currency = 'INR',
+  billingCycle = 'monthly',
   dueDateFormatted,
   daysLeft,
   isTrial = false,
   postTrialAmount = null,
   postTrialCurrency = null,
-  appUrl = "https://subspens.app",
+  appUrl = 'https://subspens.com',
 }) {
   const isUrgent = daysLeft <= 1;
   const daysText =
     daysLeft === 0
-      ? "DUE TODAY"
+      ? 'DUE TODAY'
       : daysLeft === 1
-        ? "DUE TOMORROW"
+        ? 'DUE TOMORROW'
         : `DUE IN ${daysLeft} DAYS`;
 
   const bannerBg = isTrial
-    ? "#EA580C" // Warm Orange / Alert
+    ? '#EA580C' // Alert orange
     : isUrgent
-      ? "#DC2626" // Red
-      : "#1F6F54"; // Subspens Forest Green
+      ? '#DC2626' // Alert red
+      : '#0F3D2E'; // Subspens Forest Green
 
   const chargeAmountStr =
     isTrial && postTrialAmount !== null
@@ -122,7 +180,7 @@ export function buildReminderEmailHtml({
           <tr>
             <td style="background-color: ${bannerBg}; padding: 16px 28px; text-align: left;">
               <span style="color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                ${isTrial ? "Free Trial Deadline" : "Upcoming Renewal Alert"}
+                ${isTrial ? 'Free Trial Deadline' : 'Upcoming Renewal Alert'}
               </span>
             </td>
           </tr>
@@ -131,7 +189,7 @@ export function buildReminderEmailHtml({
           <tr>
             <td style="padding: 28px 28px 20px 28px;">
               <h1 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600; color: #0F172A; line-height: 1.3;">
-                Hi ${userName || "there"},
+                Hi ${userName || 'there'},
               </h1>
               <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
                 ${
@@ -170,7 +228,7 @@ export function buildReminderEmailHtml({
               <!-- Call to Action -->
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
                 <tr>
-                  <td align="center" style="border-radius: 6px; background-color: #1F6F54;">
+                  <td align="center" style="border-radius: 6px; background-color: #0F3D2E;">
                     <a href="${appUrl}/subscriptions" target="_blank" style="font-size: 14px; font-weight: 600; color: #FFFFFF; text-decoration: none; padding: 11px 22px; display: inline-block; border-radius: 6px;">
                       View in Subspens &rarr;
                     </a>
@@ -188,7 +246,7 @@ export function buildReminderEmailHtml({
           <tr>
             <td style="background-color: #F8FAFC; padding: 18px 28px; border-top: 1px solid #E2E8F0; text-align: center;">
               <p style="margin: 0; font-size: 12px; color: #64748B;">
-                Sent with care by <strong style="color: #0F172A;">Subspens</strong> &bull; Minimalist Subscription Ledger
+                Sent with care by <strong style="color: #0F172A;">Subspens</strong> &bull; Minimalist Subscription Ledger &bull; <a href="https://subspens.com" style="color: #64748B; text-decoration: underline;">subspens.com</a>
               </p>
             </td>
           </tr>
@@ -205,31 +263,31 @@ export function buildReminderEmailHtml({
  * Format a plain-text fallback reminder email
  */
 export function buildReminderEmailText({
-  userName = "there",
+  userName = 'there',
   subscriptionName,
   amount,
-  currency = "INR",
-  billingCycle = "monthly",
+  currency = 'INR',
+  billingCycle = 'monthly',
   dueDateFormatted,
   daysLeft,
   isTrial = false,
   postTrialAmount = null,
   postTrialCurrency = null,
-  appUrl = "https://subspens.app",
+  appUrl = 'https://subspens.com',
 }) {
   const daysText =
     daysLeft === 0
-      ? "DUE TODAY"
+      ? 'DUE TODAY'
       : daysLeft === 1
-        ? "DUE TOMORROW"
+        ? 'DUE TOMORROW'
         : `DUE IN ${daysLeft} DAYS`;
 
-  const subjectPrefix = isTrial ? "Trial Expiry Alert" : "Renewal Reminder";
+  const subjectPrefix = isTrial ? 'Trial Expiry Alert' : 'Renewal Reminder';
 
   return `
 Subspens ${subjectPrefix}: ${subscriptionName} (${daysText})
 
-Hi ${userName || "there"},
+Hi ${userName || 'there'},
 
 ${
   isTrial
@@ -246,14 +304,14 @@ Subscription Details:
 Manage your subscriptions at: ${appUrl}/subscriptions
 
 --
-Subspens · Minimalist Recurring Bill & Subscription Tracker
+Subspens · Minimalist Recurring Bill & Subscription Tracker (https://subspens.com)
 `.trim();
 }
 
 /**
  * Format a clean HTML password reset email
  */
-export function buildPasswordResetEmailHtml({ userName = "there", resetUrl }) {
+export function buildPasswordResetEmailHtml({ userName = 'there', resetUrl }) {
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -269,7 +327,7 @@ export function buildPasswordResetEmailHtml({ userName = "there", resetUrl }) {
         <table role="presentation" width="100%" style="max-width: 520px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); border: 1px solid #E2E8F0;" cellspacing="0" cellpadding="0">
           <!-- Top Accent Banner -->
           <tr>
-            <td style="background-color: #1F6F54; padding: 18px 28px; text-align: left;">
+            <td style="background-color: #0F3D2E; padding: 18px 28px; text-align: left;">
               <span style="color: #FFFFFF; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
                 Subspens &bull; Account Security
               </span>
@@ -283,7 +341,7 @@ export function buildPasswordResetEmailHtml({ userName = "there", resetUrl }) {
                 Reset Your Password
               </h1>
               <p style="margin: 0 0 16px 0; font-size: 15px; color: #475569; line-height: 1.6;">
-                Hi ${userName || "there"},
+                Hi ${userName || 'there'},
               </p>
               <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
                 We received a request to reset the password for your Subspens account. Click the button below to choose a new password:
@@ -292,7 +350,7 @@ export function buildPasswordResetEmailHtml({ userName = "there", resetUrl }) {
               <!-- Call to Action Button -->
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
                 <tr>
-                  <td align="center" style="border-radius: 6px; background-color: #1F6F54;">
+                  <td align="center" style="border-radius: 6px; background-color: #0F3D2E;">
                     <a href="${resetUrl}" target="_blank" style="font-size: 14px; font-weight: 600; color: #FFFFFF; text-decoration: none; padding: 12px 26px; display: inline-block; border-radius: 6px;">
                       Reset Password &rarr;
                     </a>
@@ -304,7 +362,7 @@ export function buildPasswordResetEmailHtml({ userName = "there", resetUrl }) {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; margin-bottom: 20px;">
                 <tr>
                   <td style="padding: 14px 16px; font-size: 13px; color: #64748B; line-height: 1.5;">
-                    <strong style="color: #0F172A;">Important:</strong> This link is valid for <strong>1 hour</strong> and can only be used once. If you did not request a password reset, you can safely ignore this email &mdash; your password will remain unchanged.
+                    <strong style="color: #0F172A;">Important:</strong> This link is valid for <strong>30 minutes</strong> and can only be used once. If you did not request a password reset, you can safely ignore this email &mdash; your password will remain unchanged.
                   </td>
                 </tr>
               </table>
@@ -312,7 +370,7 @@ export function buildPasswordResetEmailHtml({ userName = "there", resetUrl }) {
               <!-- Fallback Plain URL -->
               <p style="margin: 0; font-size: 12px; color: #94A3B8; line-height: 1.6; word-break: break-all;">
                 Button not working? Copy and paste this link into your browser:<br>
-                <a href="${resetUrl}" style="color: #1F6F54; text-decoration: underline;">${resetUrl}</a>
+                <a href="${resetUrl}" style="color: #0F3D2E; text-decoration: underline;">${resetUrl}</a>
               </p>
             </td>
           </tr>
@@ -321,7 +379,7 @@ export function buildPasswordResetEmailHtml({ userName = "there", resetUrl }) {
           <tr>
             <td style="background-color: #F8FAFC; padding: 16px 28px; border-top: 1px solid #E2E8F0; text-align: center;">
               <p style="margin: 0; font-size: 12px; color: #64748B;">
-                Subspens &bull; Minimalist Subscription Ledger &bull; <a href="https://subspens.app" style="color: #64748B; text-decoration: underline;">subspens.app</a>
+                Subspens &bull; Minimalist Subscription Ledger &bull; <a href="https://subspens.com" style="color: #64748B; text-decoration: underline;">subspens.com</a>
               </p>
             </td>
           </tr>
@@ -337,22 +395,22 @@ export function buildPasswordResetEmailHtml({ userName = "there", resetUrl }) {
 /**
  * Format a plain-text password reset email
  */
-export function buildPasswordResetEmailText({ userName = "there", resetUrl }) {
+export function buildPasswordResetEmailText({ userName = 'there', resetUrl }) {
   return `
 Reset Your Subspens Password
 
-Hi ${userName || "there"},
+Hi ${userName || 'there'},
 
 We received a request to reset the password for your Subspens account.
 To reset your password, visit the following link:
 
 ${resetUrl}
 
-This link is valid for 1 hour.
+This link is valid for 30 minutes.
 
 If you didn't request a password reset, you can safely ignore this email - your password will remain unchanged.
 
 --
-Subspens · Minimalist Recurring Bill & Subscription Tracker
+Subspens · Minimalist Recurring Bill & Subscription Tracker (https://subspens.com)
 `.trim();
 }
