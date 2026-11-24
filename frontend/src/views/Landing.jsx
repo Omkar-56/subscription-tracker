@@ -89,7 +89,7 @@ function Hero() {
   }, []);
 
   return (
-    <section className="relative h-[100svh] w-full overflow-hidden flex flex-col justify-center">
+    <section className="relative min-h-[100svh] lg:h-[100svh] w-full overflow-hidden flex flex-col justify-start md:justify-center">
       {/* Background video */}
       <video
         autoPlay
@@ -103,13 +103,13 @@ function Hero() {
       </video>
 
       <div
-        className="relative z-10 h-full flex flex-1 flex-col justify-center items-center w-full pt-20 sm:pt-24 pb-6 sm:pb-8 px-4 sm:px-6 lg:px-10"
+        className="relative z-10 w-full flex-1 flex flex-col justify-start md:justify-center items-center pt-24 sm:pt-28 md:pt-24 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-10"
       >
-        <div className="mx-auto max-w-[1440px] w-full flex flex-col justify-center my-auto">
+        <div className="mx-auto max-w-[1440px] w-full flex flex-col justify-center">
           {/* Hero text */}
           <div className="relative mx-auto max-w-3xl text-center">
             <Reveal>
-              <h1 className="font-display font-normal text-3xl sm:text-5xl lg:text-[54px] xl:text-6xl leading-[0.98] sm:leading-[1.02] tracking-tight text-ink">
+              <h1 className="font-display font-normal text-3xl sm:text-5xl lg:text-[54px] xl:text-6xl leading-[1.05] sm:leading-[1.02] tracking-tight text-ink">
                 <span className="mr-2 inline-block">Track</span>
                 <span className="mr-2 inline-block">subscriptions</span>
                 <br />
@@ -120,7 +120,7 @@ function Hero() {
             </Reveal>
 
             <Reveal delay={0.2}>
-              <p className="mx-auto mt-3 sm:mt-4 max-w-xl font-secondary text-sm sm:text-base leading-relaxed text-ink/70">
+              <p className="mx-auto mt-2.5 sm:mt-4 max-w-xl font-secondary text-xs sm:text-base leading-relaxed text-ink/70">
                 Take complete control of recurring expenses, get alerted before
                 free trials expire, normalize multi-currency spending, and
                 cancel unwanted bills with 1-click guides.
@@ -129,7 +129,7 @@ function Hero() {
 
             <Reveal
               delay={0.3}
-              className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3"
+              className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3"
             >
               <Link
                 href="/subscriptions"
@@ -149,7 +149,7 @@ function Hero() {
             </Reveal>
 
             <Reveal delay={0.4}>
-              <p className="mt-3 sm:mt-3.5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-ink/55">
+              <p className="mt-2.5 sm:mt-3.5 flex flex-wrap justify-center gap-x-4 sm:gap-x-5 gap-y-1 text-xs text-ink/55">
                 <span>No credit card required</span>
                 <span>·</span>
                 <span>Zero bank account access</span>
@@ -160,7 +160,7 @@ function Hero() {
           </div>
 
           {/* Floating Mockup Card - scaled to fit viewport gracefully */}
-          <Reveal delay={0.3} className="relative mx-auto mt-5 sm:mt-6 lg:mt-7 max-w-3xl w-full">
+          <Reveal delay={0.3} className="relative mx-auto mt-4 sm:mt-6 lg:mt-7 max-w-3xl w-full">
             <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 shadow-2xl shadow-black/30">
               <div className="grid gap-2.5 rounded-xl bg-paper/95 p-3.5 sm:p-4 md:grid-cols-[1fr_1.35fr] md:p-4.5">
                 {/* Left Ledger Card */}
