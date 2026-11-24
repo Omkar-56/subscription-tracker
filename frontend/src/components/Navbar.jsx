@@ -96,7 +96,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [mobileMenuOpen]);
 
-  const isLandingPage = !user && pathname === "/";
+  const isLandingPage = pathname === "/";
 
   async function handleConfirmPayment(paymentData) {
     if (!payingSub) return;
@@ -139,17 +139,23 @@ export default function Navbar() {
     <>
       <header
         ref={mobileMenuRef}
-        className={`sticky top-0 z-40 transition-colors duration-300 ${
+        className={`${
+          isLandingPage
+            ? "fixed top-0 left-0 right-0 z-50"
+            : "sticky top-0 z-40"
+        } transition-all duration-300 ${
           mobileMenuOpen
-            ? "bg-paper border-b border-line/50"
+            ? "bg-paper border-b border-line/50 shadow-md"
             : isScrolled
-              ? "bg-paper/90 backdrop-blur-xs border-b border-line/70"
+              ? "bg-paper/90 backdrop-blur-md border-b border-line/70 shadow-xs"
               : isLandingPage
                 ? "bg-transparent border-b border-transparent"
-                : "bg-paper/90 backdrop-blur-xs border-b border-transparent"
+                : "bg-paper/90 backdrop-blur-md border-b border-transparent"
         }`}
       >
-        <div className="relative mx-auto flex items-center justify-between px-6 sm:px-10 lg:px-14 py-5 sm:py-6 max-w-[1440px] w-full">
+        <div className={`relative mx-auto flex items-center justify-between px-6 sm:px-10 lg:px-14 transition-all duration-300 ${
+          isScrolled ? "py-4 sm:py-4.5" : "py-5 sm:py-6"
+        } max-w-[1440px] w-full`}>
           {/* Logo */}
           <div className="flex items-center">
             <Link

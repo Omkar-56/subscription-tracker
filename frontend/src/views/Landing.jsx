@@ -89,31 +89,27 @@ function Hero() {
   }, []);
 
   return (
-    <section
-      className="relative overflow-hidden"
-      style={{ minHeight: "100vh", maxHeight: "1080px" }}
-    >
+    <section className="relative h-[100svh] w-full overflow-hidden">
       {/* Background video */}
       <video
         autoPlay
         muted
         loop
         playsInline
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover pointer-events-none"
         style={{ zIndex: 0 }}
       >
         <source src="/Images/hero-bg.mp4" type="video/mp4" />
       </video>
 
       <div
-        className="relative flex flex-col justify-center"
-        style={{ zIndex: 3, minHeight: "100vh", maxHeight: "1080px" }}
+        className="relative z-10 h-full flex flex-col justify-center pt-20 sm:pt-24 pb-6 sm:pb-8 px-6 sm:px-10 lg:px-14"
       >
-        <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14 py-8">
+        <div className="mx-auto max-w-[1440px] w-full">
           {/* Hero text */}
           <div className="relative mx-auto max-w-3xl text-center">
             <Reveal>
-              <h1 className="font-display font-normal text-4xl leading-[0.95] tracking-tight text-ink sm:text-5xl md:text-6xl">
+              <h1 className="font-display font-normal text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[0.95] tracking-tight text-ink">
                 <span className="mr-2 inline-block">Track</span>
                 <span className="mr-2 inline-block">subscriptions</span>
                 <br />
@@ -124,7 +120,7 @@ function Hero() {
             </Reveal>
 
             <Reveal delay={0.2}>
-              <p className="mx-auto mt-5 max-w-xl font-secondary text-base leading-relaxed text-ink/70">
+              <p className="mx-auto mt-3 sm:mt-4 max-w-xl font-secondary text-sm sm:text-base leading-relaxed text-ink/70">
                 Take complete control of recurring expenses, get alerted before
                 free trials expire, normalize multi-currency spending, and
                 cancel unwanted bills with 1-click guides.
@@ -133,7 +129,7 @@ function Hero() {
 
             <Reveal
               delay={0.3}
-              className="mt-7 flex flex-wrap items-center justify-center gap-3"
+              className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3"
             >
               <Link
                 href="/subscriptions"
@@ -153,7 +149,7 @@ function Hero() {
             </Reveal>
 
             <Reveal delay={0.4}>
-              <p className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-ink/55">
+              <p className="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-ink/55">
                 <span>No credit card required</span>
                 <span>·</span>
                 <span>Zero bank account access</span>
@@ -164,9 +160,9 @@ function Hero() {
           </div>
 
           {/* Floating Mockup Card - scaled down to fit viewport */}
-          <Reveal delay={0.3} className="relative mx-auto mt-8 max-w-3xl">
-            <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-2.5 shadow-2xl shadow-black/30">
-              <div className="grid gap-2.5 rounded-xl bg-paper/95 p-4 md:grid-cols-[1fr_1.4fr] md:p-5">
+          <Reveal delay={0.3} className="relative mx-auto mt-5 sm:mt-6 lg:mt-8 max-w-3xl">
+            <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 shadow-2xl shadow-black/30">
+              <div className="grid gap-2.5 rounded-xl bg-paper/95 p-3.5 sm:p-4 md:grid-cols-[1fr_1.4fr] md:p-5">
                 {/* Left Ledger Card */}
                 <div className="rounded-xl bg-ledger p-4 text-paper flex flex-col justify-between">
                   <div>
@@ -182,7 +178,7 @@ function Hero() {
                   </div>
 
                   {/* 12-month forecast bars */}
-                  <div className="mt-4 flex h-16 items-end gap-1">
+                  <div className="mt-4 flex h-14 sm:h-16 items-end gap-1">
                     {BAR_HEIGHTS.map((h, i) => (
                       <div
                         key={i}
@@ -207,10 +203,12 @@ function Hero() {
                   <p className="px-1 pb-0.5 text-xs uppercase tracking-[0.14em] text-ink/50">
                     Upcoming renewals
                   </p>
-                  {HERO_SUBS.map((s) => (
+                  {HERO_SUBS.map((s, idx) => (
                     <div
                       key={s.name}
-                      className="flex items-center justify-between rounded-xl border border-line bg-card px-3 py-2.5 hover:border-ledger/20 transition-colors"
+                      className={`flex items-center justify-between rounded-xl border border-line bg-card px-3 py-2 sm:py-2.5 hover:border-ledger/20 transition-colors ${
+                        idx === 3 ? "hidden sm:flex" : ""
+                      }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <span className="grid h-8 w-8 place-items-center rounded-lg bg-ledger-light font-medium text-ledger text-sm">
