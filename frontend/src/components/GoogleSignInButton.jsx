@@ -8,8 +8,15 @@ export default function GoogleSignInButton({ text = 'signin_with', onSuccess, on
   const { loginWithGoogle } = useAuth();
   const router = useRouter();
   const btnContainerRef = useRef(null);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [clientId, setClientId] = useState('');
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
 
   useEffect(() => {
     const gClientId =
@@ -33,13 +40,15 @@ export default function GoogleSignInButton({ text = 'signin_with', onSuccess, on
       script.defer = true;
       script.onload = () => setScriptLoaded(true);
       script.onerror = () => {
-        if (onError) onError('Failed to load Google Sign-In SDK');
+        if (onErrorRef.current) onErrorRef.current('Failed to load Google Sign-In SDK');
       };
       document.head.appendChild(script);
     } else {
-      script.addEventListener('load', () => setScriptLoaded(true));
+      const handleLoad = () => setScriptLoaded(true);
+      script.addEventListener('load', handleLoad);
+      return () => script.removeEventListener('load', handleLoad);
     }
-  }, [onError]);
+  }, []);
 
   useEffect(() => {
     if (!scriptLoaded || typeof window === 'undefined' || !window.google?.accounts?.id || !clientId || !btnContainerRef.current) {
@@ -49,13 +58,13 @@ export default function GoogleSignInButton({ text = 'signin_with', onSuccess, on
     async function handleCredentialResponse(response) {
       try {
         await loginWithGoogle(response.credential);
-        if (onSuccess) {
-          onSuccess();
+        if (onSuccessRef.current) {
+          onSuccessRef.current();
         } else {
           router.push('/dashboard');
         }
       } catch (err) {
-        if (onError) onError(err.message || 'Google sign-in failed');
+        if (onErrorRef.current) onErrorRef.current(err.message || 'Google sign-in failed');
       }
     }
 
@@ -81,7 +90,7 @@ export default function GoogleSignInButton({ text = 'signin_with', onSuccess, on
     } catch (err) {
       console.error('Google button init error:', err);
     }
-  }, [scriptLoaded, clientId, text, loginWithGoogle, router, onSuccess, onError]);
+  }, [scriptLoaded, clientId, text, loginWithGoogle, router]);
 
   if (!clientId) {
     return (
@@ -124,7 +133,7 @@ export default function GoogleSignInButton({ text = 'signin_with', onSuccess, on
 
   return (
     <div className="w-full flex justify-center">
-      <div ref={btnContainerRef} className="w-full flex justify-center" />
+      <div ref={btnContainerRef} className="w-full min-h-[40px] flex justify-center" />
     </div>
   );
 }
