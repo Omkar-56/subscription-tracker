@@ -109,7 +109,9 @@ export default function Navbar() {
       }
     };
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") setAccountMenuOpen(false);
+      if (e.key === "Escape") {
+        setAccountMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
@@ -219,190 +221,139 @@ export default function Navbar() {
           </nav>
 
           {/* Right side - desktop only */}
-          <div className="hidden md:flex">
+          <div className="hidden md:flex items-center">
             {user ? (
+              /* When Logged In: [Currency Option] [Bell Icon] [Profile Picture] */
               <div className="flex items-center gap-3 sm:gap-4">
-                {/* Due Date Reminders Bell & Trial Sentinel */}
+                {/* 1. Currency Option */}
+                <div className="relative flex items-center">
+                  <select
+                    value={user.baseCurrency || baseCurrency || "INR"}
+                    onChange={(e) => setBaseCurrency(e.target.value)}
+                    className="appearance-none rounded-lg border border-line/80 bg-paper/50 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
+                    title="Change default display currency for totals and analytics"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option
+                        key={c.code}
+                        value={c.code}
+                        className="text-left bg-white text-ink"
+                      >
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+
+                {/* 2. Bell Icon */}
                 <ReminderBell
                   onConfirmPayment={(sub) => setPayingSub(sub)}
                   onCancelGuide={(sub) => setGuideSub(sub)}
                   onConvertTrial={(sub) => handleConvertTrial(sub)}
                 />
 
-                {/* Currency Selector */}
-                <div className="relative flex items-center">
-                  <select
-                    value={user.baseCurrency || baseCurrency || "INR"}
-                    onChange={(e) => setBaseCurrency(e.target.value)}
-                    className="appearance-none rounded border border-line/80 bg-paper/50 pl-2 pr-5 py-0.5 text-[11px] font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
-                    title="Change default display currency for totals and analytics"
-                  >
-                    {CURRENCIES.map((c) => (
-                      <option
-                        key={c.code}
-                        value={c.code}
-                        className="text-left bg-white text-ink"
-                      >
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-
-                <span className="hidden md:inline text-xs text-ink/40">|</span>
-
-                {/* Account button: Logo/symbol with name as ONE clickable area */}
+                {/* 3. Profile Picture of the User (neat circle matching other icons) */}
                 <div className="relative" ref={accountMenuRef}>
                   <button
                     type="button"
                     onClick={() => setAccountMenuOpen((prev) => !prev)}
-                    className="flex items-center gap-2 py-1 px-2.5 rounded border border-transparent hover:border-line/70 hover:bg-line/25 transition-colors cursor-pointer select-none text-left"
+                    className="flex h-8 w-8 items-center justify-center rounded-full transition-transform active:scale-95 cursor-pointer select-none focus:outline-none shrink-0"
                     aria-expanded={accountMenuOpen}
                     aria-haspopup="true"
-                    title={user.email}
+                    aria-label="User account menu"
+                    title={user.name || user.email}
                   >
-                    {/* Account symbol / logo */}
                     {user.avatarUrl ? (
                       <img
                         src={user.avatarUrl}
-                        alt={user.name || "Account"}
-                        className="h-5 w-5 rounded-full object-cover shrink-0 ring-1 ring-line/80"
+                        alt={user.name || "User profile"}
+                        className="h-8 w-8 rounded-full object-cover ring-1 ring-line/80 hover:ring-ledger/50 transition-all shrink-0 block"
                       />
                     ) : (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ledger/10 text-ledger text-[10px] font-bold shrink-0">
+                      <div className="h-8 w-8 rounded-full bg-ledger/10 text-ledger text-xs font-semibold flex items-center justify-center ring-1 ring-line/80 hover:ring-ledger/50 transition-all shrink-0">
                         {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
-                      </span>
+                      </div>
                     )}
-
-                    {/* Account name */}
-                    <span className="text-xs font-medium text-ink/85 max-w-[130px] truncate">
-                      {user.name || user.email.split('@')[0]}
-                    </span>
-
-                    {/* Dropdown Chevron */}
-                    <svg
-                      className={`h-3 w-3 text-ink/40 transition-transform duration-200 ${
-                        accountMenuOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
                   </button>
 
-                  {/* Dropdown Menu */}
+                  {/* Dropdown Card */}
                   {accountMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1.5 w-48 rounded-md border border-line bg-paper shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                      <div className="px-3 py-2 border-b border-line/50">
-                        <p className="text-xs font-medium text-ink truncate">{user.name || 'Account'}</p>
-                        <p className="text-[11px] text-ink/50 truncate" title={user.email}>{user.email}</p>
+                    <div className="absolute right-0 top-full mt-2.5 w-72 sm:w-80 rounded-2xl sm:rounded-3xl border border-line bg-paper shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                      {/* Profile Picture of user, Name, Email */}
+                      <div className="flex items-center gap-3.5">
+                        {user.avatarUrl ? (
+                          <img
+                            src={user.avatarUrl}
+                            alt={user.name || "User profile"}
+                            className="h-14 w-14 rounded-full object-cover shrink-0 ring-2 ring-line"
+                          />
+                        ) : (
+                          <div className="h-14 w-14 rounded-full bg-ledger/10 text-ledger font-display font-semibold text-xl flex items-center justify-center shrink-0 ring-2 ring-line/60">
+                            {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-display font-semibold text-base text-ink truncate leading-tight">
+                            {user.name || user.email.split('@')[0]}
+                          </h3>
+                          <p className="text-xs text-ink/55 truncate mt-0.5" title={user.email}>
+                            {user.email}
+                          </p>
+                        </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAccountMenuOpen(false);
-                          openSettings();
-                        }}
-                        className="w-full text-left px-3 py-2 text-xs text-ink/80 hover:text-ink hover:bg-line/40 flex items-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <svg className="w-3.5 h-3.5 text-ink/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                        Settings
-                      </button>
+                      <div className="border-t border-line/70 my-3.5" />
 
-                      <div className="border-t border-line/40 my-0.5" />
+                      {/* 2 Options: Settings and Log out */}
+                      <div className="space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAccountMenuOpen(false);
+                            openSettings();
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium text-ink hover:bg-line/40 flex items-center justify-between transition-colors cursor-pointer"
+                        >
+                          <span>Settings</span>
+                          <svg className="w-4 h-4 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAccountMenuOpen(false);
-                          logout();
-                          router.push("/");
-                        }}
-                        className="w-full text-left px-3 py-2 text-xs text-ink/80 hover:text-rust hover:bg-rust/5 flex items-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <svg className="w-3.5 h-3.5 text-ink/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
-                        Sign out
-                      </button>
+                        <div className="border-t border-line/60 my-1" />
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAccountMenuOpen(false);
+                            logout();
+                            router.push("/");
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium text-ink/80 hover:text-rust hover:bg-rust/10 flex items-center justify-between transition-colors cursor-pointer"
+                        >
+                          <span>Log out</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
-                {/* Currency Selector for guest/unlogged users */}
-                <div className="relative flex items-center">
-                  <select
-                    value={baseCurrency || "INR"}
-                    onChange={(e) => setBaseCurrency(e.target.value)}
-                    className="appearance-none rounded border border-line/80 bg-paper/50 pl-2 pr-5 py-0.5 text-[11px] font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
-                    title="Change default display currency for totals and analytics"
-                  >
-                    {CURRENCIES.map((c) => (
-                      <option
-                        key={c.code}
-                        value={c.code}
-                        className="text-left bg-white text-ink"
-                      >
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-
+              /* When Logged Out: Keep the Log In and Sign Up buttons (no currency, no account icon) */
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={openLogin}
@@ -485,45 +436,47 @@ export default function Navbar() {
               Overview
             </Link>
 
-            {/* Currency Selector */}
-            <div className="flex items-center justify-between py-3 border-b border-line/30">
-              <span className="text-xs font-medium text-ink/50 uppercase tracking-wider">
-                Currency
-              </span>
-              <div className="relative flex items-center">
-                <select
-                  value={user?.baseCurrency || baseCurrency || "INR"}
-                  onChange={(e) => setBaseCurrency(e.target.value)}
-                  className="appearance-none rounded border border-line/80 bg-paper/60 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 cursor-pointer transition-colors"
-                  title="Change default display currency for totals and analytics"
-                >
-                  {CURRENCIES.map((c) => (
-                    <option
-                      key={c.code}
-                      value={c.code}
-                      className="bg-white text-ink"
-                    >
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+            {/* Currency Selector ONLY displayed when logged in */}
+            {user && (
+              <div className="flex items-center justify-between py-3 border-b border-line/30">
+                <span className="text-xs font-medium text-ink/50 uppercase tracking-wider">
+                  Currency
+                </span>
+                <div className="relative flex items-center">
+                  <select
+                    value={user?.baseCurrency || baseCurrency || "INR"}
+                    onChange={(e) => setBaseCurrency(e.target.value)}
+                    className="appearance-none rounded border border-line/80 bg-paper/60 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 cursor-pointer transition-colors"
+                    title="Change default display currency for totals and analytics"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option
+                        key={c.code}
+                        value={c.code}
+                        className="bg-white text-ink"
+                      >
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Auth buttons at the bottom */}
+            {/* Auth section at the bottom */}
             <div className="pt-4 mt-1 flex flex-col gap-2.5">
               {user ? (
                 <>
@@ -532,10 +485,10 @@ export default function Navbar() {
                       <img
                         src={user.avatarUrl}
                         alt={user.name || "Account"}
-                        className="h-7 w-7 rounded-full object-cover shrink-0 ring-1 ring-line/80"
+                        className="h-8 w-8 rounded-full object-cover shrink-0 ring-1 ring-line/80"
                       />
                     ) : (
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ledger/10 text-ledger text-xs font-bold shrink-0">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ledger/10 text-ledger text-xs font-semibold shrink-0">
                         {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
                       </span>
                     )}
@@ -551,23 +504,12 @@ export default function Navbar() {
                       setMobileMenuOpen(false);
                       openSettings();
                     }}
-                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/80 hover:text-ink hover:bg-line/20 transition-colors cursor-pointer text-left flex items-center gap-2"
+                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/80 hover:text-ink hover:bg-line/20 transition-colors cursor-pointer text-left flex items-center justify-between"
                   >
-                    <svg className="w-4 h-4 text-ink/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
+                    <span>Settings</span>
+                    <svg className="w-4 h-4 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    Settings
                   </button>
 
                   <button
@@ -576,17 +518,9 @@ export default function Navbar() {
                       router.push("/");
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-rust hover:border-rust/40 transition-colors cursor-pointer text-left flex items-center gap-2"
+                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-rust hover:border-rust/40 transition-colors cursor-pointer text-left flex items-center justify-between"
                   >
-                    <svg className="w-4 h-4 text-ink/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                      />
-                    </svg>
-                    Sign out
+                    <span>Log out</span>
                   </button>
                 </>
               ) : (
