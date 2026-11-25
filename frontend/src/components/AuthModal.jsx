@@ -189,36 +189,49 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
         ref={modalCardRef}
         className="relative w-full max-w-sm sm:max-w-[620px] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl squircle border border-line bg-paper p-5 sm:p-7 shadow-xl z-10"
       >
-        {/* 1. Subspens Logo and Cross (X) Button */}
-        <div className="flex items-center justify-between pb-4 border-b border-line/60">
-          <div className="flex items-center gap-2">
-            <img
-              src="/logo/logo.svg"
-              alt="Subspens"
-              className="h-6 w-auto object-contain"
-            />
-            <img
-              src="/logo/logo-t.svg"
-              alt="Subspens"
-              className="h-6 w-auto object-contain"
-            />
+        {/* 1. Header Text + Close (X) Button */}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            {mode === 'login' ? (
+              <div>
+                <h2 className="font-display text-2xl font-semibold text-ink">Welcome back</h2>
+                <p className="mt-1 text-xs sm:text-sm text-ink/60">
+                  Sign in to see what's renewing.
+                </p>
+              </div>
+            ) : mode === 'register' ? (
+              <div>
+                <h2 className="font-display text-2xl font-semibold text-ink">Create your account</h2>
+                <p className="mt-1 text-xs sm:text-sm text-ink/60">
+                  Start tracking what you pay for, monthly.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <h2 className="font-display text-2xl font-semibold text-ink">Reset password</h2>
+                <p className="mt-1 text-xs sm:text-sm text-ink/60">
+                  Enter your email address and we'll send you a password reset link.
+                </p>
+              </div>
+            )}
           </div>
+
           <button
             type="button"
             onClick={onClose}
             onMouseEnter={() => setHoverTarget('close')}
             onMouseLeave={() => setHoverTarget((prev) => (prev === 'close' ? null : prev))}
             disabled={submitting}
-            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-line/40 disabled:opacity-40 transition-colors cursor-pointer"
+            className="shrink-0 -mt-1 -mr-1 text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-line/40 disabled:opacity-40 transition-colors cursor-pointer"
             aria-label="Close"
           >
             ✕
           </button>
         </div>
 
-        {/* 2. Navigator: Log In <-> Sign Up (hidden in 'forgot' mode) */}
+        {/* 2. Navigator: Log In <-> Sign Up (or Back link in 'forgot' mode) */}
         {mode !== 'forgot' ? (
-          <div className="mt-4 sm:mt-5 relative flex rounded-xl squircle border border-line/60 bg-line/30 p-1 text-xs font-semibold">
+          <div className="mt-4 relative flex rounded-xl squircle border border-line/60 bg-line/30 p-1 text-xs font-semibold">
             {/* Sliding pill indicator */}
             <div
               className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg squircle bg-ledger/10 shadow-2xs transition-transform duration-300 ease-in-out ${
@@ -273,37 +286,10 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
           />
 
           <div className="flex-1 min-w-0">
-            {/* 3. Header */}
-            <div>
-              {mode === 'login' ? (
-                <div>
-                  <h2 className="font-display text-2xl font-semibold text-ink">Welcome back</h2>
-                  <p className="mt-1 text-xs sm:text-sm text-ink/60">
-                    Sign in to see what's renewing.
-                  </p>
-                </div>
-              ) : mode === 'register' ? (
-                <div>
-                  <h2 className="font-display text-2xl font-semibold text-ink">Create your account</h2>
-                  <p className="mt-1 text-xs sm:text-sm text-ink/60">
-                    Start tracking what you pay for, monthly.
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <h2 className="font-display text-2xl font-semibold text-ink">Reset password</h2>
-                  <p className="mt-1 text-xs sm:text-sm text-ink/60">
-                    Enter your email address and we'll send you a password reset link.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* 4. Google Option (only for login and register) */}
+            {/* 3. Google Option (only for login and register) */}
             {mode !== 'forgot' && (
               <>
                 <div
-                  className="mt-4 sm:mt-5"
                   onMouseEnter={() => setHoverTarget('google')}
                   onMouseLeave={() => setHoverTarget((prev) => (prev === 'google' ? null : prev))}
                 >

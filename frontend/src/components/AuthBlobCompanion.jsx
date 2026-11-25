@@ -41,7 +41,6 @@ export default function AuthBlobCompanion({
   const [isTyping, setIsTyping] = useState(false);
   const [celebrate, setCelebrate] = useState(0);
   const [errorAck, setErrorAck] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
 
   const sleepTimerRef = useRef(null);
   const wakeTimerRef = useRef(null);
@@ -49,16 +48,6 @@ export default function AuthBlobCompanion({
   const typingTimerRef = useRef(null);
   const isSleepyRef = useRef(false);
   isSleepyRef.current = isSleepy;
-
-  // Track viewport breakpoint so BlobSpeech only mounts and measures when visible (sm+)
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
-    const mq = window.matchMedia('(min-width: 640px)');
-    const sync = () => setIsDesktop(mq.matches);
-    sync();
-    mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
-  }, []);
 
   const scheduleSleep = useCallback(() => {
     clearTimeout(sleepTimerRef.current);
@@ -284,16 +273,14 @@ export default function AuthBlobCompanion({
   const sparkle = submitting || hoverTarget === 'submit' || hoverTarget === 'google';
 
   return (
-    <div className="subspens-blob-stage relative flex flex-row sm:flex-col items-center justify-center gap-3 sm:gap-1 rounded-2xl squircle border border-line/70 bg-gradient-to-b from-ledger-light/45 via-ledger-light/20 to-paper/40 px-4 py-2 sm:px-3 sm:py-5 sm:w-[196px] sm:shrink-0">
-      {/* Desktop speech cloud above the blob */}
-      {isDesktop && (
-        <div className="flex min-h-[56px] w-full items-end justify-center">
-          <BlobSpeech mood={mood} messages={speechMessages} />
-        </div>
-      )}
+    <div className="subspens-blob-stage relative flex flex-col items-center justify-center gap-0.5 sm:gap-1 py-1 sm:py-2 sm:w-[196px] sm:shrink-0">
+      {/* Speech cloud centered above the blob */}
+      <div className="flex min-h-[56px] w-full items-end justify-center">
+        <BlobSpeech mood={mood} messages={speechMessages} />
+      </div>
 
       {/* Interactive SVG jelly blob mascot */}
-      <div ref={blobRef} className="w-20 sm:w-44 -my-2 sm:-mt-1 sm:-mb-2 shrink-0">
+      <div ref={blobRef} className="w-28 sm:w-44 -mt-2 -mb-3 sm:-mt-1 sm:-mb-2 shrink-0">
         <JellyBlobMascot
           mood={mood}
           eyeStyle="v1"
@@ -307,15 +294,6 @@ export default function AuthBlobCompanion({
           className="w-full h-auto select-none"
         />
       </div>
-
-      {/* Compact mobile reaction pill */}
-      {!isDesktop && (
-        <div className="flex flex-1 items-center justify-start">
-          <span className="inline-block rounded-xl squircle border border-ledger/15 bg-white/95 px-3 py-1.5 text-xs font-semibold text-ink shadow-2xs">
-            {speechMessages[mood] || 'Ready when you are.'}
-          </span>
-        </div>
-      )}
     </div>
   );
 }
