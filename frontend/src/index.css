@@ -143,3 +143,50 @@ h1, h2, h3, h4, h5, h6,
 .squircle {
   corner-shape: squircle;
 }
+
+/* Feral Blob mascot theme tuned to Subspens' warm paper & ledger green palette */
+.subspens-blob-stage {
+  --jelly-body-top: #c7f9de;
+  --jelly-body-mid: #52d198;
+  --jelly-body-deep: #249b6c;
+  --jelly-body-rim: #8ae7be;
+
+  --jelly-outline: #0e7655;
+  --jelly-outline-light: #39b984;
+
+  --jelly-arm-light: #a5f0c9;
+  --jelly-arm-mid: #47c58c;
+  --jelly-arm-deep: #1e8a60;
+
+  --jelly-cheek-light: #ffe0e3;
+  --jelly-cheek: #ffaab8;
+  --jelly-cheek-deep: #f28aa0;
+
+  --jelly-heart-light: #ff99b8;
+  --jelly-heart: #f45b88;
+  --jelly-heart-deep: #c93262;
+
+  --jelly-eye-light: #133b2e;
+  --jelly-eye: #081f17;
+  --jelly-eye-deep: #04130d;
+  --jelly-face-ink: #081f17;
+  --jelly-face-soft: #133b2e;
+
+  --jelly-belly-glow: #bef7db;
+  --jelly-eye-sparkle: #5ee6ad;
+  --jelly-shadow: #6e8579;
+  --jelly-shadow-light: #a7b8af;
+}
+
+.subspens-blob-stage .blob-bubble {
+  --bubble-fill-top: rgba(255, 255, 255, 0.98);
+  --bubble-fill-bottom: rgba(248, 243, 233, 0.98);
+  --bubble-stroke-top: rgba(6, 78, 59, 0.16);
+  --bubble-stroke-bottom: rgba(6, 78, 59, 0.08);
+
+  color: #353535;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-shadow: none;
+  filter: drop-shadow(0 6px 12px rgba(6, 78, 59, 0.09));
+}
