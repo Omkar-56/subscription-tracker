@@ -90,7 +90,7 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
 
       {/* Popover Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-md border border-line bg-white shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 overflow-hidden rounded-2xl squircle border border-line bg-white shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100">
           <div className="flex items-center justify-between border-b border-line px-4 py-3 bg-paper/30">
             <div className="flex items-center gap-2">
               <span className="font-display text-sm font-semibold text-ink">
@@ -135,7 +135,7 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
                               {r.subscriptionName}
                             </p>
                             {isTrial && (
-                              <span className="rounded bg-amber px-1.5 py-0.2 text-[9px] font-bold text-white uppercase tracking-wider">
+                              <span className="rounded-lg squircle bg-amber px-1.5 py-0.2 text-[9px] font-bold text-white uppercase tracking-wider">
                                 Trial Sentinel
                               </span>
                             )}
@@ -186,7 +186,7 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
                                     isFreeTrial: true,
                                   });
                                 }}
-                                className="rounded bg-rust px-2 py-1 text-[10px] font-semibold text-white shadow-2xs hover:bg-rust-dark transition-colors cursor-pointer"
+                                className="rounded-lg squircle bg-rust px-2 py-1 text-[10px] font-semibold text-white shadow-2xs hover:bg-rust-dark transition-colors cursor-pointer"
                               >
                                 Cancel Guide
                               </button>
@@ -201,7 +201,7 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
                                     category: r.category,
                                   });
                                 }}
-                                className="rounded bg-ledger-light border border-ledger/30 px-2 py-0.5 text-[10px] font-medium text-ledger-dark hover:bg-ledger hover:text-white transition-colors cursor-pointer"
+                                className="rounded-lg squircle bg-ledger-light border border-ledger/30 px-2 py-0.5 text-[10px] font-medium text-ledger-dark hover:bg-ledger hover:text-white transition-colors cursor-pointer"
                               >
                                 ✓ Keep Sub
                               </button>
@@ -223,7 +223,7 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
                                 });
                               }
                             }}
-                            className="rounded bg-ledger px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
+                            className="rounded-xl squircle bg-ledger px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
                           >
                             ✓ Paid
                           </button>

@@ -19,7 +19,7 @@ function ForecastTooltip({ active, payload, label, currency = 'INR' }) {
   const charges = point.charges || point.renewals || [];
 
   return (
-    <div className="max-w-xs border border-line bg-paper px-3 py-2 shadow-sm rounded-sm">
+    <div className="max-w-xs border border-line bg-paper px-3 py-2 shadow-sm rounded-xl squircle">
       <p className="font-display text-sm font-semibold">{label}</p>
       <p className="tabular mt-1 text-sm font-medium" style={{ color: COLORS.due }}>
         Due this month: {formatMoney(point.total, currency)}
@@ -74,14 +74,14 @@ export default function ForecastChart({ months, currency = 'INR' }) {
 
   if (data.length === 0 || !hasSpend) {
     return (
-      <div className="mt-3 border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
+      <div className="mt-3 rounded-2xl squircle border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
         Add subscriptions to see your projected 12-month spend.
       </div>
     );
   }
 
   return (
-    <div className="mt-3 border border-line bg-paper px-4 pb-4 pt-5 shadow-2xs">
+    <div className="mt-3 rounded-2xl squircle border border-line bg-paper px-4 pb-4 pt-5 shadow-2xs">
       <div className="mb-2 flex justify-end">
         <label className="flex cursor-pointer items-center gap-2 text-xs text-ink/75">
           <input

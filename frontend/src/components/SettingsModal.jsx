@@ -218,7 +218,7 @@ export default function SettingsModal({ isOpen, onClose }) {
       />
 
       {/* Big Card with Squircle Edges */}
-      <div className="relative w-full max-w-4xl h-[620px] max-h-[90vh] rounded-[28px] sm:rounded-3xl border border-line bg-paper shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-4xl h-[620px] max-h-[90vh] rounded-[28px] sm:rounded-3xl squircle border border-line bg-paper shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Top Header Bar */}
         <div className="flex items-center justify-between px-6 sm:px-8 py-4.5 border-b border-line/70 bg-paper/80 backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-3">
@@ -249,7 +249,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                   key={sec.id}
                   type="button"
                   onClick={() => setActiveSection(sec.id)}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap text-left w-full ${
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl squircle text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap text-left w-full ${
                     isActive
                       ? isDanger
                         ? 'bg-rust text-white shadow-xs'
@@ -272,7 +272,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                   logout();
                   router.push('/');
                 }}
-                className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl text-xs font-medium text-ink/60 hover:text-rust hover:bg-rust/10 transition-colors cursor-pointer w-full text-left"
+                className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl squircle text-xs font-medium text-ink/60 hover:text-rust hover:bg-rust/10 transition-colors cursor-pointer w-full text-left"
               >
                 <LuLogOut className="h-4 w-4" />
                 <span>Sign out</span>
@@ -291,7 +291,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                 </div>
 
                 {/* Profile Photo / Avatar Row */}
-                <div className="rounded-2xl border border-line bg-card p-4.5 sm:p-5 flex items-center justify-between gap-4">
+                <div className="rounded-2xl squircle border border-line bg-card p-4.5 sm:p-5 flex items-center justify-between gap-4">
                   <div>
                     <h3 className="text-sm font-medium text-ink">Profile Avatar</h3>
                     <p className="text-xs text-ink/50 mt-0.5">Assigned from your account profile or initials.</p>
@@ -304,7 +304,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         className="h-12 w-12 rounded-full object-cover ring-2 ring-line"
                       />
                     ) : (
-                      <div className="h-12 w-12 rounded-2xl bg-ledger-light text-ledger font-display font-semibold text-lg flex items-center justify-center">
+                      <div className="h-12 w-12 rounded-2xl squircle bg-ledger-light text-ledger font-display font-semibold text-lg flex items-center justify-center">
                         {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
                       </div>
                     )}
@@ -312,7 +312,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                 </div>
 
                 {/* Full Name / Username Option */}
-                <form onSubmit={handleNameSubmit} className="rounded-2xl border border-line bg-card p-4.5 sm:p-5 space-y-3.5">
+                <form onSubmit={handleNameSubmit} className="rounded-2xl squircle border border-line bg-card p-4.5 sm:p-5 space-y-3.5">
                   <div>
                     <label className="block text-xs font-medium uppercase tracking-wider text-ink/60 mb-1">
                       Display Name
@@ -324,13 +324,13 @@ export default function SettingsModal({ isOpen, onClose }) {
                       placeholder="Your full name"
                       maxLength={100}
                       required
-                      className="w-full rounded-xl border border-line bg-paper/40 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
+                      className="w-full rounded-xl squircle border border-line bg-paper/40 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
                     />
                   </div>
 
                   {nameMessage && (
                     <div
-                      className={`rounded-xl p-3 text-xs flex items-center gap-2 ${
+                      className={`rounded-xl squircle p-3 text-xs flex items-center gap-2 ${
                         nameMessage.type === 'success'
                           ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                           : 'bg-rust/10 text-rust border border-rust/20'
@@ -345,7 +345,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                     <button
                       type="submit"
                       disabled={nameLoading || !name.trim()}
-                      className="rounded-xl bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
+                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
                     >
                       {nameLoading ? 'Saving…' : 'Save Name'}
                     </button>
@@ -353,7 +353,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                 </form>
 
                 {/* Email Address Option */}
-                <form onSubmit={handleEmailSubmit} className="rounded-2xl border border-line bg-card p-4.5 sm:p-5 space-y-4">
+                <form onSubmit={handleEmailSubmit} className="rounded-2xl squircle border border-line bg-card p-4.5 sm:p-5 space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-ink">Email Address</h3>
                     <p className="text-xs text-ink/50 mt-0.5">Used for notifications, renewals, and signing in.</p>
@@ -362,7 +362,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                   <div className="space-y-3">
                     <div>
                       <span className="block text-xs font-medium text-ink/60 mb-1">Current Email</span>
-                      <div className="rounded-xl border border-line/60 bg-line/20 px-3.5 py-2 text-sm text-ink/60 flex items-center gap-2">
+                      <div className="rounded-xl squircle border border-line/60 bg-line/20 px-3.5 py-2 text-sm text-ink/60 flex items-center gap-2">
                         <LuMail className="h-4 w-4 text-ink/40" />
                         <span className="truncate">{user.email}</span>
                       </div>
@@ -376,7 +376,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         onChange={(e) => setNewEmail(e.target.value)}
                         placeholder="new@example.com"
                         required
-                        className="w-full rounded-xl border border-line bg-paper/40 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
+                        className="w-full rounded-xl squircle border border-line bg-paper/40 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
                       />
                     </div>
 
@@ -390,7 +390,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                             onChange={(e) => setEmailPassword(e.target.value)}
                             placeholder="Enter current password"
                             required
-                            className="w-full rounded-xl border border-line bg-paper/40 pl-3.5 pr-10 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
+                            className="w-full rounded-xl squircle border border-line bg-paper/40 pl-3.5 pr-10 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
                           />
                           <button
                             type="button"
@@ -406,7 +406,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 
                   {emailMessage && (
                     <div
-                      className={`rounded-xl p-3 text-xs flex items-center gap-2 ${
+                      className={`rounded-xl squircle p-3 text-xs flex items-center gap-2 ${
                         emailMessage.type === 'success'
                           ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                           : 'bg-rust/10 text-rust border border-rust/20'
@@ -421,7 +421,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                     <button
                       type="submit"
                       disabled={emailLoading || !newEmail.trim() || (hasPassword && !emailPassword)}
-                      className="rounded-xl bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
+                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
                     >
                       {emailLoading ? 'Updating…' : 'Update Email'}
                     </button>
@@ -439,9 +439,9 @@ export default function SettingsModal({ isOpen, onClose }) {
                 </div>
 
                 {/* Sign-in Method Info */}
-                <div className="rounded-2xl border border-line bg-card p-4.5 sm:p-5 flex items-center justify-between gap-4">
+                <div className="rounded-2xl squircle border border-line bg-card p-4.5 sm:p-5 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-ledger-light text-ledger flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-xl squircle bg-ledger-light text-ledger flex items-center justify-center shrink-0">
                       <LuKeyRound className="h-5 w-5" />
                     </div>
                     <div>
@@ -457,7 +457,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                 </div>
 
                 {/* Password Change Form */}
-                <form onSubmit={handlePasswordSubmit} className="rounded-2xl border border-line bg-card p-4.5 sm:p-5 space-y-4">
+                <form onSubmit={handlePasswordSubmit} className="rounded-2xl squircle border border-line bg-card p-4.5 sm:p-5 space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-ink">
                       {hasPassword ? 'Change Password' : 'Set Account Password'}
@@ -478,7 +478,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                             onChange={(e) => setCurrentPassword(e.target.value)}
                             placeholder="Enter current password"
                             required
-                            className="w-full rounded-xl border border-line bg-paper/40 pl-3.5 pr-10 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
+                            className="w-full rounded-xl squircle border border-line bg-paper/40 pl-3.5 pr-10 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
                           />
                           <button
                             type="button"
@@ -501,7 +501,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                           placeholder="At least 8 characters"
                           minLength={8}
                           required
-                          className="w-full rounded-xl border border-line bg-paper/40 pl-3.5 pr-10 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
+                          className="w-full rounded-xl squircle border border-line bg-paper/40 pl-3.5 pr-10 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
                         />
                         <button
                           type="button"
@@ -522,14 +522,14 @@ export default function SettingsModal({ isOpen, onClose }) {
                         placeholder="Re-type new password"
                         minLength={8}
                         required
-                        className="w-full rounded-xl border border-line bg-paper/40 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
+                        className="w-full rounded-xl squircle border border-line bg-paper/40 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-ledger focus:bg-white transition-colors"
                       />
                     </div>
                   </div>
 
                   {passwordMessage && (
                     <div
-                      className={`rounded-xl p-3 text-xs flex items-center gap-2 ${
+                      className={`rounded-xl squircle p-3 text-xs flex items-center gap-2 ${
                         passwordMessage.type === 'success'
                           ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                           : 'bg-rust/10 text-rust border border-rust/20'
@@ -550,7 +550,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         newPassword.length < 8 ||
                         newPassword !== confirmPassword
                       }
-                      className="rounded-xl bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
+                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
                     >
                       {passwordLoading ? 'Updating…' : 'Update Password'}
                     </button>
@@ -568,7 +568,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                 </div>
 
                 {/* Base Currency Option */}
-                <div className="rounded-2xl border border-line bg-card p-4.5 sm:p-5 space-y-4">
+                <div className="rounded-2xl squircle border border-line bg-card p-4.5 sm:p-5 space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-ink">Default Currency</h3>
                     <p className="text-xs text-ink/50 mt-0.5">
@@ -584,14 +584,14 @@ export default function SettingsModal({ isOpen, onClose }) {
                           key={c.code}
                           type="button"
                           onClick={() => setBaseCurrency(c.code)}
-                          className={`p-3 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
+                          className={`p-3 rounded-xl squircle border text-left flex items-center justify-between transition-all cursor-pointer ${
                             isSelected
                               ? 'border-ledger bg-ledger/5 text-ink font-semibold ring-1 ring-ledger'
                               : 'border-line bg-paper/30 text-ink/80 hover:border-ledger/40 hover:bg-white'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 truncate">
-                            <span className="grid h-7 w-7 place-items-center rounded-lg bg-line/60 text-xs font-bold text-ink shrink-0">
+                            <span className="grid h-7 w-7 place-items-center rounded-lg squircle bg-line/60 text-xs font-bold text-ink shrink-0">
                               {c.symbol}
                             </span>
                             <span className="text-xs truncate">{c.label}</span>
@@ -613,9 +613,9 @@ export default function SettingsModal({ isOpen, onClose }) {
                   <p className="text-xs text-ink/60 mt-0.5">Permanent account actions that cannot be reversed.</p>
                 </div>
 
-                <form onSubmit={handleDeleteAccount} className="rounded-2xl border border-rust/30 bg-rust/5 p-5 sm:p-6 space-y-4">
+                <form onSubmit={handleDeleteAccount} className="rounded-2xl squircle border border-rust/30 bg-rust/5 p-5 sm:p-6 space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-rust/10 text-rust flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-xl squircle bg-rust/10 text-rust flex items-center justify-center shrink-0">
                       <LuTriangleAlert className="h-5 w-5" />
                     </div>
                     <div>
@@ -638,7 +638,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                           onChange={(e) => setDeletePassword(e.target.value)}
                           placeholder="Your current password"
                           required
-                          className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none focus:border-rust transition-colors"
+                          className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none focus:border-rust transition-colors"
                         />
                       </div>
                     )}
@@ -653,13 +653,13 @@ export default function SettingsModal({ isOpen, onClose }) {
                         onChange={(e) => setDeleteConfirmation(e.target.value)}
                         placeholder="DELETE"
                         required
-                        className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none focus:border-rust transition-colors"
+                        className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none focus:border-rust transition-colors"
                       />
                     </div>
                   </div>
 
                   {deleteError && (
-                    <div className="rounded-xl p-3 text-xs bg-rust/15 text-rust border border-rust/20 flex items-center gap-2">
+                    <div className="rounded-xl squircle p-3 text-xs bg-rust/15 text-rust border border-rust/20 flex items-center gap-2">
                       <LuTriangleAlert className="h-4 w-4 shrink-0" />
                       <span>{deleteError}</span>
                     </div>
@@ -673,7 +673,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         deleteConfirmation.trim().toUpperCase() !== 'DELETE' ||
                         (hasPassword && !deletePassword)
                       }
-                      className="rounded-xl bg-rust px-5 py-2.5 text-xs font-semibold text-white shadow-2xs hover:bg-rust/90 disabled:opacity-40 transition-colors cursor-pointer"
+                      className="rounded-xl squircle bg-rust px-5 py-2.5 text-xs font-semibold text-white shadow-2xs hover:bg-rust/90 disabled:opacity-40 transition-colors cursor-pointer"
                     >
                       {deleteLoading ? 'Deleting Account…' : 'Permanently Delete Account'}
                     </button>

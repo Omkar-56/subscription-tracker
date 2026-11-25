@@ -87,7 +87,7 @@ export default function SubscriptionCard({
             </div>
 
             {isTrial && (
-              <span className="rounded bg-amber-light border border-amber/40 px-1.5 py-0.5 text-[11px] font-bold text-amber tracking-wide flex items-center gap-1 shrink-0">
+              <span className="rounded-lg squircle bg-amber-light border border-amber/40 px-1.5 py-0.5 text-[11px] font-bold text-amber tracking-wide flex items-center gap-1 shrink-0">
                 <span>🛡️</span>
                 <span>TRIAL</span>
               </span>
@@ -104,7 +104,7 @@ export default function SubscriptionCard({
                 </span>
                 {/* Tooltip on hover */}
                 <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/alert:flex flex-col items-center z-50 whitespace-nowrap">
-                  <div className="rounded bg-ink px-2 py-1 text-[11px] font-medium text-white shadow-md">
+                  <div className="rounded-lg squircle bg-ink px-2 py-1 text-[11px] font-medium text-white shadow-md">
                     {renewalTooltip}
                   </div>
                   <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-ink" />
@@ -113,7 +113,7 @@ export default function SubscriptionCard({
             )}
 
             {priceIncrease && (
-              <span className="rounded bg-rust-light border border-rust/30 px-1.5 py-0.5 text-xs font-medium text-rust shrink-0">
+              <span className="rounded-lg squircle bg-rust-light border border-rust/30 px-1.5 py-0.5 text-xs font-medium text-rust shrink-0">
                 price hike {formatMoney(priceIncrease.oldAmount, subscription.currency)} →{' '}
                 {formatMoney(priceIncrease.newAmount, subscription.currency)}
               </span>
@@ -168,7 +168,7 @@ export default function SubscriptionCard({
               e.stopPropagation();
               setMenuOpen((prev) => !prev);
             }}
-            className={`p-1.5 rounded-sm transition-colors cursor-pointer text-ink/60 hover:text-ink hover:bg-line/40 focus:outline-none ${
+            className={`p-1.5 rounded-lg squircle transition-colors cursor-pointer text-ink/60 hover:text-ink hover:bg-line/40 focus:outline-none ${
               menuOpen ? 'bg-line/50 text-ink' : ''
             }`}
             aria-label="Actions"
@@ -184,7 +184,7 @@ export default function SubscriptionCard({
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 top-full mt-1.5 w-44 rounded-md border border-line bg-white py-1 shadow-lg z-50">
+            <div className="absolute right-0 top-full mt-1.5 w-44 overflow-hidden rounded-2xl squircle border border-line bg-white py-1 shadow-lg z-50">
               {/* Cancel Guide */}
               {onCancelGuide && subscription.status === 'active' && (
                 <button

@@ -211,12 +211,12 @@ export default function Dashboard() {
       <div className="space-y-8 animate-pulse">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 rounded-xl bg-ink/5 border border-ink/10" />
+            <div key={i} className="h-28 rounded-2xl squircle bg-ink/5 border border-ink/10" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64 rounded-xl bg-ink/5 border border-ink/10" />
-          <div className="h-64 rounded-xl bg-ink/5 border border-ink/10" />
+          <div className="h-64 rounded-2xl squircle bg-ink/5 border border-ink/10" />
+          <div className="h-64 rounded-2xl squircle bg-ink/5 border border-ink/10" />
         </div>
       </div>
     );
@@ -232,10 +232,11 @@ export default function Dashboard() {
   };
 
   return (
+    <>
     <div className="space-y-8">
       {/* Free-Trial Expiry Sentinel Banner */}
       {activeTrials.length > 0 && (
-        <div className="rounded-md border border-amber/40 bg-amber-light/40 p-4 shadow-2xs">
+        <div className="rounded-2xl squircle border border-amber/40 bg-amber-light/40 p-4 shadow-2xs">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber text-white text-base shadow-xs">
@@ -246,7 +247,7 @@ export default function Dashboard() {
                   <h3 className="font-display text-sm font-bold text-ink">
                     Free-Trial Expiry Sentinel ({activeTrials.length} Active {activeTrials.length === 1 ? 'Trial' : 'Trials'})
                   </h3>
-                  <span className="rounded bg-amber px-1.5 py-0.2 text-[10px] font-bold text-white uppercase tracking-wide">
+                  <span className="rounded-lg squircle bg-amber px-1.5 py-0.2 text-[10px] font-bold text-white uppercase tracking-wide">
                     Live Sentinel
                   </span>
                 </div>
@@ -274,7 +275,7 @@ export default function Dashboard() {
               return (
                 <div
                   key={t.id}
-                  className="flex items-center justify-between rounded bg-white/90 border border-amber/30 p-3 shadow-2xs hover:bg-white transition-colors gap-3"
+                  className="flex items-center justify-between rounded-xl squircle bg-white/90 border border-amber/30 p-3 shadow-2xs hover:bg-white transition-colors gap-3"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <BrandLogo name={t.name} category={t.category} size="sm" />
@@ -282,7 +283,7 @@ export default function Dashboard() {
                       <div className="flex items-center gap-1.5">
                         <p className="font-semibold text-xs text-ink truncate">{t.name ? t.name.charAt(0).toUpperCase() + t.name.slice(1) : ''}</p>
                         <span
-                          className={`rounded px-1.5 py-0.2 text-[10px] font-bold ${
+                          className={`rounded-lg squircle px-1.5 py-0.2 text-[10px] font-bold ${
                             isUrgent ? 'bg-rust text-white animate-pulse' : 'bg-amber-light text-amber-dark'
                           }`}
                         >
@@ -301,13 +302,13 @@ export default function Dashboard() {
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       onClick={() => setGuideSub(t)}
-                      className="rounded bg-rust px-2.5 py-1 text-xs font-semibold text-white shadow-2xs hover:bg-rust-dark transition-colors cursor-pointer"
+                      className="rounded-xl squircle bg-rust px-2.5 py-1 text-xs font-semibold text-white shadow-2xs hover:bg-rust-dark transition-colors cursor-pointer"
                     >
                       Cancel Guide
                     </button>
                     <button
                       onClick={() => handleConvertTrial(t)}
-                      className="rounded border border-line bg-paper px-2 py-1 text-xs font-medium text-ink/70 hover:bg-ledger-light hover:text-ledger-dark transition-colors cursor-pointer"
+                      className="rounded-xl squircle border border-line bg-paper px-2 py-1 text-xs font-medium text-ink/70 hover:bg-ledger-light hover:text-ledger-dark transition-colors cursor-pointer"
                       title="Keep this subscription and convert to regular cycle"
                     >
                       Keep Sub
@@ -322,7 +323,7 @@ export default function Dashboard() {
 
       {/* Actionable Due Reminders Banner */}
       {pendingReminders.length > 0 && (
-        <div className="rounded-md border border-ledger/30 bg-ledger-light/50 p-4 shadow-2xs">
+        <div className="rounded-2xl squircle border border-ledger/30 bg-ledger-light/50 p-4 shadow-2xs">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ledger text-white text-sm">
@@ -353,7 +354,7 @@ export default function Dashboard() {
                       nextRenewalDate: r.dueDate,
                     })
                   }
-                  className="rounded bg-white border border-ledger/40 px-3 py-1 text-xs font-medium text-ledger-dark hover:bg-ledger hover:text-white transition-colors shadow-2xs cursor-pointer"
+                  className="rounded-xl squircle bg-white border border-ledger/40 px-3 py-1 text-xs font-medium text-ledger-dark hover:bg-ledger hover:text-white transition-colors shadow-2xs cursor-pointer"
                 >
                   ✓ Confirm {r.subscriptionName} ({formatMoney(r.amount, r.currency)})
                 </button>
@@ -432,7 +433,7 @@ export default function Dashboard() {
           {forecast ? (
             <ForecastChart months={forecast.months || forecast.forecast} currency={baseCurrency} />
           ) : (
-            <div className="mt-3 border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
+            <div className="mt-3 rounded-2xl squircle border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
               Add subscriptions to see your projected 12-month spend.
             </div>
           )}
@@ -446,7 +447,7 @@ export default function Dashboard() {
               See all →
             </Link>
           </div>
-          <div className="mt-3 border border-line bg-paper shadow-2xs">
+          <div className="mt-3 overflow-hidden rounded-2xl squircle border border-line bg-paper shadow-2xs">
             {summary.upcomingRenewals.length === 0 && (
               <p className="px-4 py-8 text-center text-sm text-ink/70">Nothing renewing in the next two weeks.</p>
             )}
@@ -480,7 +481,7 @@ export default function Dashboard() {
                     </div>
                     <button
                       onClick={() => setPayingSub(s)}
-                      className="rounded bg-ledger-light border border-ledger/30 px-2.5 py-1 text-[11px] font-semibold text-ledger-dark hover:bg-ledger hover:text-white transition-colors cursor-pointer"
+                      className="rounded-xl squircle bg-ledger-light border border-ledger/30 px-2.5 py-1 text-[11px] font-semibold text-ledger-dark hover:bg-ledger hover:text-white transition-colors cursor-pointer"
                       title="Confirm payment & roll over to next billing cycle"
                     >
                       ✓ Paid
@@ -493,21 +494,23 @@ export default function Dashboard() {
         </section>
       </div>
 
-      {payingSub && (
-        <PaymentConfirmModal
-          subscription={payingSub}
-          onConfirm={handleConfirmPayment}
-          onCancel={() => setPayingSub(null)}
-        />
-      )}
-
-      {guideSub && (
-        <CancellationGuideModal
-          subscription={guideSub}
-          onClose={() => setGuideSub(null)}
-          onStatusChange={handleStatusChange}
-        />
-      )}
     </div>
+
+    {payingSub && (
+      <PaymentConfirmModal
+        subscription={payingSub}
+        onConfirm={handleConfirmPayment}
+        onCancel={() => setPayingSub(null)}
+      />
+    )}
+
+    {guideSub && (
+      <CancellationGuideModal
+        subscription={guideSub}
+        onClose={() => setGuideSub(null)}
+        onStatusChange={handleStatusChange}
+      />
+    )}
+    </>
   );
 }

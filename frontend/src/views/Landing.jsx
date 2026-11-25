@@ -133,7 +133,7 @@ function Hero() {
             >
               <Link
                 href="/subscriptions"
-                className="group inline-flex items-center gap-2 rounded-full bg-ledger px-6 py-2.5 sm:py-3 text-sm font-medium text-paper shadow-lg shadow-ledger/20 transition-all hover:bg-ledger-dark hover:-translate-y-0.5 active:scale-[0.97]"
+                className="group inline-flex items-center gap-2 rounded-2xl squircle bg-ledger px-6 py-2.5 sm:py-3 text-sm font-medium text-paper shadow-lg shadow-ledger/20 transition-all hover:bg-ledger-dark hover:-translate-y-0.5 active:scale-[0.97]"
               >
                 Track subscriptions free{" "}
                 <span className="transition-transform group-hover:translate-x-1">
@@ -142,7 +142,7 @@ function Hero() {
               </Link>
               <a
                 href="#how"
-                className="rounded-full border border-line bg-card px-6 py-2.5 sm:py-3 text-sm font-medium text-ink transition hover:border-ledger/40 hover:-translate-y-0.5"
+                className="rounded-2xl squircle border border-line bg-card px-6 py-2.5 sm:py-3 text-sm font-medium text-ink transition hover:border-ledger/40 hover:-translate-y-0.5"
               >
                 See how it works
               </a>
@@ -161,10 +161,10 @@ function Hero() {
 
           {/* Floating Mockup Card - scaled to fit viewport gracefully */}
           <Reveal delay={0.3} className="relative mx-auto mt-4 sm:mt-6 lg:mt-7 max-w-3xl w-full">
-            <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 shadow-2xl shadow-black/30">
-              <div className="grid gap-2.5 rounded-xl bg-paper/95 p-3.5 sm:p-4 md:grid-cols-[1fr_1.35fr] md:p-4.5">
+            <div className="rounded-3xl squircle border border-white/15 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 shadow-2xl shadow-black/30">
+              <div className="grid gap-2.5 rounded-2xl squircle bg-paper/95 p-3.5 sm:p-4 md:grid-cols-[1fr_1.35fr] md:p-4.5">
                 {/* Left Ledger Card */}
-                <div className="rounded-xl bg-ledger p-3.5 sm:p-4 text-paper flex flex-col justify-between">
+                <div className="rounded-2xl squircle bg-ledger p-3.5 sm:p-4 text-paper flex flex-col justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.14em] text-paper/60">
                       Monthly spend · INR
@@ -192,7 +192,7 @@ function Hero() {
                     ))}
                   </div>
 
-                  <div className="mt-2.5 sm:mt-3 flex items-center justify-between rounded-lg bg-paper/10 px-3 py-1.5 sm:py-2 text-xs">
+                  <div className="mt-2.5 sm:mt-3 flex items-center justify-between rounded-xl squircle bg-paper/10 px-3 py-1.5 sm:py-2 text-xs">
                     <span className="text-paper/70">Saved this year</span>
                     <span className="font-medium text-amber-light">₹7,420</span>
                   </div>
@@ -206,12 +206,12 @@ function Hero() {
                   {HERO_SUBS.map((s, idx) => (
                     <div
                       key={s.name}
-                      className={`flex items-center justify-between rounded-xl border border-line bg-card px-3 py-1.5 sm:py-2 hover:border-ledger/20 transition-colors ${
+                      className={`flex items-center justify-between rounded-xl squircle border border-line bg-card px-3 py-1.5 sm:py-2 hover:border-ledger/20 transition-colors ${
                         idx === 3 ? "hidden sm:flex" : ""
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <span className="grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-lg bg-ledger-light font-medium text-ledger text-xs sm:text-sm">
+                        <span className="grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-lg squircle bg-ledger-light font-medium text-ledger text-xs sm:text-sm">
                           {s.name[0]}
                         </span>
                         <div>
@@ -328,7 +328,7 @@ function About() {
           </Reveal>
         </div>
 
-        <div className="mt-16 grid gap-px overflow-hidden rounded-3xl border border-line bg-line md:grid-cols-3">
+        <div className="mt-16 grid gap-px overflow-hidden rounded-3xl squircle border border-line bg-line md:grid-cols-3">
           {PILLARS.map((p, i) => (
             <Reveal key={p.t} delay={i * 0.1} className="bg-card p-8">
               <span className="font-display font-medium tracking-tight text-4xl text-amber">
@@ -381,7 +381,7 @@ function Steps() {
         <div className="mt-16 grid gap-6 md:grid-cols-3">
           {STEPS.map((s, i) => (
             <Reveal key={s.t} delay={i * 0.12}>
-              <div className="h-full rounded-3xl border border-paper/15 bg-ledger-dark p-8 transition-transform duration-300 hover:-translate-y-1.5">
+              <div className="h-full rounded-3xl squircle border border-paper/15 bg-ledger-dark p-8 transition-transform duration-300 hover:-translate-y-1.5">
                 <span className="grid h-11 w-11 place-items-center rounded-full bg-amber-light font-display font-medium tracking-tight text-xl text-ledger-dark">
                   {i + 1}
                 </span>
@@ -453,8 +453,8 @@ function Features() {
             const Icon = f.icon;
             return (
               <Reveal key={f.t} delay={(i % 3) * 0.08}>
-                <div className="group h-full rounded-3xl border border-line bg-card p-8 transition-all duration-300 hover:shadow-xl hover:shadow-ink/5 hover:-translate-y-1">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-ledger-light text-ledger transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105">
+                <div className="group h-full rounded-3xl squircle border border-line bg-card p-8 transition-all duration-300 hover:shadow-xl hover:shadow-ink/5 hover:-translate-y-1">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl squircle bg-ledger-light text-ledger transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105">
                     <Icon className="h-6 w-6 text-ledger" />
                   </span>
                   <h3 className="mt-6 text-lg font-medium text-ink">{f.t}</h3>
@@ -522,7 +522,7 @@ function Compare() {
 
         <Reveal
           delay={0.1}
-          className="mt-14 overflow-x-auto rounded-3xl border border-line bg-card shadow-2xs"
+          className="mt-14 overflow-x-auto rounded-3xl squircle border border-line bg-card shadow-2xs"
         >
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
@@ -655,7 +655,7 @@ function FinalCTA() {
   return (
     <section className="pb-20 sm:pb-24">
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
-        <Reveal className="relative mx-auto w-full overflow-hidden rounded-[2.5rem] bg-ledger-dark px-8 py-20 sm:py-24 text-center text-paper shadow-2xl">
+        <Reveal className="relative mx-auto w-full overflow-hidden rounded-[2.5rem] squircle bg-ledger-dark px-8 py-20 sm:py-24 text-center text-paper shadow-2xl">
           {/* Glowing floating decorative blobs */}
           <div
             aria-hidden
@@ -682,7 +682,7 @@ function FinalCTA() {
               {user ? (
                 <Link
                   href="/subscriptions"
-                  className="inline-flex items-center gap-2 rounded-full bg-paper px-7 py-4 text-sm font-medium text-ledger-dark transition-all hover:bg-white hover:-translate-y-0.5 active:scale-[0.98] shadow-md"
+                  className="inline-flex items-center gap-2 rounded-2xl squircle bg-paper px-7 py-4 text-sm font-medium text-ledger-dark transition-all hover:bg-white hover:-translate-y-0.5 active:scale-[0.98] shadow-md"
                 >
                   Track subscriptions free →
                 </Link>
@@ -690,7 +690,7 @@ function FinalCTA() {
                 <button
                   type="button"
                   onClick={openRegister}
-                  className="inline-flex items-center gap-2 rounded-full bg-paper px-7 py-4 text-sm font-medium text-ledger-dark transition-all hover:bg-white hover:-translate-y-0.5 active:scale-[0.98] shadow-md cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-2xl squircle bg-paper px-7 py-4 text-sm font-medium text-ledger-dark transition-all hover:bg-white hover:-translate-y-0.5 active:scale-[0.98] shadow-md cursor-pointer"
                 >
                   Track subscriptions free →
                 </button>

@@ -96,7 +96,7 @@ export default function GoogleSignInButton({ text = 'signin_with', onSuccess, on
             setClientId(promptClientId.trim());
           }
         }}
-        className="w-full flex items-center justify-center gap-3 rounded-sm border border-line bg-white px-4 py-2 text-sm font-medium text-ink shadow-2xs hover:bg-stone-50 transition-colors cursor-pointer"
+        className="w-full flex items-center justify-center gap-3 rounded-xl squircle border border-line bg-white px-4 py-2 text-sm font-medium text-ink shadow-2xs hover:bg-stone-50 transition-colors cursor-pointer"
         title="Google OAuth Client ID required"
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24">

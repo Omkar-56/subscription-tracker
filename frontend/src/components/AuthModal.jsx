@@ -124,7 +124,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative w-full max-w-sm rounded-lg border border-line bg-paper p-6 sm:p-7 shadow-xl z-10 animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-sm rounded-3xl squircle border border-line bg-paper p-6 sm:p-7 shadow-xl z-10 animate-in fade-in zoom-in-95 duration-150">
         {/* 1. Subspens Logo and Cross (X) Button */}
         <div className="flex items-center justify-between pb-4 border-b border-line/60">
           <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded hover:bg-line/40 disabled:opacity-40 transition-colors cursor-pointer"
+            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-line/40 disabled:opacity-40 transition-colors cursor-pointer"
             aria-label="Close"
           >
             ✕
@@ -152,17 +152,21 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
 
         {/* 2. Navigator: Log In <-> Sign Up (hidden in 'forgot' mode) */}
         {mode !== 'forgot' ? (
-          <div className="mt-5 flex rounded-sm border border-line/60 bg-line/30 p-1 text-xs font-semibold">
+          <div className="mt-5 relative flex rounded-xl squircle border border-line/60 bg-line/30 p-1 text-xs font-semibold">
+            {/* Sliding pill indicator */}
+            <div
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg squircle bg-ledger/10 shadow-2xs transition-transform duration-300 ease-in-out ${
+                mode === 'register' ? 'translate-x-[calc(100%+8px)]' : 'translate-x-0'
+              }`}
+            />
             <button
               type="button"
               onClick={() => {
                 setMode('login');
                 setError('');
               }}
-              className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
-                mode === 'login'
-                  ? 'bg-paper text-ink shadow-2xs font-semibold'
-                  : 'text-ink/50 hover:text-ink'
+              className={`relative flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
+                mode === 'login' ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
               }`}
             >
               Log In
@@ -173,10 +177,8 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                 setMode('register');
                 setError('');
               }}
-              className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
-                mode === 'register'
-                  ? 'bg-paper text-ink shadow-2xs font-semibold'
-                  : 'text-ink/50 hover:text-ink'
+              className={`relative flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
+                mode === 'register' ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
               }`}
             >
               Sign Up
@@ -258,7 +260,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                 aria-label="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-sm border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
               />
             </div>
 
@@ -271,7 +273,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                   aria-label="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-sm border border-line bg-white px-3.5 py-2.5 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                  className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
                 />
                 <button
                   type="button"
@@ -313,7 +315,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-sm bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
+              className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
             >
               {submitting ? 'Signing in…' : 'Sign in'}
             </button>
@@ -328,7 +330,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                 aria-label="Your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-sm border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
               />
             </div>
 
@@ -340,7 +342,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                 aria-label="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-sm border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
               />
             </div>
 
@@ -354,7 +356,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                   aria-label="Password (min. 8 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-sm border border-line bg-white px-3.5 py-2.5 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                  className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
                 />
                 <button
                   type="button"
@@ -382,7 +384,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-sm bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
+              className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
             >
               {submitting ? 'Creating account…' : 'Create account'}
             </button>
@@ -412,7 +414,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                     setMode('login');
                     setForgotSuccess(false);
                   }}
-                  className="w-full rounded-sm bg-stone-100 py-2.5 text-xs font-semibold text-ink hover:bg-stone-200 transition-colors cursor-pointer"
+                  className="w-full rounded-xl squircle bg-stone-100 py-2.5 text-xs font-semibold text-ink hover:bg-stone-200 transition-colors cursor-pointer"
                 >
                   Return to Log In
                 </button>
@@ -427,7 +429,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                     aria-label="Enter your account email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-sm border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                    className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
                   />
                 </div>
 
@@ -436,7 +438,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full rounded-sm bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
+                  className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
                 >
                   {submitting ? 'Sending link…' : 'Send reset link'}
                 </button>
