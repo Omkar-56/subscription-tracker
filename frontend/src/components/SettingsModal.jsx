@@ -222,19 +222,6 @@ export default function SettingsModal({ isOpen, onClose }) {
         {/* Top Header Bar */}
         <div className="flex items-center justify-between px-6 sm:px-8 py-4.5 border-b border-line/70 bg-paper/80 backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <img
-                src="/logo/logo.svg"
-                alt="Subspens"
-                className="h-6 w-auto object-contain"
-              />
-              <img
-                src="/logo/logo-t.svg"
-                alt="Subspens"
-                className="h-6 w-auto object-contain"
-              />
-            </div>
-            <span className="text-ink/30 font-light">|</span>
             <h1 className="font-display font-medium text-lg text-ink">Settings</h1>
           </div>
 
