@@ -9,11 +9,15 @@ import {
   googleAuthSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  updateNameSchema,
+  updateEmailSchema,
+  changePasswordSchema,
+  deleteAccountSchema,
 } from '../validators/authValidators.js';
 
 const router = Router();
 
-// Protect credential & authentication endpoints with strict rate limiting (10 attempts / 15 mins)
+// Protect credential & authentication endpoints with rate limiting
 router.post('/register', authRateLimiter, validate(registerSchema), authController.register);
 router.post('/login', authRateLimiter, validate(loginSchema), authController.login);
 router.post('/google', authRateLimiter, validate(googleAuthSchema), authController.google);
@@ -23,5 +27,9 @@ router.post('/reset-password', authRateLimiter, validate(resetPasswordSchema), a
 // Authenticated user profile routes
 router.get('/me', requireAuth, authController.me);
 router.put('/currency', requireAuth, authController.updateCurrency);
+router.put('/name', requireAuth, validate(updateNameSchema), authController.updateName);
+router.put('/email', requireAuth, validate(updateEmailSchema), authController.updateEmail);
+router.put('/password', requireAuth, validate(changePasswordSchema), authController.changePassword);
+router.delete('/account', requireAuth, validate(deleteAccountSchema), authController.deleteAccount);
 
 export default router;

@@ -28,6 +28,7 @@ export default function Navbar() {
     logout,
     openLogin,
     openRegister,
+    openSettings,
   } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -35,7 +36,9 @@ export default function Navbar() {
   const [guideSub, setGuideSub] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const mobileMenuRef = useRef(null);
+  const accountMenuRef = useRef(null);
 
   const getLinkClass = (path, exact = false) => {
     const isActive = exact
@@ -67,9 +70,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
+  // Close menus when route changes
   useEffect(() => {
     setMobileMenuOpen(false);
+    setAccountMenuOpen(false);
   }, [pathname]);
 
   // Lock body scroll when mobile menu is open
@@ -96,7 +100,28 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [mobileMenuOpen]);
 
-  const isLandingPage = !user && pathname === "/";
+  // Close desktop account dropdown on outside click or escape
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const handleClickOutside = (e) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [accountMenuOpen]);
+
+  const isLandingPage = pathname === "/";
 
   async function handleConfirmPayment(paymentData) {
     if (!payingSub) return;
@@ -139,17 +164,23 @@ export default function Navbar() {
     <>
       <header
         ref={mobileMenuRef}
-        className={`sticky top-0 z-40 transition-colors duration-300 ${
+        className={`${
+          isLandingPage
+            ? "fixed top-0 left-0 right-0 z-50"
+            : "sticky top-0 z-40"
+        } transition-all duration-300 ${
           mobileMenuOpen
-            ? "bg-paper border-b border-line/50"
+            ? "bg-paper border-b border-line/50 shadow-md"
             : isScrolled
-              ? "bg-paper/90 backdrop-blur-xs border-b border-line/70"
+              ? "bg-paper/90 backdrop-blur-md border-b border-line/70 shadow-xs"
               : isLandingPage
                 ? "bg-transparent border-b border-transparent"
-                : "bg-paper/90 backdrop-blur-xs border-b border-transparent"
+                : "bg-paper/90 backdrop-blur-md border-b border-transparent"
         }`}
       >
-        <div className="relative mx-auto flex items-center justify-between px-6 sm:px-10 lg:px-14 py-5 sm:py-6 max-w-[1440px] w-full">
+        <div className={`relative mx-auto flex items-center justify-between px-6 sm:px-10 lg:px-14 transition-all duration-300 ${
+          isScrolled ? "py-4 sm:py-4.5" : "py-5 sm:py-6"
+        } max-w-[1440px] w-full`}>
           {/* Logo */}
           <div className="flex items-center">
             <Link
@@ -190,103 +221,139 @@ export default function Navbar() {
           </nav>
 
           {/* Right side - desktop only */}
-          <div className="hidden md:flex">
+          <div className="hidden md:flex items-center">
             {user ? (
+              /* When Logged In: [Currency Option] [Bell Icon] [Profile Picture] */
               <div className="flex items-center gap-3 sm:gap-4">
-                {/* Due Date Reminders Bell & Trial Sentinel */}
+                {/* 1. Currency Option */}
+                <div className="relative flex items-center">
+                  <select
+                    value={user.baseCurrency || baseCurrency || "INR"}
+                    onChange={(e) => setBaseCurrency(e.target.value)}
+                    className="appearance-none rounded-lg border border-line/80 bg-paper/50 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
+                    title="Change default display currency for totals and analytics"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option
+                        key={c.code}
+                        value={c.code}
+                        className="text-left bg-white text-ink"
+                      >
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+
+                {/* 2. Bell Icon */}
                 <ReminderBell
                   onConfirmPayment={(sub) => setPayingSub(sub)}
                   onCancelGuide={(sub) => setGuideSub(sub)}
                   onConvertTrial={(sub) => handleConvertTrial(sub)}
                 />
 
-                {/* Currency Selector */}
-                <div className="relative flex items-center">
-                  <select
-                    value={user.baseCurrency || baseCurrency || "INR"}
-                    onChange={(e) => setBaseCurrency(e.target.value)}
-                    className="appearance-none rounded border border-line/80 bg-paper/50 pl-2 pr-5 py-0.5 text-[11px] font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
-                    title="Change default display currency for totals and analytics"
+                {/* 3. Profile Picture of the User (neat circle matching other icons) */}
+                <div className="relative" ref={accountMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setAccountMenuOpen((prev) => !prev)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full transition-transform active:scale-95 cursor-pointer select-none focus:outline-none shrink-0"
+                    aria-expanded={accountMenuOpen}
+                    aria-haspopup="true"
+                    aria-label="User account menu"
+                    title={user.name || user.email}
                   >
-                    {CURRENCIES.map((c) => (
-                      <option
-                        key={c.code}
-                        value={c.code}
-                        className="text-left bg-white text-ink"
-                      >
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                    {user.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={user.name || "User profile"}
+                        className="h-8 w-8 rounded-full object-cover ring-1 ring-line/80 hover:ring-ledger/50 transition-all shrink-0 block"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-ledger/10 text-ledger text-xs font-semibold flex items-center justify-center ring-1 ring-line/80 hover:ring-ledger/50 transition-all shrink-0">
+                        {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Dropdown Card */}
+                  {accountMenuOpen && (
+                    <div className="absolute right-0 top-full mt-2.5 w-72 sm:w-80 rounded-2xl sm:rounded-3xl border border-line bg-paper shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                      {/* Profile Picture of user, Name, Email */}
+                      <div className="flex items-center gap-3.5">
+                        {user.avatarUrl ? (
+                          <img
+                            src={user.avatarUrl}
+                            alt={user.name || "User profile"}
+                            className="h-14 w-14 rounded-full object-cover shrink-0 ring-2 ring-line"
+                          />
+                        ) : (
+                          <div className="h-14 w-14 rounded-full bg-ledger/10 text-ledger font-display font-semibold text-xl flex items-center justify-center shrink-0 ring-2 ring-line/60">
+                            {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-display font-semibold text-base text-ink truncate leading-tight">
+                            {user.name || user.email.split('@')[0]}
+                          </h3>
+                          <p className="text-xs text-ink/55 truncate mt-0.5" title={user.email}>
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-line/70 my-3.5" />
+
+                      {/* 2 Options: Settings and Log out */}
+                      <div className="space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAccountMenuOpen(false);
+                            openSettings();
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium text-ink hover:bg-line/40 flex items-center justify-between transition-colors cursor-pointer"
+                        >
+                          <span>Settings</span>
+                          <svg className="w-4 h-4 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+
+                        <div className="border-t border-line/60 my-1" />
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAccountMenuOpen(false);
+                            logout();
+                            router.push("/");
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium text-ink/80 hover:text-rust hover:bg-rust/10 flex items-center justify-between transition-colors cursor-pointer"
+                        >
+                          <span>Log out</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                <span className="hidden md:inline text-xs text-ink/40">|</span>
-
-                {/* Show user's name (with email as tooltip fallback) */}
-                <span
-                  className="hidden md:inline text-xs font-medium text-ink/80 max-w-[160px] truncate"
-                  title={user.email}
-                >
-                  {user.name || user.email}
-                </span>
-                <button
-                  onClick={() => {
-                    logout();
-                    router.push("/");
-                  }}
-                  className="text-xs text-ink/60 hover:text-rust transition-colors cursor-pointer"
-                >
-                  Sign out
-                </button>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
-                {/* Currency Selector for guest/unlogged users */}
-                <div className="relative flex items-center">
-                  <select
-                    value={baseCurrency || "INR"}
-                    onChange={(e) => setBaseCurrency(e.target.value)}
-                    className="appearance-none rounded border border-line/80 bg-paper/50 pl-2 pr-5 py-0.5 text-[11px] font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
-                    title="Change default display currency for totals and analytics"
-                  >
-                    {CURRENCIES.map((c) => (
-                      <option
-                        key={c.code}
-                        value={c.code}
-                        className="text-left bg-white text-ink"
-                      >
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-
+              /* When Logged Out: Keep the Log In and Sign Up buttons (no currency, no account icon) */
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={openLogin}
@@ -349,7 +416,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile dropdown menu - overlays page content with solid color */}
+        {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 w-full bg-paper border-b border-line/70 shadow-xl px-6 py-5 flex flex-col gap-1 max-h-[calc(100vh-80px)] overflow-y-auto">
             {/* Nav links */}
@@ -369,60 +436,91 @@ export default function Navbar() {
               Overview
             </Link>
 
-            {/* Currency Selector */}
-            <div className="flex items-center justify-between py-3 border-b border-line/30">
-              <span className="text-xs font-medium text-ink/50 uppercase tracking-wider">
-                Currency
-              </span>
-              <div className="relative flex items-center">
-                <select
-                  value={user?.baseCurrency || baseCurrency || "INR"}
-                  onChange={(e) => setBaseCurrency(e.target.value)}
-                  className="appearance-none rounded border border-line/80 bg-paper/60 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 cursor-pointer transition-colors"
-                  title="Change default display currency for totals and analytics"
-                >
-                  {CURRENCIES.map((c) => (
-                    <option
-                      key={c.code}
-                      value={c.code}
-                      className="bg-white text-ink"
-                    >
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+            {/* Currency Selector ONLY displayed when logged in */}
+            {user && (
+              <div className="flex items-center justify-between py-3 border-b border-line/30">
+                <span className="text-xs font-medium text-ink/50 uppercase tracking-wider">
+                  Currency
+                </span>
+                <div className="relative flex items-center">
+                  <select
+                    value={user?.baseCurrency || baseCurrency || "INR"}
+                    onChange={(e) => setBaseCurrency(e.target.value)}
+                    className="appearance-none rounded border border-line/80 bg-paper/60 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 cursor-pointer transition-colors"
+                    title="Change default display currency for totals and analytics"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option
+                        key={c.code}
+                        value={c.code}
+                        className="bg-white text-ink"
+                      >
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-1.5 h-3 w-3 text-ink/40"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Auth buttons at the bottom */}
-            <div className="pt-4 mt-1 flex flex-col gap-3">
+            {/* Auth section at the bottom */}
+            <div className="pt-4 mt-1 flex flex-col gap-2.5">
               {user ? (
                 <>
-                  <span className="text-xs text-ink/50 truncate">
-                    {user.name || user.email}
-                  </span>
+                  <div className="flex items-center gap-2.5 px-1 py-1 mb-1">
+                    {user.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={user.name || "Account"}
+                        className="h-8 w-8 rounded-full object-cover shrink-0 ring-1 ring-line/80"
+                      />
+                    ) : (
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ledger/10 text-ledger text-xs font-semibold shrink-0">
+                        {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-ink truncate">{user.name || 'Account'}</p>
+                      <p className="text-[11px] text-ink/50 truncate">{user.email}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      openSettings();
+                    }}
+                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/80 hover:text-ink hover:bg-line/20 transition-colors cursor-pointer text-left flex items-center justify-between"
+                  >
+                    <span>Settings</span>
+                    <svg className="w-4 h-4 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+
                   <button
                     onClick={() => {
                       logout();
                       router.push("/");
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-rust hover:border-rust/40 transition-colors cursor-pointer text-left"
+                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-rust hover:border-rust/40 transition-colors cursor-pointer text-left flex items-center justify-between"
                   >
-                    Sign out
+                    <span>Log out</span>
                   </button>
                 </>
               ) : (

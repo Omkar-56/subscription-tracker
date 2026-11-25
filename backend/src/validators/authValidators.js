@@ -29,3 +29,25 @@ export const resetPasswordSchema = z.object({
     .min(8, 'Password must be at least 8 characters long')
     .max(128, 'Password cannot exceed 128 characters'),
 });
+
+export const updateNameSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(120),
+});
+
+export const updateEmailSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Please enter a valid email address'),
+  currentPassword: z.string().optional(),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z
+    .string()
+    .min(8, 'Password must be at least 8 characters long')
+    .max(128, 'Password cannot exceed 128 characters'),
+});
+
+export const deleteAccountSchema = z.object({
+  currentPassword: z.string().optional(),
+  confirmation: z.string().optional(),
+});

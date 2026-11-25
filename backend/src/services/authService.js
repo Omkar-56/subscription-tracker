@@ -19,6 +19,7 @@ const TRUSTED_DOMAINS = [
   "subspens.com",
   "www.subspens.com",
   "subtrack.subtrackweb.workers.dev",
+  "development-subtrack.subtrackweb.workers.dev",
 ];
 
 function signToken(user) {
@@ -98,53 +99,49 @@ export const authService = {
     }
 
     // Verify audience matches configured Google Client ID to prevent token reuse across other apps
-    const configuredClientIds = [
+    const ALLOWED_GOOGLE_CLIENT_IDS = [
       env.googleClientId,
+      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       "716397457965-fu0mp9f7h1j0djfds3clff0psvad46do.apps.googleusercontent.com",
       "344939829448-qfvrfn4p17dkhv2h5q0citsp6kaj5kan.apps.googleusercontent.com",
     ].filter(Boolean);
 
     if (
-      configuredClientIds.length > 0 &&
-      payload.aud &&
-      !configuredClientIds.includes(payload.aud)
+      ALLOWED_GOOGLE_CLIENT_IDS.length > 0 &&
+      !ALLOWED_GOOGLE_CLIENT_IDS.includes(payload.aud)
     ) {
-      console.warn(
-        `[Google OAuth Security Alert] Token audience mismatch: ${payload.aud}`,
-      );
       throw new ApiError(
         401,
-        "Unauthorized Google credential: audience mismatch",
+        "Google token audience mismatch. Unauthorized client.",
       );
     }
 
     const { sub: googleId, email, name, picture: avatarUrl } = payload;
     if (!email) {
-      throw new ApiError(400, "Google account has no associated email address");
+      throw new ApiError(400, "Google account does not have an email address");
     }
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = email.toLowerCase().trim();
 
-    // Check if user exists by googleId
+    // 1. Check if user already exists by googleId
     let user = await userModel.findByGoogleId(googleId);
 
-    // If not found by googleId, check by email
+    // 2. If not found by googleId, check if account with same email already exists
     if (!user) {
       user = await userModel.findByEmail(cleanEmail);
       if (user) {
-        // Link google account to existing email user
+        // Link googleId to existing user
         user = await userModel.linkGoogleAccount(user.id, {
           googleId,
           avatarUrl,
         });
       } else {
-        // Create brand new user
+        // Create new user from Google profile
         user = await userModel.create({
           name: name || cleanEmail.split("@")[0],
           email: cleanEmail,
           googleId,
           avatarUrl,
-          passwordHash: null,
           baseCurrency: "INR",
         });
       }
@@ -163,20 +160,20 @@ export const authService = {
   },
 
   async forgotPassword(email, requestOrigin = null) {
-    const normalizedEmail = (email || "").trim().toLowerCase();
-    const user = await userModel.findByEmail(normalizedEmail);
-
-    // Standard security: Always return the exact same response to prevent user enumeration
     const genericSuccess = {
       message:
-        "If an account exists with this email address, you will receive password reset instructions.",
+        "If an account with that email exists, we have sent a password reset link to it.",
     };
+
+    if (!email) return genericSuccess;
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await userModel.findByEmail(cleanEmail);
 
     if (!user) {
       return genericSuccess;
     }
 
-    // Generate cryptographically secure random token
     const rawToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = crypto
       .createHash("sha256")
@@ -186,27 +183,31 @@ export const authService = {
 
     await userModel.setResetPasswordToken(user.id, tokenHash, expiresAt);
 
-    // Securely determine appUrl - strictly enforce known whitelist to prevent Host Header / Origin Poisoning
     let appUrl = "https://subspens.com";
-    const isDev = (env.nodeEnv || process.env.NODE_ENV) !== "production";
 
     if (requestOrigin) {
       try {
         const parsed = new URL(requestOrigin);
         const host = parsed.hostname.toLowerCase();
 
-        const isTrusted =
+        const isAllowedDomain =
           TRUSTED_DOMAINS.includes(host) ||
-          (isDev && (host === "localhost" || host === "127.0.0.1")) ||
-          (env.clientOrigin && env.clientOrigin.includes(host));
+          (env.nodeEnv !== "production" &&
+            (host === "localhost" || host === "127.0.0.1"));
 
-        if (isTrusted) {
+        if (isAllowedDomain) {
           appUrl = parsed.origin;
+        } else {
+          console.warn(
+            `[Security Warning] Untrusted reset link origin rejected: ${requestOrigin}. Defaulting to https://subspens.com`,
+          );
         }
-      } catch {
-        // Fallback to https://subspens.com on invalid origin
+      } catch (e) {
+        console.warn(
+          `[Security Warning] Malformed origin in forgot-password: ${requestOrigin}`,
+        );
       }
-    } else if (env.clientOrigin && !env.clientOrigin.includes("*")) {
+    } else if (env.clientOrigin && env.clientOrigin !== "*") {
       appUrl = env.clientOrigin.split(",")[0].trim().replace(/\/$/, "");
     }
 
@@ -279,5 +280,112 @@ export const authService = {
     }
     const updated = await userModel.updateBaseCurrency(userId, validCurrency);
     return updated;
+  },
+
+  async updateName(userId, name) {
+    const cleanName = (name || "").trim();
+    if (!cleanName) {
+      throw new ApiError(400, "Name cannot be empty");
+    }
+    const updated = await userModel.updateName(userId, cleanName);
+    if (!updated) {
+      throw new ApiError(404, "User not found");
+    }
+    return {
+      user: updated,
+      token: signToken(updated),
+    };
+  },
+
+  async updateEmail(userId, email, currentPassword) {
+    const cleanEmail = (email || "").trim().toLowerCase();
+    if (!cleanEmail) {
+      throw new ApiError(400, "Email cannot be empty");
+    }
+
+    const user = await userModel.findByIdWithPassword(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    if (user.email.toLowerCase() === cleanEmail) {
+      const safe = await userModel.findById(userId);
+      return { user: safe, token: signToken(safe) };
+    }
+
+    // Check if new email is already used by another account
+    const existing = await userModel.findByEmail(cleanEmail);
+    if (existing && existing.id !== userId) {
+      throw new ApiError(409, "An account with this email address already exists");
+    }
+
+    // Require current password if account has password_hash
+    if (user.password_hash) {
+      if (!currentPassword) {
+        throw new ApiError(400, "Current password is required to change your email address");
+      }
+      const valid = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!valid) {
+        throw new ApiError(401, "Incorrect current password");
+      }
+    }
+
+    const updated = await userModel.updateEmail(userId, cleanEmail);
+    return {
+      user: updated,
+      token: signToken(updated),
+    };
+  },
+
+  async changePassword(userId, { currentPassword, newPassword }) {
+    if (!newPassword || newPassword.length < 8) {
+      throw new ApiError(400, "New password must be at least 8 characters long");
+    }
+
+    const user = await userModel.findByIdWithPassword(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    // If account has an existing password, verify current password
+    if (user.password_hash) {
+      if (!currentPassword) {
+        throw new ApiError(400, "Current password is required");
+      }
+      const valid = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!valid) {
+        throw new ApiError(401, "Incorrect current password");
+      }
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await userModel.updatePassword(userId, passwordHash);
+
+    return {
+      message: "Password updated successfully",
+    };
+  },
+
+  async deleteAccount(userId, { currentPassword }) {
+    const user = await userModel.findByIdWithPassword(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    // Verify current password if password exists
+    if (user.password_hash) {
+      if (!currentPassword) {
+        throw new ApiError(400, "Current password is required to delete your account");
+      }
+      const valid = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!valid) {
+        throw new ApiError(401, "Incorrect current password");
+      }
+    }
+
+    await userModel.deleteUser(userId);
+    return {
+      message: "Account permanently deleted",
+    };
   },
 };
