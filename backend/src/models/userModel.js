@@ -1,6 +1,6 @@
 import { query } from '../config/db.js';
 
-const USER_COLUMNS = 'id, name, email, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, \'INR\') AS "baseCurrency", created_at AS "createdAt"';
+const USER_COLUMNS = 'id, name, email, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, \'INR\') AS "baseCurrency", (password_hash IS NOT NULL) AS "hasPassword", created_at AS "createdAt"';
 
 export const userModel = {
   async create({ name, email, passwordHash = null, googleId = null, avatarUrl = null, baseCurrency = 'INR' }) {
@@ -15,7 +15,7 @@ export const userModel = {
 
   async findByEmail(email) {
     const { rows } = await query(
-      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'INR') AS "baseCurrency", created_at AS "createdAt" FROM users WHERE LOWER(email) = LOWER($1)`,
+      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'INR') AS "baseCurrency", (password_hash IS NOT NULL) AS "hasPassword", created_at AS "createdAt" FROM users WHERE LOWER(email) = LOWER($1)`,
       [email]
     );
     return rows[0] || null;
@@ -23,7 +23,7 @@ export const userModel = {
 
   async findByGoogleId(googleId) {
     const { rows } = await query(
-      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'INR') AS "baseCurrency", created_at AS "createdAt" FROM users WHERE google_id = $1`,
+      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'INR') AS "baseCurrency", (password_hash IS NOT NULL) AS "hasPassword", created_at AS "createdAt" FROM users WHERE google_id = $1`,
       [googleId]
     );
     return rows[0] || null;
@@ -45,6 +45,30 @@ export const userModel = {
     const { rows } = await query(
       `SELECT ${USER_COLUMNS} FROM users WHERE id = $1`,
       [id]
+    );
+    return rows[0] || null;
+  },
+
+  async findByIdWithPassword(id) {
+    const { rows } = await query(
+      `SELECT id, name, email, password_hash, google_id AS "googleId", avatar_url AS "avatarUrl", COALESCE(base_currency, 'INR') AS "baseCurrency", (password_hash IS NOT NULL) AS "hasPassword", created_at AS "createdAt" FROM users WHERE id = $1`,
+      [id]
+    );
+    return rows[0] || null;
+  },
+
+  async updateName(id, name) {
+    const { rows } = await query(
+      `UPDATE users SET name = $2 WHERE id = $1 RETURNING ${USER_COLUMNS}`,
+      [id, name]
+    );
+    return rows[0] || null;
+  },
+
+  async updateEmail(id, email) {
+    const { rows } = await query(
+      `UPDATE users SET email = $2 WHERE id = $1 RETURNING ${USER_COLUMNS}`,
+      [id, email]
     );
     return rows[0] || null;
   },
@@ -86,6 +110,25 @@ export const userModel = {
        WHERE id = $1 
        RETURNING ${USER_COLUMNS}`,
       [id, passwordHash]
+    );
+    return rows[0] || null;
+  },
+
+  async updatePassword(id, passwordHash) {
+    const { rows } = await query(
+      `UPDATE users 
+       SET password_hash = $2 
+       WHERE id = $1 
+       RETURNING ${USER_COLUMNS}`,
+      [id, passwordHash]
+    );
+    return rows[0] || null;
+  },
+
+  async deleteUser(id) {
+    const { rows } = await query(
+      `DELETE FROM users WHERE id = $1 RETURNING id`,
+      [id]
     );
     return rows[0] || null;
   },

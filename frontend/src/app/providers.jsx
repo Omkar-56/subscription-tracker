@@ -3,9 +3,10 @@
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import AuthModal from '../components/AuthModal';
+import SettingsModal from '../components/SettingsModal';
 
 function AppShell({ children }) {
-  const { loading, authModal, closeAuthModal } = useAuth();
+  const { loading, authModal, closeAuthModal, settingsOpen, closeSettings } = useAuth();
 
   if (loading) {
     return (
@@ -23,6 +24,10 @@ function AppShell({ children }) {
         isOpen={Boolean(authModal)}
         initialMode={authModal || 'login'}
         onClose={closeAuthModal}
+      />
+      <SettingsModal
+        isOpen={Boolean(settingsOpen)}
+        onClose={closeSettings}
       />
     </div>
   );

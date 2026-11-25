@@ -38,6 +38,10 @@ export const api = {
   resetPassword: (payload) => request('/auth/reset-password', { method: 'POST', body: payload, auth: false }),
   me: () => request('/auth/me'),
   updateCurrency: (currency) => request('/auth/currency', { method: 'PUT', body: { currency } }),
+  updateName: (name) => request('/auth/name', { method: 'PUT', body: { name } }),
+  updateEmail: (payload) => request('/auth/email', { method: 'PUT', body: payload }),
+  changePassword: (payload) => request('/auth/password', { method: 'PUT', body: payload }),
+  deleteAccount: (payload = {}) => request('/auth/account', { method: 'DELETE', body: payload }),
 
   listSubscriptions: () => request('/subscriptions'),
   createSubscription: (payload) => request('/subscriptions', { method: 'POST', body: payload }),
@@ -49,7 +53,7 @@ export const api = {
   deleteSubscription: (id) => request(`/subscriptions/${id}`, { method: 'DELETE' }),
   priceHistory: (id) => request(`/subscriptions/${id}/price-history`),
   getPayments: (id) => request(`/subscriptions/${id}/payments`),
-  getAllPayments: (limit = 50) => request(`/subscriptions/payments/recent?limit=${limit}` ),
+  getAllPayments: (limit = 50) => request(`/subscriptions/payments/recent?limit=${limit}`),
 
   getReminders: () => request('/reminders'),
   dismissReminder: (id) => request(`/reminders/${id}/dismiss`, { method: 'PATCH' }),
