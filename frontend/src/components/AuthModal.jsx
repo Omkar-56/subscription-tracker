@@ -74,10 +74,10 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
 
   function handleAuthSuccess() {
     onClose();
-    // Only navigate to dashboard if currently on the landing page '/'
+    // Only navigate to subscriptions if currently on the landing page '/'
     // If on /subscriptions, /dashboard, etc., stay on current page so the user continues their workflow
     if (pathname === '/') {
-      router.push('/dashboard');
+      router.push('/subscriptions');
     }
   }
 

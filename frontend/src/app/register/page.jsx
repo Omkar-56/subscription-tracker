@@ -10,7 +10,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      router.replace('/dashboard');
+      router.replace('/subscriptions');
     } else {
       setAuthModal('register');
       router.replace('/');
