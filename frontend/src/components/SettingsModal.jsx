@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
+import RadialFillButton from './RadialFillButton';
 import {
   LuUser,
   LuShieldCheck,
@@ -342,13 +343,14 @@ export default function SettingsModal({ isOpen, onClose }) {
                   )}
 
                   <div className="flex justify-end">
-                    <button
+                    <RadialFillButton
                       type="submit"
                       disabled={nameLoading || !name.trim()}
-                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
+                      fillClassName="bg-ledger-dark"
+                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs disabled:opacity-50 cursor-pointer"
                     >
                       {nameLoading ? 'Saving…' : 'Save Name'}
-                    </button>
+                    </RadialFillButton>
                   </div>
                 </form>
 
@@ -418,13 +420,14 @@ export default function SettingsModal({ isOpen, onClose }) {
                   )}
 
                   <div className="flex justify-end">
-                    <button
+                    <RadialFillButton
                       type="submit"
                       disabled={emailLoading || !newEmail.trim() || (hasPassword && !emailPassword)}
-                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
+                      fillClassName="bg-ledger-dark"
+                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs disabled:opacity-50 cursor-pointer"
                     >
                       {emailLoading ? 'Updating…' : 'Update Email'}
-                    </button>
+                    </RadialFillButton>
                   </div>
                 </form>
               </div>
@@ -541,7 +544,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                   )}
 
                   <div className="flex justify-end">
-                    <button
+                    <RadialFillButton
                       type="submit"
                       disabled={
                         passwordLoading ||
@@ -550,10 +553,11 @@ export default function SettingsModal({ isOpen, onClose }) {
                         newPassword.length < 8 ||
                         newPassword !== confirmPassword
                       }
-                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-50 transition-colors cursor-pointer"
+                      fillClassName="bg-ledger-dark"
+                      className="rounded-xl squircle bg-ledger px-5 py-2 text-xs font-semibold text-white shadow-2xs disabled:opacity-50 cursor-pointer"
                     >
                       {passwordLoading ? 'Updating…' : 'Update Password'}
-                    </button>
+                    </RadialFillButton>
                   </div>
                 </form>
               </div>
@@ -666,17 +670,18 @@ export default function SettingsModal({ isOpen, onClose }) {
                   )}
 
                   <div className="pt-2 flex justify-end">
-                    <button
+                    <RadialFillButton
                       type="submit"
                       disabled={
                         deleteLoading ||
                         deleteConfirmation.trim().toUpperCase() !== 'DELETE' ||
                         (hasPassword && !deletePassword)
                       }
-                      className="rounded-xl squircle bg-rust px-5 py-2.5 text-xs font-semibold text-white shadow-2xs hover:bg-rust/90 disabled:opacity-40 transition-colors cursor-pointer"
+                      fillClassName="bg-rust-dark"
+                      className="rounded-xl squircle bg-rust px-5 py-2.5 text-xs font-semibold text-white shadow-2xs disabled:opacity-40 cursor-pointer"
                     >
                       {deleteLoading ? 'Deleting Account…' : 'Permanently Delete Account'}
-                    </button>
+                    </RadialFillButton>
                   </div>
                 </form>
               </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
+import RadialFillButton from "../components/RadialFillButton";
 import {
   LuShieldCheck,
   LuBellRing,
@@ -120,7 +121,7 @@ function Hero() {
             </Reveal>
 
             <Reveal delay={0.2}>
-              <p className="mx-auto mt-2.5 sm:mt-4 max-w-xl font-secondary text-xs sm:text-base leading-relaxed text-ink/70">
+              <p className="mx-auto mt-2.5 sm:mt-4 max-w-xl font-secondary text-xs sm:text-base leading-relaxed text-ink/85">
                 Take complete control of recurring expenses, get alerted before
                 free trials expire, normalize multi-currency spending, and
                 cancel unwanted bills with 1-click guides.
@@ -131,25 +132,24 @@ function Hero() {
               delay={0.3}
               className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3"
             >
-              <Link
+              <RadialFillButton
                 href="/subscriptions"
-                className="group inline-flex items-center gap-2 rounded-2xl squircle bg-ledger px-6 py-2.5 sm:py-3 text-sm font-medium text-paper shadow-lg shadow-ledger/20 transition-all hover:bg-ledger-dark hover:-translate-y-0.5 active:scale-[0.97]"
+                fillClassName="bg-ledger-dark"
+                className="rounded-2xl squircle bg-ledger px-6 py-2.5 sm:py-3 text-sm font-medium text-paper shadow-lg shadow-ledger/20 active:scale-[0.97]"
               >
-                Track subscriptions free{" "}
-                <span className="transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </Link>
-              <a
+                Track subscriptions free
+              </RadialFillButton>
+              <RadialFillButton
                 href="#how"
-                className="rounded-2xl squircle border border-line bg-card px-6 py-2.5 sm:py-3 text-sm font-medium text-ink transition hover:border-ledger/40 hover:-translate-y-0.5"
+                fillClassName="bg-ledger-light"
+                className="rounded-2xl squircle border border-line bg-card px-6 py-2.5 sm:py-3 text-sm font-medium text-ink transition-colors duration-300 hover:border-ledger/40 hover:text-ledger-dark active:scale-[0.97]"
               >
                 See how it works
-              </a>
+              </RadialFillButton>
             </Reveal>
 
             <Reveal delay={0.4}>
-              <p className="mt-2.5 sm:mt-3.5 flex flex-wrap justify-center gap-x-4 sm:gap-x-5 gap-y-1 text-xs text-ink/55">
+              <p className="mt-2.5 sm:mt-3.5 flex flex-wrap justify-center gap-x-4 sm:gap-x-5 gap-y-1 text-xs text-ink/75">
                 <span>No credit card required</span>
                 <span>·</span>
                 <span>Zero bank account access</span>
@@ -200,7 +200,7 @@ function Hero() {
 
                 {/* Right Upcoming Renewals */}
                 <div className="space-y-1 sm:space-y-1.5">
-                  <p className="px-1 pb-0.5 text-xs uppercase tracking-[0.14em] text-ink/50">
+                  <p className="px-1 pb-0.5 text-xs uppercase tracking-[0.14em] text-ink/70">
                     Upcoming renewals
                   </p>
                   {HERO_SUBS.map((s, idx) => (
@@ -218,7 +218,7 @@ function Hero() {
                           <p className="text-xs sm:text-sm font-medium text-ink">
                             {s.name}
                           </p>
-                          <p className="text-[11px] sm:text-xs text-ink/50">{s.cat}</p>
+                          <p className="text-[11px] sm:text-xs text-ink/70">{s.cat}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -268,7 +268,7 @@ function Logos() {
   return (
     <section className="border-y border-line py-10">
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
-        <p className="text-center text-xs uppercase tracking-[0.18em] text-ink/50">
+        <p className="text-center text-xs uppercase tracking-[0.18em] text-ink/75">
           Works with all your favorite tools, media & platforms
         </p>
         <div className="relative mt-6 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_15%,black_85%,transparent)]">
@@ -309,16 +309,16 @@ function About() {
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
         <div className="grid gap-16 md:grid-cols-2">
           <Reveal>
-            <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
+            <h2 className="font-display font-normal tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
               The{" "}
-              <em className="text-ledger not-italic font-semibold">
+              <em className="text-ledger not-italic font-medium">
                 intentional
               </em>{" "}
               subscription tracker.
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="font-secondary text-lg leading-relaxed text-ink/70">
+            <p className="font-secondary text-lg leading-relaxed text-ink/85">
               Built for individuals and teams seeking clarity over recurring
               overhead. Unlike complex budgeting software that demands bank
               credentials, Subspens lets you track subscriptions, set renewal
@@ -335,7 +335,7 @@ function About() {
                 0{i + 1}
               </span>
               <h3 className="mt-6 text-lg font-medium text-ink">{p.t}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink/60">{p.d}</p>
+              <p className="mt-2 text-sm leading-relaxed text-ink/80">{p.d}</p>
             </Reveal>
           ))}
         </div>
@@ -367,9 +367,9 @@ function Steps() {
           <span className="text-xs uppercase tracking-[0.18em] text-amber-light font-semibold">
             Simple 3-step setup
           </span>
-          <h2 className="mt-5 font-display font-medium tracking-tight text-5xl leading-[1.05] md:text-6xl">
+          <h2 className="mt-5 font-display font-normal tracking-tight text-5xl leading-[1.05] md:text-6xl">
             Set up in under{" "}
-            <em className="text-amber-light not-italic font-semibold">
+            <em className="text-amber-light not-italic font-medium">
               60 seconds.
             </em>
           </h2>
@@ -436,13 +436,13 @@ function Features() {
     <section id="features" className="py-24 sm:py-28">
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
         <Reveal className="text-center">
-          <h2 className="mx-auto max-w-3xl font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
+          <h2 className="mx-auto max-w-3xl font-display font-normal tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
             Engineered for complete{" "}
-            <em className="text-ledger not-italic font-semibold">
+            <em className="text-ledger not-italic font-medium">
               subscription clarity.
             </em>
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-ink/60">
+          <p className="mx-auto mt-5 max-w-xl text-ink/80">
             Everything you need to audit, organize, and stop unintended
             recurring leakage.
           </p>
@@ -458,7 +458,7 @@ function Features() {
                     <Icon className="h-6 w-6 text-ledger" />
                   </span>
                   <h3 className="mt-6 text-lg font-medium text-ink">{f.t}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-ink/60">
+                  <p className="mt-2 text-sm leading-relaxed text-ink/80">
                     {f.d}
                   </p>
                 </div>
@@ -511,11 +511,11 @@ function Compare() {
     <section id="compare" className="pb-24 sm:pb-28">
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
         <Reveal className="text-center">
-          <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
+          <h2 className="font-display font-normal tracking-tight text-5xl leading-[1.05] text-ink md:text-6xl">
             Why Subspens is{" "}
-            <em className="text-ledger not-italic font-semibold">#1.</em>
+            <em className="text-ledger not-italic font-medium">#1.</em>
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-ink/60">
+          <p className="mx-auto mt-5 max-w-xl text-ink/80">
             How we compare to expensive budgeting apps and tedious spreadsheets.
           </p>
         </Reveal>
@@ -526,7 +526,7 @@ function Compare() {
         >
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
-              <tr className="border-b border-line text-ink/50">
+              <tr className="border-b border-line text-ink/75">
                 <th className="p-5 font-medium">Feature</th>
                 <th className="bg-ledger-light p-5 font-medium text-ledger">
                   Subspens
@@ -546,8 +546,8 @@ function Compare() {
                     <span className="mr-2 font-bold">✓</span>
                     {r[1]}
                   </td>
-                  <td className="p-5 text-ink/55">{r[2]}</td>
-                  <td className="p-5 text-ink/55">{r[3]}</td>
+                  <td className="p-5 text-ink/75">{r[2]}</td>
+                  <td className="p-5 text-ink/75">{r[3]}</td>
                 </tr>
               ))}
             </tbody>
@@ -597,13 +597,13 @@ function FAQ() {
       <div className="mx-auto max-w-[1440px] w-full px-6 sm:px-10 lg:px-14">
         <div className="grid gap-14 md:grid-cols-[1fr_1.5fr]">
           <Reveal>
-            <h2 className="font-display font-medium tracking-tight text-5xl leading-[1.05] text-ink">
+            <h2 className="font-display font-normal tracking-tight text-5xl leading-[1.05] text-ink">
               Common{" "}
-              <em className="text-ledger not-italic font-semibold">
+              <em className="text-ledger not-italic font-medium">
                 questions.
               </em>
             </h2>
-            <p className="mt-5 text-ink/60">
+            <p className="mt-5 text-ink/80">
               Everything about our free tracker and privacy standards.
             </p>
           </Reveal>
@@ -635,7 +635,7 @@ function FAQ() {
                         : "grid-rows-[0fr] opacity-0"
                     }`}
                   >
-                    <div className="overflow-hidden pr-12 text-sm leading-relaxed text-ink/60">
+                    <div className="overflow-hidden pr-12 text-sm leading-relaxed text-ink/80">
                       {a}
                     </div>
                   </div>
@@ -667,9 +667,9 @@ function FinalCTA() {
           />
 
           <div className="relative z-10">
-            <h2 className="mx-auto max-w-3xl font-display font-medium tracking-tight text-5xl leading-[1.05] md:text-7xl">
+            <h2 className="mx-auto max-w-3xl font-display font-normal tracking-tight text-5xl leading-[1.05] md:text-7xl">
               Ready to close your{" "}
-              <em className="text-amber-light not-italic font-semibold">
+              <em className="text-amber-light not-italic font-medium">
                 financial leaks?
               </em>
             </h2>
@@ -680,20 +680,21 @@ function FinalCTA() {
 
             <div className="mt-10 flex justify-center">
               {user ? (
-                <Link
+                <RadialFillButton
                   href="/subscriptions"
-                  className="inline-flex items-center gap-2 rounded-2xl squircle bg-paper px-7 py-4 text-sm font-medium text-ledger-dark transition-all hover:bg-white hover:-translate-y-0.5 active:scale-[0.98] shadow-md"
+                  fillClassName="bg-ledger-light"
+                  className="rounded-2xl squircle bg-paper px-7 py-4 text-sm font-medium text-ledger-dark shadow-md active:scale-[0.98]"
                 >
-                  Track subscriptions free →
-                </Link>
+                  Track subscriptions free
+                </RadialFillButton>
               ) : (
-                <button
-                  type="button"
+                <RadialFillButton
                   onClick={openRegister}
-                  className="inline-flex items-center gap-2 rounded-2xl squircle bg-paper px-7 py-4 text-sm font-medium text-ledger-dark transition-all hover:bg-white hover:-translate-y-0.5 active:scale-[0.98] shadow-md cursor-pointer"
+                  fillClassName="bg-ledger-light"
+                  className="rounded-2xl squircle bg-paper px-7 py-4 text-sm font-medium text-ledger-dark shadow-md cursor-pointer active:scale-[0.98]"
                 >
-                  Track subscriptions free →
-                </button>
+                  Track subscriptions free
+                </RadialFillButton>
               )}
             </div>
           </div>
@@ -726,53 +727,53 @@ function Footer() {
                 style={{ display: "block" }}
               />
             </Link>
-            <p className="mt-3 max-w-sm text-sm text-ink/60 leading-relaxed">
+            <p className="mt-3 max-w-sm text-sm text-ink/80 leading-relaxed">
               The high-clarity subscription tracker to monitor recurring
               services, catch trial expirations, and eliminate wasted spend.
             </p>
           </div>
           <div className="space-y-2 text-sm">
-            <p className="text-xs uppercase tracking-[0.14em] text-ink/45 font-semibold">
+            <p className="text-xs uppercase tracking-[0.14em] text-ink/70 font-semibold">
               Product
             </p>
             <Link
               href="/subscriptions"
-              className="block text-ink/70 hover:text-ink transition-colors"
+              className="block text-ink/85 hover:text-ink transition-colors"
             >
               Subscriptions
             </Link>
             <Link
               href="/dashboard"
-              className="block text-ink/70 hover:text-ink transition-colors"
+              className="block text-ink/85 hover:text-ink transition-colors"
             >
               Overview
             </Link>
             <Link
               href="/subscriptions"
-              className="block text-ink/70 hover:text-ink transition-colors"
+              className="block text-ink/85 hover:text-ink transition-colors"
             >
               Track for free
             </Link>
           </div>
           <div className="space-y-2 text-sm">
-            <p className="text-xs uppercase tracking-[0.14em] text-ink/45 font-semibold">
+            <p className="text-xs uppercase tracking-[0.14em] text-ink/70 font-semibold">
               Legal & trust
             </p>
             <Link
               href="/privacy-policy"
-              className="block text-ink/70 hover:text-ink transition-colors"
+              className="block text-ink/85 hover:text-ink transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-service"
-              className="block text-ink/70 hover:text-ink transition-colors"
+              className="block text-ink/85 hover:text-ink transition-colors"
             >
               Terms of Service
             </Link>
           </div>
         </div>
-        <div className="mt-12 flex flex-wrap justify-between gap-2 border-t border-line pt-6 text-xs text-ink/50">
+        <div className="mt-12 flex flex-wrap justify-between gap-2 border-t border-line pt-6 text-xs text-ink/75">
           <span>
             © {new Date().getFullYear()} Subspens. All rights reserved.
           </span>
