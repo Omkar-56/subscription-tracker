@@ -27,83 +27,590 @@ export default function PrivacyPolicyPage() {
         <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
           Privacy Policy
         </h1>
-        <p className="text-xs text-ink/50">Last updated: November 16, 2026</p>
+        <p className="text-xs text-ink/50">Last updated: 26 November 2026</p>
+        <p className="text-sm sm:text-base text-ink/80 leading-relaxed">
+          This Privacy Policy describes Our policies and procedures on the
+          collection, use and disclosure of Your information when You use the
+          Service, and tells You about Your privacy rights and how the law
+          protects You.
+        </p>
+        <p className="text-sm sm:text-base text-ink/80 leading-relaxed">
+          We use Your personal data to provide and improve the Service,
+          including sending You subscription renewal reminder emails. By using
+          the Service, You agree to the collection and use of information in
+          accordance with this Privacy Policy.
+        </p>
       </div>
 
       <div className="prose prose-stone max-w-none space-y-6 text-sm sm:text-base text-ink/80 leading-relaxed">
         <section className="space-y-3">
           <h2 className="font-display text-xl font-semibold text-ink">
-            1. Our Privacy First Commitment
+            1. Interpretation and Definitions
           </h2>
+          <h3 className="font-display text-base font-semibold text-ink">
+            Interpretation
+          </h3>
           <p>
-            At <strong>Subspens</strong>, we believe financial clarity should
-            never come at the cost of personal privacy. Unlike traditional
-            personal finance applications,{" "}
-            <strong>Subspens never connects to your bank accounts</strong> (we
-            do not use Plaid, Yodlee, or financial scraping tools) and we never
-            require your credit card numbers to track subscriptions.
+            The words whose initial letters are capitalised have meanings
+            defined under the following conditions. The following definitions
+            shall have the same meaning regardless of whether they appear in
+            singular or in plural.
           </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="font-display text-xl font-semibold text-ink">
-            2. Information We Collect
-          </h2>
+          <h3 className="font-display text-base font-semibold text-ink">
+            Definitions
+          </h3>
+          <p>For the purposes of this Privacy Policy:</p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
-              <strong>Account Information:</strong> If you create an account, we
-              store your email address and encrypted password hash (or Google
-              OAuth profile identifier).
+              <strong>Account</strong> means a unique account created for You to
+              access Our Service.
             </li>
             <li>
-              <strong>Subscription Ledger Data:</strong> Information you choose
-              to record, including service names, billing cycles, cost amounts,
-              currency preferences, and renewal dates.
+              <strong>Company</strong> (referred to as either &ldquo;the
+              Company&rdquo;, &ldquo;We&rdquo;, &ldquo;Us&rdquo; or
+              &ldquo;Our&rdquo; in this Privacy Policy) refers to subspens.com,
+              Unique Youtopia, Kharadi, Pune, Maharashtra 411014, India.
             </li>
             <li>
-              <strong>Guest Mode:</strong> If you use Subspens without creating
-              an account, your subscription data is stored locally on your
-              device in your browser's localStorage and is never transmitted to
-              our database.
+              <strong>Cookies</strong> are small files placed on Your Device by
+              a website, containing details of Your browsing history on that
+              website among its many uses.
+            </li>
+            <li>
+              <strong>Country</strong> refers to Maharashtra, India.
+            </li>
+            <li>
+              <strong>Device</strong> means any device that can access the
+              Service such as a computer, a cell phone or a digital tablet.
+            </li>
+            <li>
+              <strong>Personal Data</strong> is any information that relates to
+              an identified or identifiable individual.
+            </li>
+            <li>
+              <strong>Service</strong> refers to the Website.
+            </li>
+            <li>
+              <strong>Service Providers</strong> means any natural or legal
+              person who processes data on behalf of the Company. This includes
+              third-party companies or individuals employed by the Company to
+              facilitate the Service, to provide the Service on behalf of the
+              Company, to perform services related to the Service, or to assist
+              the Company in analysing how the Service is used.
+            </li>
+            <li>
+              <strong>Subscription Data</strong> means the information You enter
+              into the Service about Your personal subscriptions, including
+              service names, billing amounts, billing cycles, and renewal dates,
+              for the purpose of tracking and receiving reminders. The Company
+              does not collect or process any actual payment card, bank account,
+              or financial account information through the Service, and no
+              payments are made to, or through, the Service.
+            </li>
+            <li>
+              <strong>Usage Data</strong> refers to data collected
+              automatically, either generated by the use of the Service or from
+              the Service infrastructure itself (for example, the duration of a
+              page visit).
+            </li>
+            <li>
+              <strong>Website</strong> refers to subspens.com, accessible from{" "}
+              <a
+                href="https://subspens.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ledger hover:underline"
+              >
+                https://subspens.com/
+              </a>
+            </li>
+            <li>
+              <strong>You</strong> means the individual accessing or using the
+              Service, or the company, or other legal entity on behalf of which
+              such individual is accessing or using the Service, as applicable.
             </li>
           </ul>
         </section>
 
         <section className="space-y-3">
           <h2 className="font-display text-xl font-semibold text-ink">
-            3. How Your Information is Used
+            2. Collecting and Using Your Personal Data
           </h2>
+          <h3 className="font-display text-base font-semibold text-ink">
+            Types of Data Collected
+          </h3>
+          <h4 className="font-display text-sm font-semibold text-ink">
+            Personal Data
+          </h4>
           <p>
-            Your information is used strictly to provide you with subscription
-            tracking, renewal date calculations, automated reminder
-            notifications, and currency normalization calculations. We do not
-            sell, rent, or monetize user data with third-party advertisers.
+            While using Our Service, We may ask You to provide Us with certain
+            personally identifiable information that can be used to contact or
+            identify You. This includes:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Email address</li>
+            <li>First name and last name</li>
+            <li>Account password (stored in encrypted/hashed form)</li>
+            <li>
+              Subscription Data You choose to enter (service names, amounts,
+              billing cycles, renewal dates)
+            </li>
+            <li>
+              If You sign up or log in using Google Sign-In, the basic profile
+              information Google provides to Us (such as Your name, email
+              address, and profile picture), in accordance with Google&apos;s
+              own privacy policy and the permissions You grant at the time of
+              sign-in.
+            </li>
+          </ul>
+          <h4 className="font-display text-sm font-semibold text-ink">
+            Usage Data
+          </h4>
+          <p>
+            Usage Data is collected automatically when using the Service. This
+            may include information such as Your Device&apos;s IP address,
+            browser type, browser version, the pages of Our Service that You
+            visit, the time and date of Your visit, the time spent on those
+            pages, and other diagnostic data, collected via Google Analytics as
+            described in Section 4 below.
+          </p>
+          <h4 className="font-display text-sm font-semibold text-ink">
+            Information from Third-Party Social Media Services
+          </h4>
+          <p>
+            If You create Your Account using Google Sign-In, We may collect
+            Personal Data already associated with Your Google account, such as
+            Your name and email address, which You permit Google to share with
+            Us at the time of sign-in. You may also have the option of sharing
+            additional information with Us through Google, depending on Your
+            Google account settings.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="font-display text-xl font-semibold text-ink">
-            4. Security
+            3. How We Use Your Personal Data
           </h2>
           <p>
-            We implement industry-standard encryption protocols (HTTPS/TLS) and
-            secure database storage. Passwords are cryptographically hashed
-            using bcrypt.
+            The Company may use Personal Data for the following purposes:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>
+              <strong>To create and manage Your Account:</strong> to recognise
+              You as a registered user and provide You access to the Service.
+            </li>
+            <li>
+              <strong>To provide the core functionality of the Service:</strong>{" "}
+              to store Your Subscription Data and send You email reminders ahead
+              of subscription renewal dates You have entered.
+            </li>
+            <li>
+              <strong>To contact You:</strong> to email You regarding updates,
+              security notices, or necessary communications related to the
+              Service&apos;s functionality, including the reminder emails
+              described above.
+            </li>
+            <li>
+              <strong>To manage Your requests:</strong> to attend to and manage
+              Your requests, including account deletion or data export requests,
+              to Us.
+            </li>
+            <li>
+              <strong>For business transfers:</strong> We may use Your
+              information to evaluate or conduct a merger, divestiture,
+              restructuring, reorganisation, dissolution, or other sale or
+              transfer of some or all of Our assets.
+            </li>
+            <li>
+              <strong>For other business purposes:</strong> such as data
+              analysis, identifying usage trends, and improving the Service, its
+              features, and user experience.
+            </li>
+          </ul>
+          <p>
+            We do not sell Your Personal Data. We do not use Your Subscription
+            Data for advertising or marketing purposes, and We do not share Your
+            Subscription Data with third parties except as described in this
+            Policy to operate the Service itself (see Section 4).
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="font-display text-xl font-semibold text-ink">
-            5. Contact
+            4. Service Providers and Third-Party Data Processing
           </h2>
           <p>
-            If you have questions about our privacy practices, please contact us
-            at{" "}
+            We use the following third-party Service Providers to operate the
+            Service. Each processes certain data on Our behalf as described
+            below:
+          </p>
+          <div className="space-y-2">
+            <h3 className="font-display text-base font-semibold text-ink">
+              Cloudflare (Hosting and Database)
+            </h3>
+            <p>
+              Our Service, including Our database, is hosted using
+              Cloudflare&apos;s infrastructure. Account information and
+              Subscription Data are stored on Cloudflare&apos;s servers. You can
+              review Cloudflare&apos;s privacy practices at{" "}
+              <a
+                href="https://www.cloudflare.com/privacypolicy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ledger hover:underline"
+              >
+                https://www.cloudflare.com/privacypolicy/
+              </a>
+              .
+            </p>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-display text-base font-semibold text-ink">
+              Resend (Transactional Email)
+            </h3>
+            <p>
+              We use Resend to send transactional emails, including
+              account-related emails and subscription renewal reminder emails.
+              Your email address, and the content needed to generate a reminder
+              (such as the subscription name and renewal date), is shared with
+              Resend solely to deliver these emails. You can review Resend&apos;s
+              privacy practices at{" "}
+              <a
+                href="https://resend.com/legal/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ledger hover:underline"
+              >
+                https://resend.com/legal/privacy-policy
+              </a>
+              .
+            </p>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-display text-base font-semibold text-ink">
+              Google Sign-In (Authentication)
+            </h3>
+            <p>
+              If You choose to sign in using Google, Google acts as a Service
+              Provider for authentication purposes. We receive limited profile
+              information from Google as described in Section 2. You can review
+              Google&apos;s privacy practices at{" "}
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ledger hover:underline"
+              >
+                https://policies.google.com/privacy
+              </a>
+              .
+            </p>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-display text-base font-semibold text-ink">
+              Google Analytics (Analytics)
+            </h3>
+            <p>
+              We use Google Analytics to understand how visitors use Our
+              Service. Google Analytics uses Cookies to collect Usage Data. You
+              can learn about Google&apos;s privacy practices at{" "}
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ledger hover:underline"
+              >
+                https://policies.google.com/privacy
+              </a>
+              , and You can opt out of Google Analytics tracking using the
+              Google Analytics opt-out browser add-on, available at{" "}
+              <a
+                href="https://tools.google.com/dlpage/gaoptout"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ledger hover:underline"
+              >
+                https://tools.google.com/dlpage/gaoptout
+              </a>
+              .
+            </p>
+          </div>
+          <p>
+            These Service Providers have access to Your Personal Data only to
+            perform specific tasks on Our behalf and are obligated not to
+            disclose or use it for any other purpose.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            5. Cookies
+          </h2>
+          <p>We use Cookies for the following purposes:</p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>
+              <strong>Necessary/Essential Cookies:</strong> used to keep You
+              logged in and maintain Your session while using the Service. The
+              Service cannot function properly without these.
+            </li>
+            <li>
+              <strong>Analytics Cookies:</strong> set by Google Analytics to
+              collect information about how You use the Service, as described in
+              Section 4.
+            </li>
+          </ul>
+          <p>
+            We do not use advertising or marketing Cookies. You can instruct
+            Your browser to refuse all Cookies or to indicate when a Cookie is
+            being sent; however, if You do not accept Cookies, You may not be
+            able to use the login/session features of Our Service properly.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            6. Retention of Your Personal Data
+          </h2>
+          <p>
+            The Company will retain Your Personal Data and Subscription Data
+            only for as long as is necessary for the purposes set out in this
+            Privacy Policy, which is for as long as Your Account remains active.
+          </p>
+          <p>
+            If You delete Your Account, We will delete or anonymise Your
+            Personal Data and Subscription Data within a reasonable period,
+            except where We are required to retain certain data to comply with
+            legal obligations, resolve disputes, or enforce Our agreements.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            7. Deletion of Your Personal Data
+          </h2>
+          <p>
+            You have the right to delete or request that We assist in deleting
+            the Personal Data and Subscription Data that We have collected about
+            You.
+          </p>
+          <p>
+            You may delete, update, or correct Your Subscription Data and
+            account information directly within the Service through Your account
+            settings, where such features are available. You may also delete
+            Your Account, or request deletion of Your Personal Data, by
+            contacting Us at{" "}
             <code className="text-xs bg-paper/60 px-1.5 py-0.5 rounded border border-line">
               support@subspens.com
             </code>
             .
           </p>
+          <p>
+            Please note that We may need to retain certain information where We
+            have a legal obligation or lawful basis to do so.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            8. Disclosure of Your Personal Data
+          </h2>
+          <h3 className="font-display text-base font-semibold text-ink">
+            Business Transactions
+          </h3>
+          <p>
+            If the Company is involved in a merger, acquisition or asset sale,
+            Your Personal Data may be transferred. We will provide notice before
+            Your Personal Data is transferred and becomes subject to a different
+            Privacy Policy.
+          </p>
+          <h3 className="font-display text-base font-semibold text-ink">
+            Law Enforcement
+          </h3>
+          <p>
+            Under certain circumstances, the Company may be required to disclose
+            Your Personal Data if required to do so by law or in response to
+            valid requests by public authorities.
+          </p>
+          <h3 className="font-display text-base font-semibold text-ink">
+            Other Legal Requirements
+          </h3>
+          <p>
+            The Company may disclose Your Personal Data in the good faith belief
+            that such action is necessary to:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Comply with a legal obligation</li>
+            <li>Protect and defend the rights or property of the Company</li>
+            <li>
+              Prevent or investigate possible wrongdoing in connection with the
+              Service
+            </li>
+            <li>
+              Protect the personal safety of Users of the Service or the public
+            </li>
+            <li>Protect against legal liability</li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            9. Security of Your Personal Data
+          </h2>
+          <p>
+            The security of Your Personal Data is important to Us. We use
+            commercially reasonable measures, including encrypted password
+            storage, to protect Your Personal Data. However, no method of
+            transmission over the Internet or method of electronic storage is
+            100% secure, and We cannot guarantee its absolute security.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            10. Children&apos;s Privacy
+          </h2>
+          <p>
+            Our Service does not address anyone under the age of 18. We do not
+            knowingly collect personally identifiable information from anyone
+            under the age of 18. If You are a parent or guardian and You are
+            aware that Your child has provided Us with Personal Data, please
+            contact Us. If We become aware that We have collected Personal Data
+            from anyone under the age of 18 without verification of parental
+            consent, We take steps to remove that information from Our servers.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            11. Your Data Protection Rights
+          </h2>
+          <p>
+            Depending on Your location, You may have the following rights
+            regarding Your Personal Data:
+          </p>
+          <h3 className="font-display text-base font-semibold text-ink">
+            For European Union (EU/EEA) and United Kingdom Users (GDPR)
+          </h3>
+          <p>
+            If You are located in the EU/EEA or UK, You have the right to:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Access the Personal Data We hold about You</li>
+            <li>Request correction of inaccurate Personal Data</li>
+            <li>
+              Request erasure of Your Personal Data (&ldquo;right to be
+              forgotten&rdquo;)
+            </li>
+            <li>Request restriction of processing of Your Personal Data</li>
+            <li>Request portability of Your Personal Data</li>
+            <li>Object to Our processing of Your Personal Data</li>
+            <li>
+              Withdraw consent at any time, where processing is based on consent
+            </li>
+            <li>
+              Lodge a complaint with a supervisory authority in Your country of
+              residence
+            </li>
+          </ul>
+          <p>
+            Our lawful basis for processing Your Personal Data is primarily: (i)
+            performance of a contract (providing You the Service You signed up
+            for), and (ii) Our legitimate interests in operating and improving
+            the Service. Where We rely on consent (such as for analytics
+            Cookies), You may withdraw that consent at any time.
+          </p>
+          <h3 className="font-display text-base font-semibold text-ink">
+            For California Residents (CCPA)
+          </h3>
+          <p>
+            If You are a California resident, You have the right to know what
+            Personal Information We collect, to request deletion of Your
+            Personal Information, and to not be discriminated against for
+            exercising these rights. As stated above, We do not sell Your
+            Personal Data.
+          </p>
+          <h3 className="font-display text-base font-semibold text-ink">
+            For Users in Other Jurisdictions
+          </h3>
+          <p>
+            If You reside outside the EU/EEA, UK, or California, You may still
+            contact Us to request access to, correction of, or deletion of Your
+            Personal Data, and We will respond in accordance with applicable
+            law.
+          </p>
+          <p>
+            To exercise any of these rights, contact Us at{" "}
+            <code className="text-xs bg-paper/60 px-1.5 py-0.5 rounded border border-line">
+              support@subspens.com
+            </code>
+            .
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            12. International Data Transfers
+          </h2>
+          <p>
+            The Company is based in Maharashtra, India. If You access the
+            Service from outside India, Your information, including Personal
+            Data and Subscription Data, may be transferred to, stored, and
+            processed in India or in other countries where Our Service Providers
+            (including Cloudflare and Resend) operate or maintain servers, which
+            may have data protection laws different from those of Your
+            jurisdiction.
+          </p>
+          <p>
+            By using the Service, You consent to this transfer, storage, and
+            processing of Your information. We take reasonable steps to ensure
+            Your data is treated securely and in accordance with this Privacy
+            Policy wherever it is processed.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            13. Links to Other Websites
+          </h2>
+          <p>
+            Our Service may contain links to other websites that are not
+            operated by Us. If You click on a third-party link, You will be
+            directed to that third party&apos;s site. We strongly advise You to
+            review the Privacy Policy of every site You visit. We have no
+            control over and assume no responsibility for the content, privacy
+            policies or practices of any third-party sites or services.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            14. Changes to This Privacy Policy
+          </h2>
+          <p>
+            We may update Our Privacy Policy from time to time. We will notify
+            You of any material changes by posting the new Privacy Policy on
+            this page and updating the &ldquo;Last updated&rdquo; date at the
+            top. You are advised to review this Privacy Policy periodically for
+            any changes.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            15. Contact Us
+          </h2>
+          <p>
+            If you have any questions about this Privacy Policy, You can contact
+            us:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>
+              By email:{" "}
+              <code className="text-xs bg-paper/60 px-1.5 py-0.5 rounded border border-line">
+                support@subspens.com
+              </code>
+            </li>
+          </ul>
         </section>
       </div>
     </main>
