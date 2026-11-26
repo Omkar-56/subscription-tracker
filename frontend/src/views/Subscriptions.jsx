@@ -9,6 +9,7 @@ import ReceiptParserModal from "../components/ReceiptParserModal";
 import PaymentConfirmModal from "../components/PaymentConfirmModal";
 import PaymentHistoryModal from "../components/PaymentHistoryModal";
 import CancellationGuideModal from "../components/CancellationGuideModal";
+import RadialFillButton from "../components/RadialFillButton";
 import { formatMoney, addCycleToDate, formatDateIso } from "../utils/date";
 import { getGuestSubs, saveGuestSubs } from "../utils/guestSubs";
 import {
@@ -548,15 +549,17 @@ export default function Subscriptions() {
           <h1 className="font-display text-2xl font-semibold text-ink">
             Subscriptions
           </h1>
-          <p className="mt-1 text-sm text-ink/60">
+          <p className="mt-1 text-sm text-ink/80">
             Everything you&apos;re paying for or trialing, in one searchable
             ledger.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <button
+          <RadialFillButton
             onClick={() => setShowReceiptParser(true)}
-            className="flex items-center gap-2 rounded-xl squircle border border-line bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-2xs hover:bg-stone-50 transition-colors cursor-pointer"
+            fillClassName="bg-ledger-light"
+            contentClassName="gap-2"
+            className="rounded-xl squircle border border-line bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-2xs transition-colors duration-300 hover:border-ledger/40 hover:text-ledger-dark cursor-pointer active:scale-[0.98]"
             title="Upload invoice, document, screenshot, or paste text to auto-create subscriptions with Gemini"
           >
             <svg
@@ -573,14 +576,15 @@ export default function Subscriptions() {
               />
             </svg>
             <span>Upload Receipt</span>
-          </button>
+          </RadialFillButton>
           {subscriptions.length > 0 && (
-            <button
+            <RadialFillButton
               onClick={() => setShowForm(true)}
-              className="rounded-xl squircle bg-ledger px-4 py-2 text-sm font-medium text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
+              fillClassName="bg-ledger-dark"
+              className="rounded-xl squircle bg-ledger px-4 py-2 text-sm font-medium text-white shadow-2xs cursor-pointer active:scale-[0.98]"
             >
               + Add subscription
-            </button>
+            </RadialFillButton>
           )}
         </div>
       </div>
@@ -617,7 +621,7 @@ export default function Subscriptions() {
                       className={`relative flex items-center gap-1.5 rounded-lg squircle px-3 py-1.5 transition-colors duration-300 cursor-pointer whitespace-nowrap ${
                         statusFilter === tab.id
                           ? "text-ledger-dark font-semibold"
-                          : "text-ink/60 hover:text-ink"
+                          : "text-ink/80 hover:text-ink"
                       }`}
                     >
                       <span>{tab.label}</span>
@@ -627,7 +631,7 @@ export default function Subscriptions() {
                             ? tab.id === "trials"
                               ? "bg-amber text-white"
                               : "bg-ledger text-white"
-                            : "bg-line/60 text-ink/50"
+                            : "bg-line/60 text-ink/75"
                         }`}
                       >
                         {tab.count}
@@ -646,10 +650,10 @@ export default function Subscriptions() {
               placeholder="Search by name, category, notes…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl squircle border border-line bg-line/15 hover:bg-line/25 px-3 py-1.5 pl-8 text-xs text-ink outline-none transition-all placeholder:text-ink/40 focus:border-line focus:bg-line/60 focus:outline-none focus:ring-0"
+              className="w-full rounded-xl squircle border border-line bg-line/15 hover:bg-line/25 px-3 py-1.5 pl-8 text-xs text-ink outline-none transition-all placeholder:text-ink/65 focus:border-line focus:bg-line/60 focus:outline-none focus:ring-0"
             />
             <svg
-              className="absolute left-2.5 top-2 h-3.5 w-3.5 text-ink/40"
+              className="absolute left-2.5 top-2 h-3.5 w-3.5 text-ink/65"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -684,7 +688,7 @@ export default function Subscriptions() {
                 className={`flex items-center gap-2 rounded-xl squircle border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
                   filterPanelOpen || activeFilterCount > 0
                     ? "border-ledger bg-ledger/5 text-ledger"
-                    : "border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink"
+                    : "border-line bg-paper/30 text-ink/80 hover:border-ink/30 hover:text-ink"
                 }`}
               >
                 <svg
@@ -902,7 +906,7 @@ export default function Subscriptions() {
                 className={`flex items-center gap-2 rounded-xl squircle border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
                   sortOpen || sortBy !== "default"
                     ? "border-ledger bg-ledger/5 text-ledger"
-                    : "border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink"
+                    : "border-line bg-paper/30 text-ink/80 hover:border-ink/30 hover:text-ink"
                 }`}
               >
                 <svg
@@ -992,7 +996,7 @@ export default function Subscriptions() {
                 className={`flex items-center justify-center h-6 w-6 rounded-full border text-[11px] font-bold transition-all cursor-pointer ${
                   legendOpen
                     ? "border-ledger bg-ledger/10 text-ledger"
-                    : "border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink"
+                    : "border-line bg-paper/30 text-ink/80 hover:border-ink/30 hover:text-ink"
                 }`}
                 title="Category color legend"
                 aria-label="Category color legend"
@@ -1098,7 +1102,7 @@ export default function Subscriptions() {
 
           {/* Summary + reset */}
           <div className="flex items-center gap-3 text-xs">
-            <span className="text-ink/60">
+            <span className="text-ink/80">
               Showing{" "}
               <strong className="text-ink">
                 {filteredSubscriptions.length}
@@ -1126,28 +1130,31 @@ export default function Subscriptions() {
         {filteredSubscriptions.length === 0 && (
           <div className="py-14 text-center flex flex-col items-center justify-center">
             {subscriptions.length === 0 && (
-              <button
+              <RadialFillButton
                 onClick={() => setShowForm(true)}
-                className="mb-4 inline-flex items-center gap-2 rounded-xl squircle bg-ledger px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-ledger-dark transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                fillClassName="bg-ledger-dark"
+                contentClassName="gap-2"
+                className="mb-4 rounded-xl squircle bg-ledger px-5 py-2.5 text-sm font-medium text-white shadow-sm cursor-pointer active:scale-[0.98]"
               >
                 + Add subscription
-              </button>
+              </RadialFillButton>
             )}
-            <p className="text-sm font-medium text-ink/70">
+            <p className="text-sm font-medium text-ink/85">
               No subscriptions found
             </p>
-            <p className="mt-1 text-xs text-ink/40">
+            <p className="mt-1 text-xs text-ink/70">
               {hasActiveFilters
                 ? "Try tweaking or resetting your search and filter criteria."
                 : "Add your first subscription or free trial to get started."}
             </p>
             {hasActiveFilters && (
-              <button
+              <RadialFillButton
                 onClick={resetFilters}
-                className="mt-3 rounded-xl squircle border border-line bg-paper px-3 py-1.5 text-xs text-ink hover:bg-line/40 transition-colors cursor-pointer"
+                fillClassName="bg-ledger-light"
+                className="mt-3 rounded-xl squircle border border-line bg-paper px-3 py-1.5 text-xs text-ink transition-colors duration-300 hover:border-ledger/40 hover:text-ledger-dark cursor-pointer"
               >
                 Clear all filters
-              </button>
+              </RadialFillButton>
             )}
           </div>
         )}

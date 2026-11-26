@@ -251,7 +251,7 @@ export default function Dashboard() {
                     Live Sentinel
                   </span>
                 </div>
-                <p className="text-xs text-ink/75">
+                <p className="text-xs text-ink/85">
                   Cancellation deadlines detected. Cancel before the deadline to avoid auto-converting to full-price recurring charges.
                 </p>
               </div>
@@ -278,7 +278,7 @@ export default function Dashboard() {
                   className="flex items-center justify-between rounded-xl squircle bg-white/90 border border-amber/30 p-3 shadow-2xs hover:bg-white transition-colors gap-3"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <BrandLogo name={t.name} category={t.category} size="sm" />
+                    <BrandLogo name={t.name} category={t.category} size="md" bare />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className="font-semibold text-xs text-ink truncate">{t.name ? t.name.charAt(0).toUpperCase() + t.name.slice(1) : ''}</p>
@@ -290,10 +290,10 @@ export default function Dashboard() {
                           {days <= 0 ? 'Cutoff TODAY!' : `${days}d left`}
                         </span>
                       </div>
-                      <p className="text-[11px] text-ink/65 mt-0.5">
+                      <p className="text-[11px] text-ink/80 mt-0.5">
                         Cancel cutoff: <strong>{formatDate(deadline)}</strong>
                       </p>
-                      <p className="text-[10px] text-ink/65 mt-0.2">
+                      <p className="text-[10px] text-ink/80 mt-0.2">
                         Post-trial: {formatMoney(t.postTrialAmount || t.amount, t.postTrialCurrency || t.currency)}/{t.billingCycle}
                       </p>
                     </div>
@@ -333,7 +333,7 @@ export default function Dashboard() {
                 <h3 className="font-display text-sm font-semibold text-ink">
                   {pendingReminders.length} Renewal Reminder{pendingReminders.length === 1 ? '' : 's'} Due
                 </h3>
-                <p className="text-xs text-ink/70">
+                <p className="text-xs text-ink/80">
                   Payments due shortly. Confirm once charged to advance cycles and log payment history.
                 </p>
               </div>
@@ -371,7 +371,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-baseline justify-between">
               <h1 className="font-display text-xl sm:text-2xl font-semibold">Overview</h1>
-              <span className="text-xs text-ink/70">
+              <span className="text-xs text-ink/80">
                 Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong>
               </span>
             </div>
@@ -407,7 +407,7 @@ export default function Dashboard() {
         <section className="lg:col-span-6 pt-1 sm:pt-1.5">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-lg sm:text-xl font-semibold">Spend by category</h2>
-            <span className="text-xs text-ink/70">
+            <span className="text-xs text-ink/80">
               {summary.categoryBreakdown.length} {summary.categoryBreakdown.length === 1 ? 'category' : 'categories'}
             </span>
           </div>
@@ -428,12 +428,12 @@ export default function Dashboard() {
         <section className="lg:col-span-6">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-lg sm:text-xl font-semibold">12-month forecast</h2>
-            <span className="text-xs text-ink/70">Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong></span>
+            <span className="text-xs text-ink/80">Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong></span>
           </div>
           {forecast ? (
             <ForecastChart months={forecast.months || forecast.forecast} currency={baseCurrency} />
           ) : (
-            <div className="mt-3 rounded-2xl squircle border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
+            <div className="mt-3 rounded-2xl squircle border border-line bg-paper p-8 text-center text-sm text-ink/80 shadow-2xs">
               Add subscriptions to see your projected 12-month spend.
             </div>
           )}
@@ -449,7 +449,7 @@ export default function Dashboard() {
           </div>
           <div className="mt-3 overflow-hidden rounded-2xl squircle border border-line bg-paper shadow-2xs">
             {summary.upcomingRenewals.length === 0 && (
-              <p className="px-4 py-8 text-center text-sm text-ink/70">Nothing renewing in the next two weeks.</p>
+              <p className="px-4 py-8 text-center text-sm text-ink/80">Nothing renewing in the next two weeks.</p>
             )}
             {summary.upcomingRenewals.map((s) => {
               const isDifferentCurrency = s.currency !== baseCurrency && s.convertedAmount;
@@ -460,10 +460,10 @@ export default function Dashboard() {
                   className="flex items-center justify-between border-b border-line px-4 py-3 last:border-b-0 hover:bg-paper/30 transition-colors gap-3"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <BrandLogo name={s.name} category={s.category} size="sm" />
+                    <BrandLogo name={s.name} category={s.category} size="md" bare />
                     <div className="min-w-0">
                       <p className="font-medium text-xs sm:text-sm truncate">{s.name ? s.name.charAt(0).toUpperCase() + s.name.slice(1) : ''}</p>
-                      <p className="text-[11px] sm:text-xs text-ink/70">
+                      <p className="text-[11px] sm:text-xs text-ink/80">
                         {formatDate(s.nextRenewalDate)} · in {days}d
                       </p>
                     </div>
@@ -474,7 +474,7 @@ export default function Dashboard() {
                         {formatMoney(s.amount, s.currency)}
                       </p>
                       {isDifferentCurrency && (
-                        <p className="tabular text-[10px] sm:text-[11px] text-ink/65">
+                        <p className="tabular text-[10px] sm:text-[11px] text-ink/75">
                           ≈ {formatMoney(s.convertedAmount, baseCurrency)}
                         </p>
                       )}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import BrandLogo from './BrandLogo';
+import RadialFillButton from './RadialFillButton';
 import { VALID_CATEGORIES, formatCategoryLabel, normalizeCategory } from '../utils/brands';
 
 const CATEGORIES = VALID_CATEGORIES;
@@ -131,12 +132,20 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           {/* Mode Switcher: Regular Paid Subscription vs Free Trial Sentinel */}
-          <div className="flex rounded-xl squircle bg-stone-100 p-1 text-xs font-semibold">
+          <div className="relative flex rounded-xl squircle border border-line/60 bg-stone-100 p-1 text-xs font-semibold">
+            {/* Sliding pill indicator */}
+            <div
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg squircle shadow-2xs transition-[transform,background-color] duration-300 ease-in-out ${
+                form.isFreeTrial
+                  ? 'translate-x-[calc(100%+8px)] bg-amber-light'
+                  : 'translate-x-0 bg-white'
+              }`}
+            />
             <button
               type="button"
               onClick={() => update('isFreeTrial', false)}
-              className={`flex-1 rounded-lg squircle py-1.5 transition-all cursor-pointer ${
-                !form.isFreeTrial ? 'bg-white text-ink shadow-2xs' : 'text-ink/50 hover:text-ink'
+              className={`relative z-10 flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
+                !form.isFreeTrial ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
               }`}
             >
               Paid Subscription
@@ -147,8 +156,8 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                 update('isFreeTrial', true);
                 if (form.amount === '') update('amount', 0);
               }}
-              className={`flex-1 rounded-lg squircle py-1.5 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                form.isFreeTrial ? 'bg-amber-light text-amber shadow-2xs' : 'text-ink/50 hover:text-ink'
+              className={`relative z-10 flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer flex items-center justify-center gap-1.5 ${
+                form.isFreeTrial ? 'text-amber font-semibold' : 'text-ink/50 hover:text-ink'
               }`}
             >
               <span>🛡️</span>
@@ -345,20 +354,21 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
 
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-line">
-            <button
-              type="button"
+            <RadialFillButton
               onClick={onCancel}
-              className="rounded-xl squircle border border-line px-4 py-2 text-sm text-ink/70 hover:text-ink hover:bg-stone-50 transition-colors cursor-pointer"
+              fillClassName="bg-ledger-light"
+              className="rounded-xl squircle border border-line px-4 py-2 text-sm text-ink/70 transition-colors duration-300 hover:border-ledger/40 hover:text-ledger-dark cursor-pointer"
             >
               Cancel
-            </button>
-            <button
+            </RadialFillButton>
+            <RadialFillButton
               type="submit"
               disabled={submitting}
-              className="rounded-xl squircle bg-ledger px-5 py-2 text-sm font-semibold text-white hover:bg-ledger-dark disabled:opacity-60 transition-colors shadow-2xs cursor-pointer"
+              fillClassName="bg-ledger-dark"
+              className="rounded-xl squircle bg-ledger px-5 py-2 text-sm font-semibold text-white disabled:opacity-60 shadow-2xs cursor-pointer"
             >
               {submitting ? 'Saving…' : form.isFreeTrial ? '🛡️ Save Sentinel' : initial ? 'Save Changes' : 'Add Subscription'}
-            </button>
+            </RadialFillButton>
           </div>
         </form>
       </div>

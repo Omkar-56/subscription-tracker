@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import ReminderBell from "./ReminderBell";
 import PaymentConfirmModal from "./PaymentConfirmModal";
 import CancellationGuideModal from "./CancellationGuideModal";
+import RadialFillButton from "./RadialFillButton";
 import { api } from "../api/client";
 
 const CURRENCIES = [
@@ -361,13 +362,13 @@ export default function Navbar() {
                 >
                   Log In
                 </button>
-                <button
-                  type="button"
+                <RadialFillButton
                   onClick={openRegister}
-                  className="rounded-xl squircle bg-ledger px-4 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
+                  fillClassName="bg-ledger-dark"
+                  className="rounded-xl squircle bg-ledger px-4 py-2 text-xs font-semibold text-white shadow-2xs cursor-pointer"
                 >
                   Sign Up
-                </button>
+                </RadialFillButton>
               </div>
             )}
           </div>
@@ -525,26 +526,26 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <button
-                    type="button"
+                  <RadialFillButton
                     onClick={() => {
                       openLogin();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full rounded-xl squircle border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-ink hover:border-ink/30 transition-colors cursor-pointer"
+                    fillClassName="bg-ledger-light"
+                    className="w-full rounded-xl squircle border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 transition-colors duration-300 hover:text-ledger-dark hover:border-ledger/40 cursor-pointer"
                   >
                     Log In
-                  </button>
-                  <button
-                    type="button"
+                  </RadialFillButton>
+                  <RadialFillButton
                     onClick={() => {
                       openRegister();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full rounded-xl squircle bg-ledger px-4 py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
+                    fillClassName="bg-ledger-dark"
+                    className="w-full rounded-xl squircle bg-ledger px-4 py-2.5 text-sm font-semibold text-white shadow-2xs cursor-pointer"
                   >
                     Sign Up
-                  </button>
+                  </RadialFillButton>
                 </>
               )}
             </div>

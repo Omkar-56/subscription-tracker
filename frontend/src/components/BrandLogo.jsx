@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { getBrandLogoUrl, getInitials, getCategoryStyle } from '../utils/brands';
 
-export default function BrandLogo({ name = '', category = 'other', size = 'md' }) {
+export default function BrandLogo({ name = '', category = 'other', size = 'md', bare = false }) {
   const [imgError, setImgError] = useState(false);
   const logoUrl = getBrandLogoUrl(name);
   const initials = getInitials(name);
@@ -21,7 +21,31 @@ export default function BrandLogo({ name = '', category = 'other', size = 'md' }
     lg: 'w-6 h-6',
   }[size] || 'w-5 h-5';
 
+  const bareSizes = {
+    sm: 'w-6 h-6',
+    md: 'w-7 h-7',
+    lg: 'w-9 h-9',
+  }[size] || 'w-7 h-7';
+
+  const bareFallbackSizes = {
+    sm: 'w-6 h-6 text-[11px] rounded-lg squircle',
+    md: 'w-7 h-7 text-xs rounded-lg squircle',
+    lg: 'w-9 h-9 text-sm rounded-xl squircle',
+  }[size] || 'w-7 h-7 text-xs rounded-lg squircle';
+
   if (logoUrl && !imgError) {
+    if (bare) {
+      return (
+        <img
+          src={logoUrl}
+          alt={`${name} logo`}
+          className={`${bareSizes} object-contain shrink-0 rounded-md`}
+          onError={() => setImgError(true)}
+          loading="lazy"
+        />
+      );
+    }
+
     return (
       <div
         className={`${sizeClasses} bg-white border border-line/70 flex items-center justify-center p-1.5 shadow-2xs shrink-0 overflow-hidden`}
@@ -39,7 +63,7 @@ export default function BrandLogo({ name = '', category = 'other', size = 'md' }
 
   return (
     <div
-      className={`${sizeClasses} ${categoryStyle.bg} border flex items-center justify-center font-display font-semibold tracking-tight shrink-0 select-none`}
+      className={`${bare ? bareFallbackSizes : sizeClasses} ${categoryStyle.bg} border flex items-center justify-center font-display font-semibold tracking-tight shrink-0 select-none`}
       title={`${name} (${category})`}
     >
       {initials}

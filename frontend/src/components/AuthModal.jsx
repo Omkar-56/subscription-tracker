@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import GoogleSignInButton from './GoogleSignInButton';
 import AuthBlobCompanion from './AuthBlobCompanion';
+import RadialFillButton from './RadialFillButton';
 
 export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
   const [mode, setMode] = useState(initialMode); // 'login' | 'register' | 'forgot'
@@ -73,10 +74,10 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
 
   function handleAuthSuccess() {
     onClose();
-    // Only navigate to dashboard if currently on the landing page '/'
+    // Only navigate to subscriptions if currently on the landing page '/'
     // If on /subscriptions, /dashboard, etc., stay on current page so the user continues their workflow
     if (pathname === '/') {
-      router.push('/dashboard');
+      router.push('/subscriptions');
     }
   }
 
@@ -359,15 +360,16 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
 
                 {error && <p className="text-xs text-rust font-medium">{error}</p>}
 
-                <button
+                <RadialFillButton
                   type="submit"
                   disabled={submitting}
                   onMouseEnter={() => setHoverTarget('submit')}
                   onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
-                  className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
+                  fillClassName="bg-ledger-dark"
+                  className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
                 >
                   {submitting ? 'Signing in…' : 'Sign in'}
-                </button>
+                </RadialFillButton>
               </form>
             ) : mode === 'register' ? (
               <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
@@ -419,15 +421,16 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
 
                 {error && <p className="text-xs text-rust font-medium">{error}</p>}
 
-                <button
+                <RadialFillButton
                   type="submit"
                   disabled={submitting}
                   onMouseEnter={() => setHoverTarget('submit')}
                   onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
-                  className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
+                  fillClassName="bg-ledger-dark"
+                  className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
                 >
                   {submitting ? 'Creating account…' : 'Create account'}
-                </button>
+                </RadialFillButton>
               </form>
             ) : (
               /* Forgot Password Mode */
@@ -448,13 +451,13 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
                     <p className="text-[11px] text-ink/45">
                       Didn't receive an email? Check your spam folder or try again in a few minutes.
                     </p>
-                    <button
-                      type="button"
+                    <RadialFillButton
                       onClick={() => switchMode('login')}
-                      className="w-full rounded-xl squircle bg-stone-100 py-2.5 text-xs font-semibold text-ink hover:bg-stone-200 transition-colors cursor-pointer"
+                      fillClassName="bg-ledger-light"
+                      className="w-full rounded-xl squircle bg-stone-100 py-2.5 text-xs font-semibold text-ink transition-colors duration-300 hover:text-ledger-dark cursor-pointer"
                     >
                       Return to Log In
-                    </button>
+                    </RadialFillButton>
                   </div>
                 ) : (
                   <form onSubmit={handleForgotSubmit} className="space-y-3.5">
@@ -474,15 +477,16 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
 
                     {error && <p className="text-xs text-rust font-medium">{error}</p>}
 
-                    <button
+                    <RadialFillButton
                       type="submit"
                       disabled={submitting}
                       onMouseEnter={() => setHoverTarget('submit')}
                       onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
-                      className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark disabled:opacity-60 transition-colors cursor-pointer"
+                      fillClassName="bg-ledger-dark"
+                      className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
                     >
                       {submitting ? 'Sending link…' : 'Send reset link'}
-                    </button>
+                    </RadialFillButton>
                   </form>
                 )}
               </div>

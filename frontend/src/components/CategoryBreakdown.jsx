@@ -11,7 +11,7 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
   if (!categories || categories.length === 0) {
     return (
       <div className="rounded-2xl squircle border border-line bg-paper p-8 text-center shadow-2xs">
-        <p className="text-sm text-ink/70">
+        <p className="text-sm text-ink/80">
           Add subscriptions to see your spend distributed by category.
         </p>
       </div>
@@ -71,7 +71,7 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
             {activeCategory ? (
               <div className="px-2">
-                <p className="text-[11px] font-medium text-ink/60 truncate max-w-[110px]">
+                <p className="text-[11px] font-medium text-ink/80 truncate max-w-[110px]">
                   {formatCategoryLabel(activeCategory.category)}
                 </p>
                 <p className="font-display text-sm font-bold text-ink">
@@ -83,11 +83,11 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
               </div>
             ) : (
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-ink/40 font-medium">Monthly</p>
+                <p className="text-[10px] uppercase tracking-wider text-ink/70 font-medium">Monthly</p>
                 <p className="font-display text-sm font-bold text-ink">
                   {formatMoney(totalMonthly, currency)}
                 </p>
-                <p className="text-[10px] text-ink/40">total</p>
+                <p className="text-[10px] text-ink/70">total</p>
               </div>
             )}
           </div>
@@ -95,7 +95,7 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
 
         {/* Legend / Hover Hint */}
         <div className="mt-2 text-center">
-          <span className="text-[11px] text-ink/40 italic">
+          <span className="text-[11px] text-ink/70 italic">
             {activeCategory ? `${activeCategory.count} active subscription${activeCategory.count > 1 ? 's' : ''}` : 'Hover or tap chart slice for details'}
           </span>
         </div>
@@ -124,16 +124,16 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
                   <span className="font-medium text-ink truncate capitalize">
                     {formatCategoryLabel(item.category)}
                   </span>
-                  <span className="text-[10px] text-ink/40 font-mono">
+                  <span className="text-[10px] text-ink/75 font-mono">
                     ({item.count})
                   </span>
                 </div>
                 <div className="flex items-center gap-2 tabular font-mono">
                   <span className="text-ink font-semibold">
                     {formatMoney(item.monthlySpend, currency)}
-                    <span className="text-[10px] font-sans text-ink/40">/mo</span>
+                    <span className="text-[10px] font-sans text-ink/75">/mo</span>
                   </span>
-                  <span className="text-[10px] text-ink/40 w-10 text-right">
+                  <span className="text-[10px] text-ink/75 w-10 text-right">
                     {item.percentage}%
                   </span>
                 </div>

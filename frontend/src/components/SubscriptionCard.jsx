@@ -71,7 +71,7 @@ export default function SubscriptionCard({
     >
       {/* Left section: BrandLogo + Info */}
       <div className="flex min-w-0 items-center gap-3 sm:gap-3.5 flex-1">
-        <BrandLogo name={displayName || subscription.name} category={subscription.category} size="md" />
+        <BrandLogo name={displayName || subscription.name} category={subscription.category} size="md" bare />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -120,14 +120,14 @@ export default function SubscriptionCard({
             )}
           </div>
 
-          <p className="mt-1 sm:mt-0.5 text-xs text-ink/60">
+          <p className="mt-1 sm:mt-0.5 text-xs text-ink/80">
             {isTrial ? (
               <>
                 <span>
                   Trial ends {formatDate(subscription.trialEndDate || subscription.nextRenewalDate)}
                 </span>
                 {subscription.postTrialAmount && (
-                  <span className="ml-2 font-medium text-ink/80">
+                  <span className="ml-2 font-medium text-ink/90">
                     • Then {formatMoney(subscription.postTrialAmount, subscription.postTrialCurrency || subscription.currency)} / {subscription.billingCycle}
                   </span>
                 )}
@@ -138,7 +138,7 @@ export default function SubscriptionCard({
             {subscription.notes && (
               <>
                 <span className="mx-1">•</span>
-                <span className="italic text-ink/50">{subscription.notes}</span>
+                <span className="italic text-ink/75">{subscription.notes}</span>
               </>
             )}
           </p>
@@ -156,7 +156,7 @@ export default function SubscriptionCard({
               ≈ {formatMoney(subscription.convertedAmount, baseCurrency)}
             </p>
           ) : (
-            <p className="text-[11px] text-ink/50 capitalize">per {subscription.billingCycle}</p>
+            <p className="text-[11px] text-ink/75 capitalize">per {subscription.billingCycle}</p>
           )}
         </div>
 
@@ -168,7 +168,7 @@ export default function SubscriptionCard({
               e.stopPropagation();
               setMenuOpen((prev) => !prev);
             }}
-            className={`p-1.5 rounded-lg squircle transition-colors cursor-pointer text-ink/60 hover:text-ink hover:bg-line/40 focus:outline-none ${
+            className={`p-1.5 rounded-lg squircle transition-colors cursor-pointer text-ink/75 hover:text-ink hover:bg-line/40 focus:outline-none ${
               menuOpen ? 'bg-line/50 text-ink' : ''
             }`}
             aria-label="Actions"

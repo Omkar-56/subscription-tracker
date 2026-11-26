@@ -84,7 +84,7 @@ export default function GoogleSignInButton({ text = 'signin_with', onSuccess, on
         if (onSuccessRef.current) {
           onSuccessRef.current();
         } else {
-          router.push('/dashboard');
+          router.push('/subscriptions');
         }
       } catch (err) {
         if (onErrorRef.current) onErrorRef.current(err.message || 'Google sign-in failed');

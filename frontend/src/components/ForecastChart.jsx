@@ -30,7 +30,7 @@ function ForecastTooltip({ active, payload, label, currency = 'INR' }) {
       {charges.length > 0 && (
         <ul className="mt-2 space-y-1 border-t border-line pt-2">
           {charges.map((c, i) => (
-            <li key={`${c.name}-${i}`} className="flex items-center justify-between gap-4 text-xs text-ink/70">
+            <li key={`${c.name}-${i}`} className="flex items-center justify-between gap-4 text-xs text-ink/85">
               <span className="truncate">{c.name}</span>
               <span className="tabular shrink-0 font-medium">
                 {c.nativeCurrency && c.nativeCurrency !== currency ? (
@@ -74,7 +74,7 @@ export default function ForecastChart({ months, currency = 'INR' }) {
 
   if (data.length === 0 || !hasSpend) {
     return (
-      <div className="mt-3 rounded-2xl squircle border border-line bg-paper p-8 text-center text-sm text-ink/70 shadow-2xs">
+      <div className="mt-3 rounded-2xl squircle border border-line bg-paper p-8 text-center text-sm text-ink/80 shadow-2xs">
         Add subscriptions to see your projected 12-month spend.
       </div>
     );
@@ -83,7 +83,7 @@ export default function ForecastChart({ months, currency = 'INR' }) {
   return (
     <div className="mt-3 rounded-2xl squircle border border-line bg-paper px-4 pb-4 pt-5 shadow-2xs">
       <div className="mb-2 flex justify-end">
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-ink/75">
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-ink/85">
           <input
             type="checkbox"
             checked={showCumulative}
@@ -99,12 +99,12 @@ export default function ForecastChart({ months, currency = 'INR' }) {
           <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="shortLabel"
-            tick={{ fontSize: 12, fill: COLORS.axis, opacity: 0.5 }}
+            tick={{ fontSize: 12, fill: COLORS.axis, opacity: 0.75 }}
             tickLine={false}
             axisLine={{ stroke: COLORS.grid }}
           />
           <YAxis
-            tick={{ fontSize: 12, fill: COLORS.axis, opacity: 0.5 }}
+            tick={{ fontSize: 12, fill: COLORS.axis, opacity: 0.75 }}
             tickLine={false}
             axisLine={false}
             width={64}
@@ -136,7 +136,7 @@ export default function ForecastChart({ months, currency = 'INR' }) {
         </LineChart>
       </ResponsiveContainer>
 
-      <p className="mt-2 text-xs text-ink/65">
+      <p className="mt-2 text-xs text-ink/80">
         Hover any month to see exactly which subscriptions fall due in it.
       </p>
     </div>
