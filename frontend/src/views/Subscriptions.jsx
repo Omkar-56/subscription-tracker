@@ -93,6 +93,10 @@ export default function Subscriptions() {
   const [pendingCycle, setPendingCycle] = useState("all");
   const filterPanelRef = useRef(null);
 
+  // Status tab refs for sliding pill measurement
+  const tabRefs = useRef([]);
+  const [pillStyle, setPillStyle] = useState({ left: 2, width: 0 });
+
   // Sort dropdown state
   const [sortOpen, setSortOpen] = useState(false);
   const sortRef = useRef(null);
@@ -100,6 +104,26 @@ export default function Subscriptions() {
   // Category color legend state
   const [legendOpen, setLegendOpen] = useState(false);
   const legendRef = useRef(null);
+
+  // Update sliding pill position whenever statusFilter changes
+  const STATUS_TABS = [
+    { id: "all", label: "All" },
+    { id: "active", label: "Active" },
+    { id: "trials", label: "Trials" },
+    { id: "cancelled", label: "Cancelled" },
+  ];
+  useEffect(() => {
+    const updatePill = () => {
+      const activeIndex = STATUS_TABS.findIndex((t) => t.id === statusFilter);
+      const el = tabRefs.current[activeIndex];
+      if (el) {
+        setPillStyle({ left: el.offsetLeft, width: el.offsetWidth });
+      }
+    };
+    updatePill();
+    const raf = requestAnimationFrame(updatePill);
+    return () => cancelAnimationFrame(raf);
+  }, [statusFilter]);
 
   async function refresh() {
     if (!user) {
@@ -516,6 +540,7 @@ export default function Subscriptions() {
     SORT_OPTIONS.find((o) => o.id === sortBy)?.label ?? "Sort";
 
   return (
+    <>
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -531,7 +556,7 @@ export default function Subscriptions() {
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={() => setShowReceiptParser(true)}
-            className="flex items-center gap-2 rounded-sm border border-line bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-2xs hover:bg-stone-50 transition-colors cursor-pointer"
+            className="flex items-center gap-2 rounded-xl squircle border border-line bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-2xs hover:bg-stone-50 transition-colors cursor-pointer"
             title="Upload invoice, document, screenshot, or paste text to auto-create subscriptions with Gemini"
           >
             <svg
@@ -552,7 +577,7 @@ export default function Subscriptions() {
           {subscriptions.length > 0 && (
             <button
               onClick={() => setShowForm(true)}
-              className="rounded-sm bg-ledger px-4 py-2 text-sm font-medium text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
+              className="rounded-xl squircle bg-ledger px-4 py-2 text-sm font-medium text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
             >
               + Add subscription
             </button>
@@ -562,90 +587,57 @@ export default function Subscriptions() {
 
       {error && <p className="text-sm text-rust">{error}</p>}
 
-      {showReceiptParser && (
-        <ReceiptParserModal
-          isOpen={showReceiptParser}
-          onClose={() => setShowReceiptParser(false)}
-          onParsed={() => refresh()}
-        />
-      )}
-      {showForm && (
-        <SubscriptionForm
-          defaultCurrency={baseCurrency}
-          onSubmit={handleCreate}
-          onCancel={() => setShowForm(false)}
-        />
-      )}
-      {editing && (
-        <SubscriptionForm
-          defaultCurrency={baseCurrency}
-          initial={{
-            name: editing.name,
-            category: editing.category,
-            amount: editing.amount,
-            currency: editing.currency,
-            billingCycle: editing.billingCycle,
-            nextRenewalDate: editing.nextRenewalDate?.slice(0, 10),
-            status: editing.status,
-            notes: editing.notes || "",
-            reminderDaysBefore: editing.reminderDaysBefore || 2,
-            isFreeTrial: Boolean(editing.isFreeTrial),
-            trialEndDate: editing.trialEndDate
-              ? String(editing.trialEndDate).slice(0, 10)
-              : "",
-            cancellationDeadline: editing.cancellationDeadline
-              ? String(editing.cancellationDeadline).slice(0, 10)
-              : "",
-            postTrialAmount: editing.postTrialAmount,
-            postTrialCurrency: editing.postTrialCurrency || editing.currency,
-          }}
-          onSubmit={handleUpdate}
-          onCancel={() => setEditing(null)}
-        />
-      )}
-
       {/* ── Filter & Search Card ────────────────────────────────────── */}
-      <div className="space-y-3 rounded-t border border-line bg-paper p-3 sm:p-4 shadow-2xs">
+      <div className="space-y-3 rounded-2xl squircle border border-line bg-paper p-3 sm:p-4 shadow-2xs">
         {/* Row 1: Status tabs + Search */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Status Tabs */}
-          <div className="w-full overflow-x-auto">
-            <div className="inline-flex min-w-max rounded-sm bg-paper p-0.5 text-xs font-medium border border-line">
-              {[
-                { id: "all", label: "All", count: counts.all },
-                { id: "active", label: "Active", count: counts.active },
-                { id: "trials", label: "Trials", count: counts.trials },
-                {
-                  id: "cancelled",
-                  label: "Cancelled",
-                  count: counts.cancelled,
-                },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setStatusFilter(tab.id)}
-                  className={`flex items-center gap-1.5 rounded-xs px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
-                    statusFilter === tab.id
-                      ? "bg-ledger-light text-ledger-dark shadow-2xs font-semibold"
-                      : "text-ink/60 hover:text-ink"
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span
-                    className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-                      statusFilter === tab.id
-                        ? tab.id === "trials"
-                          ? "bg-amber text-white"
-                          : "bg-ledger text-white"
-                        : "bg-line/60 text-ink/50"
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+          {(() => {
+            const tabs = [
+              { id: "all", label: "All", count: counts.all },
+              { id: "active", label: "Active", count: counts.active },
+              { id: "trials", label: "Trials", count: counts.trials },
+              { id: "cancelled", label: "Cancelled", count: counts.cancelled },
+            ];
+            return (
+              <div className="w-full overflow-x-auto">
+                <div className="relative inline-flex min-w-max rounded-xl squircle bg-paper p-0.5 text-xs font-medium border border-line">
+                  {/* Sliding pill — sized and positioned from real button measurements */}
+                  {pillStyle.width > 0 && (
+                    <div
+                      className="absolute top-0.5 bottom-0.5 rounded-lg squircle bg-ledger-light shadow-2xs transition-all duration-300 ease-in-out pointer-events-none"
+                      style={{ left: pillStyle.left, width: pillStyle.width }}
+                    />
+                  )}
+                  {tabs.map((tab, i) => (
+                    <button
+                      key={tab.id}
+                      ref={(el) => (tabRefs.current[i] = el)}
+                      onClick={() => setStatusFilter(tab.id)}
+                      className={`relative flex items-center gap-1.5 rounded-lg squircle px-3 py-1.5 transition-colors duration-300 cursor-pointer whitespace-nowrap ${
+                        statusFilter === tab.id
+                          ? "text-ledger-dark font-semibold"
+                          : "text-ink/60 hover:text-ink"
+                      }`}
+                    >
+                      <span>{tab.label}</span>
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[10px] transition-colors duration-300 ${
+                          statusFilter === tab.id
+                            ? tab.id === "trials"
+                              ? "bg-amber text-white"
+                              : "bg-ledger text-white"
+                            : "bg-line/60 text-ink/50"
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Search */}
           <div className="relative w-full">
@@ -654,7 +646,7 @@ export default function Subscriptions() {
               placeholder="Search by name, category, notes…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-sm border border-line bg-line/15 hover:bg-line/25 px-3 py-1.5 pl-8 text-xs text-ink outline-none transition-all placeholder:text-ink/40 focus:border-line focus:bg-line/60 focus:outline-none focus:ring-0"
+              className="w-full rounded-xl squircle border border-line bg-line/15 hover:bg-line/25 px-3 py-1.5 pl-8 text-xs text-ink outline-none transition-all placeholder:text-ink/40 focus:border-line focus:bg-line/60 focus:outline-none focus:ring-0"
             />
             <svg
               className="absolute left-2.5 top-2 h-3.5 w-3.5 text-ink/40"
@@ -689,7 +681,7 @@ export default function Subscriptions() {
                 onClick={() =>
                   filterPanelOpen ? closeFilterPanel() : openFilterPanel()
                 }
-                className={`flex items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                className={`flex items-center gap-2 rounded-xl squircle border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
                   filterPanelOpen || activeFilterCount > 0
                     ? "border-ledger bg-ledger/5 text-ledger"
                     : "border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink"
@@ -718,7 +710,7 @@ export default function Subscriptions() {
 
               {/* Filter panel dropdown */}
               {filterPanelOpen && (
-                <div className="absolute left-0 top-full z-40 mt-1.5 w-[300px] rounded-md border border-line bg-white shadow-lg">
+                <div className="absolute left-0 top-full z-40 mt-1.5 w-[300px] overflow-hidden rounded-2xl squircle border border-line bg-white shadow-lg">
                   {/* Header */}
                   <div className="border-b border-line/60 px-4 py-2.5">
                     <span className="text-[11px] font-semibold uppercase tracking-widest text-ink/40">
@@ -907,7 +899,7 @@ export default function Subscriptions() {
                   setLegendOpen(false);
                   setSortOpen((o) => !o);
                 }}
-                className={`flex items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                className={`flex items-center gap-2 rounded-xl squircle border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
                   sortOpen || sortBy !== "default"
                     ? "border-ledger bg-ledger/5 text-ledger"
                     : "border-line bg-paper/30 text-ink/70 hover:border-ink/30 hover:text-ink"
@@ -947,7 +939,7 @@ export default function Subscriptions() {
               </button>
 
               {sortOpen && (
-                <div className="absolute left-0 top-full z-40 mt-1.5 w-56 rounded-md border border-line bg-white shadow-lg py-1">
+                <div className="absolute left-0 top-full z-40 mt-1.5 w-56 overflow-hidden rounded-2xl squircle border border-line bg-white shadow-lg py-1">
                   <div className="border-b border-line/60 px-4 py-2">
                     <span className="text-[11px] font-semibold uppercase tracking-widest text-ink/40">
                       Sort by
@@ -1010,7 +1002,7 @@ export default function Subscriptions() {
               </button>
 
               {legendOpen && (
-                <div className="absolute left-1/2 -translate-x-[60%] sm:left-0 sm:translate-x-0 sm:right-auto top-full z-40 mt-1.5 w-60 sm:w-64 max-w-[calc(100vw-32px)] rounded-md border border-line bg-white p-3 shadow-lg animate-in fade-in duration-100">
+                <div className="absolute left-1/2 -translate-x-[60%] sm:left-0 sm:translate-x-0 sm:right-auto top-full z-40 mt-1.5 w-60 sm:w-64 max-w-[calc(100vw-32px)] rounded-2xl squircle border border-line bg-white p-3 shadow-lg animate-in fade-in duration-100">
                   <div className="flex items-center justify-between border-b border-line/60 pb-2 mb-2">
                     <span className="text-xs font-semibold text-ink">
                       Category Colors
@@ -1040,7 +1032,7 @@ export default function Subscriptions() {
                           );
                           setLegendOpen(false);
                         }}
-                        className={`flex w-full items-center justify-between px-2 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                        className={`flex w-full items-center justify-between px-2 py-1.5 rounded-lg squircle text-xs transition-colors cursor-pointer ${
                           categoryFilter.toLowerCase() ===
                           item.key.toLowerCase()
                             ? "bg-ledger-light/60 font-semibold text-ledger-dark"
@@ -1130,13 +1122,13 @@ export default function Subscriptions() {
       </div>
 
       {/* Subscription List */}
-      <div className="border border-t-0 border-line bg-paper px-2 sm:px-4">
+      <div className="overflow-hidden rounded-2xl squircle border border-line bg-paper px-2 sm:px-4">
         {filteredSubscriptions.length === 0 && (
           <div className="py-14 text-center flex flex-col items-center justify-center">
             {subscriptions.length === 0 && (
               <button
                 onClick={() => setShowForm(true)}
-                className="mb-4 inline-flex items-center gap-2 rounded-sm bg-ledger px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-ledger-dark transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                className="mb-4 inline-flex items-center gap-2 rounded-xl squircle bg-ledger px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-ledger-dark transition-all transform hover:-translate-y-0.5 cursor-pointer"
               >
                 + Add subscription
               </button>
@@ -1152,7 +1144,7 @@ export default function Subscriptions() {
             {hasActiveFilters && (
               <button
                 onClick={resetFilters}
-                className="mt-3 rounded-sm border border-line bg-paper px-3 py-1.5 text-xs text-ink hover:bg-line/40 transition-colors cursor-pointer"
+                className="mt-3 rounded-xl squircle border border-line bg-paper px-3 py-1.5 text-xs text-ink hover:bg-line/40 transition-colors cursor-pointer"
               >
                 Clear all filters
               </button>
@@ -1180,26 +1172,69 @@ export default function Subscriptions() {
         ))}
       </div>
 
-      {payingSub && (
-        <PaymentConfirmModal
-          subscription={payingSub}
-          onConfirm={handleConfirmPayment}
-          onCancel={() => setPayingSub(null)}
-        />
-      )}
-      {guideSub && (
-        <CancellationGuideModal
-          subscription={guideSub}
-          onClose={() => setGuideSub(null)}
-          onStatusChange={handleStatusChange}
-        />
-      )}
-      {historySub && (
-        <PaymentHistoryModal
-          subscription={historySub}
-          onClose={() => setHistorySub(null)}
-        />
-      )}
     </div>
+
+    {showReceiptParser && (
+      <ReceiptParserModal
+        isOpen={showReceiptParser}
+        onClose={() => setShowReceiptParser(false)}
+        onParsed={() => refresh()}
+      />
+    )}
+    {showForm && (
+      <SubscriptionForm
+        defaultCurrency={baseCurrency}
+        onSubmit={handleCreate}
+        onCancel={() => setShowForm(false)}
+      />
+    )}
+    {editing && (
+      <SubscriptionForm
+        defaultCurrency={baseCurrency}
+        initial={{
+          name: editing.name,
+          category: editing.category,
+          amount: editing.amount,
+          currency: editing.currency,
+          billingCycle: editing.billingCycle,
+          nextRenewalDate: editing.nextRenewalDate?.slice(0, 10),
+          status: editing.status,
+          notes: editing.notes || "",
+          reminderDaysBefore: editing.reminderDaysBefore || 2,
+          isFreeTrial: Boolean(editing.isFreeTrial),
+          trialEndDate: editing.trialEndDate
+            ? String(editing.trialEndDate).slice(0, 10)
+            : "",
+          cancellationDeadline: editing.cancellationDeadline
+            ? String(editing.cancellationDeadline).slice(0, 10)
+            : "",
+          postTrialAmount: editing.postTrialAmount,
+          postTrialCurrency: editing.postTrialCurrency || editing.currency,
+        }}
+        onSubmit={handleUpdate}
+        onCancel={() => setEditing(null)}
+      />
+    )}
+    {payingSub && (
+      <PaymentConfirmModal
+        subscription={payingSub}
+        onConfirm={handleConfirmPayment}
+        onCancel={() => setPayingSub(null)}
+      />
+    )}
+    {guideSub && (
+      <CancellationGuideModal
+        subscription={guideSub}
+        onClose={() => setGuideSub(null)}
+        onStatusChange={handleStatusChange}
+      />
+    )}
+    {historySub && (
+      <PaymentHistoryModal
+        subscription={historySub}
+        onClose={() => setHistorySub(null)}
+      />
+    )}
+    </>
   );
 }

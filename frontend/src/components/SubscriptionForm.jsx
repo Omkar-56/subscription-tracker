@@ -106,8 +106,8 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-xl rounded-md border border-line bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="w-full max-w-xl rounded-3xl squircle border border-line bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line pb-4">
           <div className="flex items-center gap-3">
@@ -123,7 +123,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
           </div>
           <button
             onClick={onCancel}
-            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded hover:bg-stone-100 cursor-pointer"
+            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-stone-100 cursor-pointer"
           >
             ✕
           </button>
@@ -131,11 +131,11 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           {/* Mode Switcher: Regular Paid Subscription vs Free Trial Sentinel */}
-          <div className="flex rounded-sm bg-stone-100 p-1 text-xs font-semibold">
+          <div className="flex rounded-xl squircle bg-stone-100 p-1 text-xs font-semibold">
             <button
               type="button"
               onClick={() => update('isFreeTrial', false)}
-              className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer ${
+              className={`flex-1 rounded-lg squircle py-1.5 transition-all cursor-pointer ${
                 !form.isFreeTrial ? 'bg-white text-ink shadow-2xs' : 'text-ink/50 hover:text-ink'
               }`}
             >
@@ -147,7 +147,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                 update('isFreeTrial', true);
                 if (form.amount === '') update('amount', 0);
               }}
-              className={`flex-1 rounded-xs py-1.5 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`flex-1 rounded-lg squircle py-1.5 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 form.isFreeTrial ? 'bg-amber-light text-amber shadow-2xs' : 'text-ink/50 hover:text-ink'
               }`}
             >
@@ -167,7 +167,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                 placeholder="e.g. Netflix, Spotify, AWS"
                 value={form.name}
                 onChange={(e) => update('name', e.target.value)}
-                className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
+                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
               />
             </div>
 
@@ -179,7 +179,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
               <select
                 value={form.category}
                 onChange={(e) => update('category', e.target.value)}
-                className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
+                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -192,7 +192,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
             {/* Conditional Trial Sentinel Fields */}
             {form.isFreeTrial ? (
               <>
-                <div className="col-span-1 sm:col-span-2 rounded border border-amber/30 bg-amber-light/20 p-3">
+                <div className="col-span-1 sm:col-span-2 rounded-xl squircle border border-amber/30 bg-amber-light/20 p-3">
                   <p className="text-xs font-bold text-amber flex items-center gap-1.5">
                     <span>🛡️ Sentinel Trial Protection</span>
                   </p>
@@ -210,7 +210,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                     type="date"
                     value={form.trialEndDate}
                     onChange={(e) => update('trialEndDate', e.target.value)}
-                    className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-amber focus:ring-1 focus:ring-amber"
+                    className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-amber focus:ring-1 focus:ring-amber"
                   />
                 </div>
 
@@ -225,7 +225,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                     placeholder="e.g. 19.99"
                     value={form.postTrialAmount}
                     onChange={(e) => update('postTrialAmount', e.target.value)}
-                    className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger font-mono"
+                    className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger font-mono"
                   />
                 </div>
               </>
@@ -244,7 +244,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                 placeholder="0.00"
                 value={form.amount}
                 onChange={(e) => update('amount', e.target.value)}
-                className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger font-mono"
+                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger font-mono"
               />
             </div>
 
@@ -259,7 +259,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                   onChange={(e) => {
                     if (e.target.value !== 'OTHER') update('currency', e.target.value);
                   }}
-                  className="w-1/2 rounded-sm border border-line px-2 py-2 text-sm outline-none focus:border-ledger cursor-pointer"
+                  className="w-1/2 rounded-xl squircle border border-line px-2 py-2 text-sm outline-none focus:border-ledger cursor-pointer"
                 >
                   {COMMON_CURRENCIES.map((c) => (
                     <option key={c} value={c}>{c}</option>
@@ -272,7 +272,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                   placeholder="INR"
                   value={form.currency}
                   onChange={(e) => update('currency', e.target.value.toUpperCase())}
-                  className="w-1/2 rounded-sm border border-line px-3 py-2 text-sm uppercase outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
+                  className="w-1/2 rounded-xl squircle border border-line px-3 py-2 text-sm uppercase outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
                 />
               </div>
             </div>
@@ -285,7 +285,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
               <select
                 value={form.billingCycle}
                 onChange={(e) => update('billingCycle', e.target.value)}
-                className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer capitalize"
+                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer capitalize"
               >
                 {CYCLES.map((c) => (
                   <option key={c} value={c}>{c}</option>
@@ -304,7 +304,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                   type="date"
                   value={form.nextRenewalDate}
                   onChange={(e) => update('nextRenewalDate', e.target.value)}
-                  className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
+                  className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
                 />
               </div>
             )}
@@ -317,7 +317,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
               <select
                 value={form.reminderDaysBefore || 2}
                 onChange={(e) => update('reminderDaysBefore', Number(e.target.value))}
-                className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
+                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
               >
                 <option value={1}>1 day before due</option>
                 <option value={2}>2 days before due</option>
@@ -336,7 +336,7 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
                 onChange={(e) => update('notes', e.target.value)}
                 rows={1}
                 placeholder="e.g. Cancel before 14-day trial ends"
-                className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
+                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
               />
             </div>
           </div>
@@ -348,14 +348,14 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-sm border border-line px-4 py-2 text-sm text-ink/70 hover:text-ink hover:bg-stone-50 transition-colors cursor-pointer"
+              className="rounded-xl squircle border border-line px-4 py-2 text-sm text-ink/70 hover:text-ink hover:bg-stone-50 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-sm bg-ledger px-5 py-2 text-sm font-semibold text-white hover:bg-ledger-dark disabled:opacity-60 transition-colors shadow-2xs cursor-pointer"
+              className="rounded-xl squircle bg-ledger px-5 py-2 text-sm font-semibold text-white hover:bg-ledger-dark disabled:opacity-60 transition-colors shadow-2xs cursor-pointer"
             >
               {submitting ? 'Saving…' : form.isFreeTrial ? '🛡️ Save Sentinel' : initial ? 'Save Changes' : 'Add Subscription'}
             </button>

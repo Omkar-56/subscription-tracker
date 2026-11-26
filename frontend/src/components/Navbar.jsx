@@ -230,7 +230,7 @@ export default function Navbar() {
                   <select
                     value={user.baseCurrency || baseCurrency || "INR"}
                     onChange={(e) => setBaseCurrency(e.target.value)}
-                    className="appearance-none rounded-lg border border-line/80 bg-paper/50 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
+                    className="appearance-none rounded-xl squircle border border-line/80 bg-paper/50 pl-2.5 pr-6 py-1 text-xs font-medium text-ink/80 outline-none hover:border-ink/20 focus:border-ink/25 text-center [text-align-last:center] cursor-pointer transition-colors"
                     title="Change default display currency for totals and analytics"
                   >
                     {CURRENCIES.map((c) => (
@@ -291,7 +291,7 @@ export default function Navbar() {
 
                   {/* Dropdown Card */}
                   {accountMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2.5 w-72 sm:w-80 rounded-2xl sm:rounded-3xl border border-line bg-paper shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="absolute right-0 top-full mt-2.5 w-72 sm:w-80 rounded-2xl sm:rounded-3xl squircle border border-line bg-paper shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-150">
                       {/* Profile Picture of user, Name, Email */}
                       <div className="flex items-center gap-3.5">
                         {user.avatarUrl ? (
@@ -325,7 +325,7 @@ export default function Navbar() {
                             setAccountMenuOpen(false);
                             openSettings();
                           }}
-                          className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium text-ink hover:bg-line/40 flex items-center justify-between transition-colors cursor-pointer"
+                          className="w-full text-left px-3.5 py-2.5 rounded-xl squircle text-sm font-medium text-ink hover:bg-line/40 flex items-center justify-between transition-colors cursor-pointer"
                         >
                           <span>Settings</span>
                           <svg className="w-4 h-4 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,7 +342,7 @@ export default function Navbar() {
                             logout();
                             router.push("/");
                           }}
-                          className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium text-ink/80 hover:text-rust hover:bg-rust/10 flex items-center justify-between transition-colors cursor-pointer"
+                          className="w-full text-left px-3.5 py-2.5 rounded-xl squircle text-sm font-medium text-ink/80 hover:text-rust hover:bg-rust/10 flex items-center justify-between transition-colors cursor-pointer"
                         >
                           <span>Log out</span>
                         </button>
@@ -364,7 +364,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={openRegister}
-                  className="rounded-sm bg-ledger px-4 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
+                  className="rounded-xl squircle bg-ledger px-4 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
                 >
                   Sign Up
                 </button>
@@ -504,7 +504,7 @@ export default function Navbar() {
                       setMobileMenuOpen(false);
                       openSettings();
                     }}
-                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/80 hover:text-ink hover:bg-line/20 transition-colors cursor-pointer text-left flex items-center justify-between"
+                    className="w-full rounded-xl squircle border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/80 hover:text-ink hover:bg-line/20 transition-colors cursor-pointer text-left flex items-center justify-between"
                   >
                     <span>Settings</span>
                     <svg className="w-4 h-4 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -518,7 +518,7 @@ export default function Navbar() {
                       router.push("/");
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-rust hover:border-rust/40 transition-colors cursor-pointer text-left flex items-center justify-between"
+                    className="w-full rounded-xl squircle border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-rust hover:border-rust/40 transition-colors cursor-pointer text-left flex items-center justify-between"
                   >
                     <span>Log out</span>
                   </button>
@@ -531,7 +531,7 @@ export default function Navbar() {
                       openLogin();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full rounded-sm border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-ink hover:border-ink/30 transition-colors cursor-pointer"
+                    className="w-full rounded-xl squircle border border-line/60 px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-ink hover:border-ink/30 transition-colors cursor-pointer"
                   >
                     Log In
                   </button>
@@ -541,7 +541,7 @@ export default function Navbar() {
                       openRegister();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full rounded-sm bg-ledger px-4 py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
+                    className="w-full rounded-xl squircle bg-ledger px-4 py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors cursor-pointer"
                   >
                     Sign Up
                   </button>
