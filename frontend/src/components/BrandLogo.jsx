@@ -10,10 +10,10 @@ export default function BrandLogo({ name = '', category = 'other', size = 'md' }
   const categoryStyle = getCategoryStyle(category);
 
   const sizeClasses = {
-    sm: 'w-7 h-7 text-xs rounded-xs',
-    md: 'w-10 h-10 text-sm rounded-sm',
-    lg: 'w-12 h-12 text-base rounded-md',
-  }[size] || 'w-10 h-10 text-sm rounded-sm';
+    sm: 'w-7 h-7 text-xs rounded-lg squircle',
+    md: 'w-10 h-10 text-sm rounded-xl squircle',
+    lg: 'w-12 h-12 text-base rounded-2xl squircle',
+  }[size] || 'w-10 h-10 text-sm rounded-xl squircle';
 
   const iconSizes = {
     sm: 'w-4 h-4',

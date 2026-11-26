@@ -29,7 +29,7 @@ export function securityHeaders(req, res, next) {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://subspens.com https://www.subspens.com https://subtrack.subtrackweb.workers.dev https://oauth2.googleapis.com https://generativelanguage.googleapis.com",
+    "connect-src 'self' https://subspens.com https://www.subspens.com https://subtrack.subtrackweb.workers.dev https://development-subtrack.subtrackweb.workers.dev https://oauth2.googleapis.com https://generativelanguage.googleapis.com",
     "frame-src https://accounts.google.com",
     "object-src 'none'",
     "base-uri 'self'",

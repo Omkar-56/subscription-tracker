@@ -191,11 +191,11 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-lg rounded-md border border-line bg-white shadow-xl flex flex-col max-h-[90vh] z-10 animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl squircle border border-line bg-white shadow-xl flex flex-col max-h-[90vh] z-10 animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-stone-100 text-ink border border-line/60">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl squircle bg-stone-100 text-ink border border-line/60">
               <svg className="h-4 w-4 text-ink/75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -212,7 +212,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
           <button
             onClick={onClose}
             disabled={isProcessing}
-            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded hover:bg-stone-100 disabled:opacity-40 cursor-pointer"
+            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-stone-100 disabled:opacity-40 cursor-pointer"
           >
             ✕
           </button>
@@ -244,7 +244,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
 
               {/* Parsed subscriptions list summary */}
               {successResult.subscriptions?.length > 0 && (
-                <div className="mt-3 divide-y divide-line/60 rounded border border-line bg-paper/40 text-left">
+                <div className="mt-3 divide-y divide-line/60 overflow-hidden rounded-2xl squircle border border-line bg-paper/40 text-left">
                   {successResult.subscriptions.map((s) => (
                     <div key={s.id} className="p-3 flex items-center justify-between gap-3 text-xs">
                       <div>
@@ -267,7 +267,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full mt-4 rounded bg-ledger py-2 text-xs font-semibold text-white hover:bg-ledger-dark transition-colors cursor-pointer"
+                className="w-full mt-4 rounded-xl squircle bg-ledger py-2 text-xs font-semibold text-white hover:bg-ledger-dark transition-colors cursor-pointer"
               >
                 Done & View Subscriptions
               </button>
@@ -318,7 +318,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
                     }}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-col items-center justify-center border-2 border-dashed border-line rounded-md p-6 text-center hover:border-ledger/50 bg-stone-50/50 hover:bg-stone-50 transition-colors cursor-pointer"
+                    className="flex flex-col items-center justify-center border-2 border-dashed border-line rounded-2xl squircle p-6 text-center hover:border-ledger/50 bg-stone-50/50 hover:bg-stone-50 transition-colors cursor-pointer"
                   >
                     <input
                       ref={fileInputRef}
@@ -330,7 +330,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
                     />
 
                     {previewUrl ? (
-                      <div className="relative group max-h-40 overflow-hidden rounded border border-line">
+                      <div className="relative group max-h-40 overflow-hidden rounded-xl squircle border border-line">
                         <img
                           src={previewUrl}
                           alt="Receipt Preview"
@@ -372,7 +372,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
                     onChange={(e) => setPastedText(e.target.value)}
                     disabled={isProcessing}
                     placeholder="e.g. Thanks for your Netflix subscription payment of $15.99 on Oct 25, 2026. Next billing date: Nov 25, 2026..."
-                    className="mt-1.5 w-full rounded border border-line bg-paper/30 p-2.5 text-xs text-ink outline-none focus:border-ledger font-mono"
+                    className="mt-1.5 w-full rounded-xl squircle border border-line bg-paper/30 p-2.5 text-xs text-ink outline-none focus:border-ledger font-mono"
                   />
                 </div>
               )}
@@ -398,7 +398,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
               )}
 
               {error && (
-                <div className="rounded bg-rust/10 border border-rust/30 p-2.5 text-xs text-rust">
+                <div className="rounded-xl squircle bg-rust/10 border border-rust/30 p-2.5 text-xs text-rust">
                   {error}
                 </div>
               )}
@@ -413,7 +413,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
               type="button"
               onClick={onClose}
               disabled={isProcessing}
-              className="rounded px-3 py-1.5 text-xs font-medium text-ink/70 hover:bg-stone-200/50 transition-colors disabled:opacity-50 cursor-pointer"
+              className="rounded-xl squircle px-3 py-1.5 text-xs font-medium text-ink/70 hover:bg-stone-200/50 transition-colors disabled:opacity-50 cursor-pointer"
             >
               Cancel
             </button>
@@ -421,7 +421,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
               type="button"
               onClick={handleParse}
               disabled={isProcessing || (tab === 'upload' && !file) || (tab === 'text' && !pastedText.trim())}
-              className="flex items-center gap-1.5 rounded bg-ledger px-4 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 rounded-xl squircle bg-ledger px-4 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-ledger-dark transition-colors disabled:opacity-50 cursor-pointer"
             >
               <span>{isProcessing ? 'Parsing…' : 'Parse & Add with Gemini'}</span>
             </button>

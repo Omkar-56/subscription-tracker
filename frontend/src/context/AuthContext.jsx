@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [guestCurrency, setGuestCurrency] = useState('INR');
   const [authModal, setAuthModal] = useState(null); // null | 'login' | 'register' | 'forgot'
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -22,6 +23,9 @@ export function AuthProvider({ children }) {
   const openRegister = useCallback(() => setAuthModal('register'), []);
   const openForgotPassword = useCallback(() => setAuthModal('forgot'), []);
   const closeAuthModal = useCallback(() => setAuthModal(null), []);
+
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
   useEffect(() => {
     const token = localStorage.getItem('subspens_token') || localStorage.getItem('subtrack_token');
@@ -78,10 +82,32 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
+  const updateUser = useCallback((updatedUser) => {
+    setUser(updatedUser);
+  }, []);
+
+  const updateTokenAndUser = useCallback((newToken, updatedUser) => {
+    if (newToken) {
+      localStorage.setItem('subspens_token', newToken);
+    }
+    if (updatedUser) {
+      setUser(updatedUser);
+    }
+  }, []);
+
+  const deleteAccount = useCallback(async (payload) => {
+    await api.deleteAccount(payload);
+    localStorage.removeItem('subspens_token');
+    localStorage.removeItem('subtrack_token');
+    setUser(null);
+    setSettingsOpen(false);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('subspens_token');
     localStorage.removeItem('subtrack_token');
     setUser(null);
+    setSettingsOpen(false);
   }, []);
 
   const isPro = Boolean(user && (user.plan === 'pro' || user.plan === 'lifetime'));
@@ -100,6 +126,12 @@ export function AuthProvider({ children }) {
         openForgotPassword,
         closeAuthModal,
         setAuthModal,
+        settingsOpen,
+        openSettings,
+        closeSettings,
+        updateUser,
+        updateTokenAndUser,
+        deleteAccount,
         login,
         register,
         loginWithGoogle,

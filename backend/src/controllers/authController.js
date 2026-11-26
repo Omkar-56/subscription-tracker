@@ -38,4 +38,24 @@ export const authController = {
     const user = await authService.updateCurrency(req.user.id, req.body.currency);
     res.json({ user });
   }),
+
+  updateName: asyncHandler(async (req, res) => {
+    const result = await authService.updateName(req.user.id, req.body.name);
+    res.json(result);
+  }),
+
+  updateEmail: asyncHandler(async (req, res) => {
+    const result = await authService.updateEmail(req.user.id, req.body.email, req.body.currentPassword);
+    res.json(result);
+  }),
+
+  changePassword: asyncHandler(async (req, res) => {
+    const result = await authService.changePassword(req.user.id, req.body);
+    res.json(result);
+  }),
+
+  deleteAccount: asyncHandler(async (req, res) => {
+    const result = await authService.deleteAccount(req.user.id, req.body);
+    res.json(result);
+  }),
 };

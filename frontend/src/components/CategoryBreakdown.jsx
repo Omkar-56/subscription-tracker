@@ -10,7 +10,7 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
 
   if (!categories || categories.length === 0) {
     return (
-      <div className="rounded-sm border border-line bg-paper p-8 text-center shadow-2xs">
+      <div className="rounded-2xl squircle border border-line bg-paper p-8 text-center shadow-2xs">
         <p className="text-sm text-ink/70">
           Add subscriptions to see your spend distributed by category.
         </p>
@@ -35,7 +35,7 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
   const activeCategory = activeIndex !== null ? chartData[activeIndex] : null;
 
   return (
-    <div className="rounded-sm border border-line bg-paper p-5 shadow-2xs flex flex-col justify-between">
+    <div className="rounded-2xl squircle border border-line bg-paper p-5 shadow-2xs flex flex-col justify-between">
       <div>
         {/* Donut Chart with Centered Metric */}
         <div className="relative mt-1 h-48 w-full">
@@ -110,7 +110,7 @@ export default function CategoryBreakdown({ categories = [], totalMonthly = 0, c
               key={item.category}
               onMouseEnter={() => setActiveIndex(index)}
               onMouseLeave={() => setActiveIndex(null)}
-              className={`rounded-xs p-1.5 transition-colors cursor-pointer ${
+              className={`rounded-lg squircle p-1.5 transition-colors cursor-pointer ${
                 isHovered ? 'bg-stone-50' : 'hover:bg-stone-50/60'
               }`}
             >

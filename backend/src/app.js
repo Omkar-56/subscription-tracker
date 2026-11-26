@@ -13,11 +13,12 @@ import { apiRateLimiter } from './middleware/rateLimiter.js';
 export function createApp() {
   const app = express();
 
-  // Trusted production origins
+  // Trusted production & preview origins
   const ALLOWED_ORIGINS = new Set([
     'https://subspens.com',
     'https://www.subspens.com',
     'https://subtrack.subtrackweb.workers.dev',
+    'https://development-subtrack.subtrackweb.workers.dev',
   ]);
 
   if (env.clientOrigin && env.clientOrigin !== '*') {
@@ -28,7 +29,7 @@ export function createApp() {
     // Allow non-browser requests or same-origin requests with no Origin header
     if (!origin) return callback(null, true);
 
-    // Allow whitelisted production domains
+    // Allow whitelisted production & preview domains
     if (ALLOWED_ORIGINS.has(origin)) {
       return callback(null, true);
     }
