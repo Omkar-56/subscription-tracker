@@ -278,7 +278,7 @@ export default function Dashboard() {
                   className="flex items-center justify-between rounded-xl squircle bg-white/90 border border-amber/30 p-3 shadow-2xs hover:bg-white transition-colors gap-3"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <BrandLogo name={t.name} category={t.category} size="sm" />
+                    <BrandLogo name={t.name} category={t.category} size="md" bare />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className="font-semibold text-xs text-ink truncate">{t.name ? t.name.charAt(0).toUpperCase() + t.name.slice(1) : ''}</p>
@@ -460,7 +460,7 @@ export default function Dashboard() {
                   className="flex items-center justify-between border-b border-line px-4 py-3 last:border-b-0 hover:bg-paper/30 transition-colors gap-3"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <BrandLogo name={s.name} category={s.category} size="sm" />
+                    <BrandLogo name={s.name} category={s.category} size="md" bare />
                     <div className="min-w-0">
                       <p className="font-medium text-xs sm:text-sm truncate">{s.name ? s.name.charAt(0).toUpperCase() + s.name.slice(1) : ''}</p>
                       <p className="text-[11px] sm:text-xs text-ink/80">

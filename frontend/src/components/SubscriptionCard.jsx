@@ -71,7 +71,7 @@ export default function SubscriptionCard({
     >
       {/* Left section: BrandLogo + Info */}
       <div className="flex min-w-0 items-center gap-3 sm:gap-3.5 flex-1">
-        <BrandLogo name={displayName || subscription.name} category={subscription.category} size="md" />
+        <BrandLogo name={displayName || subscription.name} category={subscription.category} size="md" bare />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">

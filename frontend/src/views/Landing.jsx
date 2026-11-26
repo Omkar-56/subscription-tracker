@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import RadialFillButton from "../components/RadialFillButton";
+import BrandLogo from "../components/BrandLogo";
 import {
   LuShieldCheck,
   LuBellRing,
@@ -211,9 +212,7 @@ function Hero() {
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <span className="grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-lg squircle bg-ledger-light font-medium text-ledger text-xs sm:text-sm">
-                          {s.name[0]}
-                        </span>
+                        <BrandLogo name={s.name} category={s.cat.toLowerCase()} size="md" bare />
                         <div>
                           <p className="text-xs sm:text-sm font-medium text-ink">
                             {s.name}
