@@ -61,7 +61,7 @@ export function getNextActiveRenewalDate(renewalDateInput, cycle, today = new Da
  * Calculates in-memory projected renewal dates for overdue subscriptions.
  * Triggers background database auto-renewal without blocking the GET response.
  */
-function syncOverdueSubscriptions(userId, subscriptions) {
+function syncOverdueSubscriptions(userId, subscriptions, { triggerBackground = true } = {}) {
   if (!Array.isArray(subscriptions)) return [];
   const today = new Date();
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -78,7 +78,7 @@ function syncOverdueSubscriptions(userId, subscriptions) {
   }
 
   // Trigger non-blocking database auto-renewal if any subscriptions reached their renewal date
-  if (hasDueSubs && userId) {
+  if (triggerBackground && hasDueSubs && userId) {
     runBackground(() => subscriptionService.autoRenewDueSubscriptions({ userId }));
   }
 
@@ -106,14 +106,6 @@ function amountAsOf(subscription, changes, at) {
     }
   }
   return amount === null ? Number(subscription.amount) : amount;
-}
-
-async function resolveUserBaseCurrency(userId, overrideCurrency) {
-  if (overrideCurrency && overrideCurrency.length === 3) {
-    return overrideCurrency.toUpperCase();
-  }
-  const user = await userModel.findById(userId);
-  return user?.baseCurrency || 'INR';
 }
 
 export const subscriptionService = {
@@ -152,6 +144,11 @@ export const subscriptionService = {
       await priceHistoryModel.record(id, existing.amount, data.amount);
     }
 
+    // Keep alerts/reminders in sync when renewal date, trial dates, or status changes
+    await reminderModel.syncStaleForUser(userId).catch((err) => {
+      console.warn('[update syncStaleForUser warning]:', err?.message || err);
+    });
+
     return updated;
   },
 
@@ -174,7 +171,12 @@ export const subscriptionService = {
     const sub = await this.get(userId, id);
     const nextDate = addCycle(sub.nextRenewalDate, sub.billingCycle);
     const nextDateStr = formatDateString(nextDate);
-    return subscriptionModel.updateRenewalDate(userId, id, nextDateStr);
+    const updated = await subscriptionModel.updateRenewalDate(userId, id, nextDateStr);
+
+    // Clear old cycle reminders prior to the advanced renewal date
+    await reminderModel.markPaidForSubscriptionBeforeDate(userId, id, nextDateStr);
+
+    return updated;
   },
 
   async confirmPayment(userId, id, paymentData = {}) {
@@ -301,17 +303,33 @@ export const subscriptionService = {
   },
 
   async dashboard(userId, { upcomingWithinDays = 14, currency = null } = {}) {
-    // 1. Fetch user, raw subscriptions, reminders, price increases, and live rates all concurrently
-    const [user, rawSubs, pendingReminders, recentPriceIncreases, rates] = await Promise.all([
+    // 1. Fetch user, raw subscriptions, price increases, and live rates concurrently
+    const [user, rawSubs, recentPriceIncreases, rates] = await Promise.all([
       userModel.findById(userId),
       subscriptionModel.findAllForUser(userId),
-      reminderModel.findPendingForUser(userId).catch(() => []),
       priceHistoryModel.findRecentIncreasesForUser(userId, 30).catch(() => []),
       currencyService.getRates(),
     ]);
 
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const hasDueSubs = rawSubs.some(
+      (s) => s.status === 'active' && !s.isFreeTrial && parseDateParts(s.nextRenewalDate) <= todayStart
+    );
+
+    // Ensure overdue subscriptions are renewed in DB BEFORE reading pendingReminders
+    if (hasDueSubs) {
+      await subscriptionService.autoRenewDueSubscriptions({ userId }).catch((err) => {
+        console.warn('[dashboard autoRenew warning]:', err?.message || err);
+      });
+    }
+
+    // Sync/resolve stale or duplicate reminders and fetch clean pending reminders
+    await reminderModel.syncStaleForUser(userId).catch(() => {});
+    const pendingReminders = await reminderModel.findPendingForUser(userId).catch(() => []);
+
     const baseCurrency = (currency && currency.length === 3 ? currency : user?.baseCurrency) || 'INR';
-    const all = syncOverdueSubscriptions(userId, rawSubs);
+    const all = syncOverdueSubscriptions(userId, rawSubs, { triggerBackground: false });
     const active = all.filter((s) => s.status === 'active');
     const cancelled = all.filter((s) => s.status === 'cancelled');
 
@@ -333,8 +351,6 @@ export const subscriptionService = {
       byCategory[s.category].count += 1;
     }
 
-    const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const horizon = new Date(todayStart);
     horizon.setDate(horizon.getDate() + upcomingWithinDays);
 
