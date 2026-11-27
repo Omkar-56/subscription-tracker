@@ -166,12 +166,14 @@ export default function Dashboard() {
     }
     setPayingSub(null);
     refresh();
+    window.dispatchEvent(new CustomEvent('subspens:reminders-refresh'));
   }
 
   async function handleConvertTrial(sub) {
     try {
       await api.convertTrial(sub.id);
       refresh();
+      window.dispatchEvent(new CustomEvent('subspens:reminders-refresh'));
     } catch (err) {
       const guestSubs = getGuestSubs().map((s) =>
         s.id === sub.id ? { ...s, isFreeTrial: false } : s
@@ -195,6 +197,7 @@ export default function Dashboard() {
       });
       setGuideSub(null);
       refresh();
+      window.dispatchEvent(new CustomEvent('subspens:reminders-refresh'));
     } catch {
       const guestSubs = getGuestSubs().map((s) =>
         s.id === subscription.id ? { ...s, status: newStatus } : s

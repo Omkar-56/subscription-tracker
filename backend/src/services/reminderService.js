@@ -1,7 +1,7 @@
 import { reminderModel } from '../models/reminderModel.js';
 import { subscriptionModel } from '../models/subscriptionModel.js';
 import { userModel } from '../models/userModel.js';
-import { parseDateParts, formatDateString } from './subscriptionService.js';
+import { subscriptionService, parseDateParts, formatDateString } from './subscriptionService.js';
 import { sendEmail, buildReminderEmailHtml, buildReminderEmailText } from './emailService.js';
 import { env } from '../config/env.js';
 
@@ -114,12 +114,11 @@ export const reminderService = {
           text,
         });
 
-        // 2. Record notification in in-app reminders table
-        const reminderRecord = await reminderModel.create({
+        // 2. Record or update notification in in-app reminders table (no duplicates for same due date)
+        const reminderRecord = await reminderModel.createOrUpdatePending({
           userId: sub.userId,
           subscriptionId: sub.id,
           dueDate: formattedDueDate,
-          status: 'pending',
           sentAt: new Date(),
           channel: 'email',
           message: isTrial
@@ -219,6 +218,16 @@ export const reminderService = {
   },
 
   async getPendingReminders(userId) {
+    // 1. Auto-renew any overdue subscriptions first so their renewal dates & old reminders update immediately
+    await subscriptionService.autoRenewDueSubscriptions({ userId }).catch((err) => {
+      console.warn('[getPendingReminders autoRenew warning]:', err?.message || err);
+    });
+
+    // 2. Sync/resolve any remaining stale or duplicate reminders against current subscription dates/status
+    await reminderModel.syncStaleForUser(userId).catch((err) => {
+      console.warn('[getPendingReminders syncStale warning]:', err?.message || err);
+    });
+
     return reminderModel.findPendingForUser(userId);
   },
 

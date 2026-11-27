@@ -270,6 +270,7 @@ export default function Subscriptions() {
       setSubscriptions((prev) => [newSub, ...prev]);
     }
     refresh();
+    window.dispatchEvent(new CustomEvent("subspens:reminders-refresh"));
   }
 
   async function handleUpdate(data) {
@@ -301,6 +302,7 @@ export default function Subscriptions() {
       saveGuestSubs(guestSubs);
     }
     refresh();
+    window.dispatchEvent(new CustomEvent("subspens:reminders-refresh"));
   }
 
   async function handleConvertTrial(subscription) {
@@ -319,6 +321,7 @@ export default function Subscriptions() {
       saveGuestSubs(guestSubs);
     }
     refresh();
+    window.dispatchEvent(new CustomEvent("subspens:reminders-refresh"));
   }
 
   async function handleConfirmPayment(paymentData) {
@@ -354,6 +357,7 @@ export default function Subscriptions() {
       saveGuestSubs(guestSubs);
     }
     refresh();
+    window.dispatchEvent(new CustomEvent("subspens:reminders-refresh"));
   }
 
   async function handleStatusChange(subscription, newStatus) {
@@ -397,6 +401,7 @@ export default function Subscriptions() {
       saveGuestSubs(guestSubs);
     }
     refresh();
+    window.dispatchEvent(new CustomEvent("subspens:reminders-refresh"));
   }
 
   async function handleDelete(subscription) {
@@ -412,6 +417,7 @@ export default function Subscriptions() {
       saveGuestSubs(guestSubs);
     }
     refresh();
+    window.dispatchEvent(new CustomEvent("subspens:reminders-refresh"));
   }
 
   // Extract unique categories from actual data

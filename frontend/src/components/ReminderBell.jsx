@@ -31,9 +31,11 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
     }
     window.addEventListener('subspens:refresh', onExternalRefresh);
     window.addEventListener('subtrack:refresh', onExternalRefresh);
+    window.addEventListener('subspens:reminders-refresh', onExternalRefresh);
     return () => {
       window.removeEventListener('subspens:refresh', onExternalRefresh);
       window.removeEventListener('subtrack:refresh', onExternalRefresh);
+      window.removeEventListener('subspens:reminders-refresh', onExternalRefresh);
     };
   }, []);
 
@@ -66,7 +68,11 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
     <div className="relative" ref={dropdownRef}>
       {/* Bell Button */}
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          const next = !open;
+          setOpen(next);
+          if (next) loadReminders();
+        }}
         className="relative rounded-full p-1.5 text-ink/60 hover:bg-paper hover:text-ink transition-colors"
         title="Due date reminders & Free-Trial Sentinel alerts"
       >
