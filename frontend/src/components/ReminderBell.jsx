@@ -114,7 +114,7 @@ export default function ReminderBell({ onConfirmPayment, onCancelGuide, onConver
             </button>
           </div>
 
-          <div className="max-h-96 overflow-y-auto divide-y divide-line/60">
+          <div className="max-h-96 overflow-y-auto custom-scrollbar divide-y divide-line/60">
             {reminders.length === 0 ? (
               <div className="p-6 text-center text-xs text-ink/50">
                 <p className="font-medium text-ink/70">All caught up!</p>

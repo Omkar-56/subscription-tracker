@@ -188,309 +188,311 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose }) {
       {/* Modal Dialog Card */}
       <div
         ref={modalCardRef}
-        className="relative w-full max-w-sm sm:max-w-[620px] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl squircle border border-line bg-paper p-5 sm:p-7 shadow-xl z-10"
+        className="relative w-full max-w-sm sm:max-w-[620px] max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden rounded-3xl squircle border border-line bg-paper py-2.5 pl-2.5 pr-1.5 sm:py-3 sm:pl-3 sm:pr-1.5 shadow-xl z-10"
       >
-        {/* 1. Header Text + Close (X) Button */}
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            {mode === 'login' ? (
-              <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Welcome back</h2>
-                <p className="mt-1 text-xs sm:text-sm text-ink/60">
-                  Sign in to see what's renewing.
-                </p>
-              </div>
-            ) : mode === 'register' ? (
-              <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Create your account</h2>
-                <p className="mt-1 text-xs sm:text-sm text-ink/60">
-                  Start tracking what you pay for, monthly.
-                </p>
-              </div>
-            ) : (
-              <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Reset password</h2>
-                <p className="mt-1 text-xs sm:text-sm text-ink/60">
-                  Enter your email address and we'll send you a password reset link.
-                </p>
-              </div>
-            )}
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pl-2.5 pr-2 py-2 sm:pl-4 sm:pr-3 sm:py-3">
+          {/* 1. Header Text + Close (X) Button */}
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              {mode === 'login' ? (
+                <div>
+                  <h2 className="font-display text-2xl font-semibold text-ink">Welcome back</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-ink/60">
+                    Sign in to see what's renewing.
+                  </p>
+                </div>
+              ) : mode === 'register' ? (
+                <div>
+                  <h2 className="font-display text-2xl font-semibold text-ink">Create your account</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-ink/60">
+                    Start tracking what you pay for, monthly.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <h2 className="font-display text-2xl font-semibold text-ink">Reset password</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-ink/60">
+                    Enter your email address and we'll send you a password reset link.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              onMouseEnter={() => setHoverTarget('close')}
+              onMouseLeave={() => setHoverTarget((prev) => (prev === 'close' ? null : prev))}
+              disabled={submitting}
+              className="shrink-0 -mt-1 -mr-1 text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-line/40 disabled:opacity-40 transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              ✕
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            onMouseEnter={() => setHoverTarget('close')}
-            onMouseLeave={() => setHoverTarget((prev) => (prev === 'close' ? null : prev))}
-            disabled={submitting}
-            className="shrink-0 -mt-1 -mr-1 text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-line/40 disabled:opacity-40 transition-colors cursor-pointer"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
+          {/* 2. Navigator: Log In <-> Sign Up (or Back link in 'forgot' mode) */}
+          {mode !== 'forgot' ? (
+            <div className="mt-4 relative flex rounded-xl squircle border border-line/60 bg-line/30 p-1 text-xs font-semibold">
+              {/* Sliding pill indicator */}
+              <div
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg squircle bg-ledger/10 shadow-2xs transition-transform duration-300 ease-in-out ${
+                  mode === 'register' ? 'translate-x-[calc(100%+8px)]' : 'translate-x-0'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => switchMode('login')}
+                className={`relative flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
+                  mode === 'login' ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
+                }`}
+              >
+                Log In
+              </button>
+              <button
+                type="button"
+                onClick={() => switchMode('register')}
+                className={`relative flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
+                  mode === 'register' ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
+          ) : (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => switchMode('login')}
+                className="inline-flex items-center gap-1.5 text-xs text-ink/60 hover:text-ink font-medium transition-colors cursor-pointer"
+              >
+                ← Back to Log In
+              </button>
+            </div>
+          )}
 
-        {/* 2. Navigator: Log In <-> Sign Up (or Back link in 'forgot' mode) */}
-        {mode !== 'forgot' ? (
-          <div className="mt-4 relative flex rounded-xl squircle border border-line/60 bg-line/30 p-1 text-xs font-semibold">
-            {/* Sliding pill indicator */}
-            <div
-              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg squircle bg-ledger/10 shadow-2xs transition-transform duration-300 ease-in-out ${
-                mode === 'register' ? 'translate-x-[calc(100%+8px)]' : 'translate-x-0'
-              }`}
+          {/* Companion Mascot + Form Body */}
+          <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row sm:items-stretch gap-4 sm:gap-6">
+            <AuthBlobCompanion
+              isOpen={isOpen}
+              modalRef={modalCardRef}
+              mode={mode}
+              focusedField={focusedField}
+              activeInputEl={activeInputEl}
+              activeTextLength={activeTextLength}
+              showPassword={showPassword}
+              error={error}
+              submitting={submitting}
+              forgotSuccess={forgotSuccess}
+              hoverTarget={hoverTarget}
             />
-            <button
-              type="button"
-              onClick={() => switchMode('login')}
-              className={`relative flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
-                mode === 'login' ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
-              }`}
-            >
-              Log In
-            </button>
-            <button
-              type="button"
-              onClick={() => switchMode('register')}
-              className={`relative flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
-                mode === 'register' ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
-        ) : (
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => switchMode('login')}
-              className="inline-flex items-center gap-1.5 text-xs text-ink/60 hover:text-ink font-medium transition-colors cursor-pointer"
-            >
-              ← Back to Log In
-            </button>
-          </div>
-        )}
 
-        {/* Companion Mascot + Form Body */}
-        <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row sm:items-stretch gap-4 sm:gap-6">
-          <AuthBlobCompanion
-            isOpen={isOpen}
-            modalRef={modalCardRef}
-            mode={mode}
-            focusedField={focusedField}
-            activeInputEl={activeInputEl}
-            activeTextLength={activeTextLength}
-            showPassword={showPassword}
-            error={error}
-            submitting={submitting}
-            forgotSuccess={forgotSuccess}
-            hoverTarget={hoverTarget}
-          />
-
-          <div className="flex-1 min-w-0">
-            {/* 3. Google Option (only for login and register) */}
-            {mode !== 'forgot' && (
-              <>
-                <div
-                  onMouseEnter={() => setHoverTarget('google')}
-                  onMouseLeave={() => setHoverTarget((prev) => (prev === 'google' ? null : prev))}
-                >
-                  <GoogleSignInButton
-                    text={mode === 'login' ? 'signin_with' : 'signup_with'}
-                    onSuccess={handleAuthSuccess}
-                    onError={(err) => setError(err)}
-                  />
-                </div>
-
-                {/* Divider */}
-                <div className="relative my-4 sm:my-5">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-line/70" />
-                  </div>
-                  <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
-                    <span className="bg-paper px-2.5 text-ink/50 font-medium">Or continue with email</span>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* 5. Forms */}
-            {mode === 'login' ? (
-              <form onSubmit={handleLoginSubmit} className="space-y-3.5">
-                <div>
-                  <input
-                    type="email"
-                    required
-                    placeholder="Email address"
-                    aria-label="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={handleFieldFocus('email')}
-                    onBlur={handleFieldBlur('email')}
-                    className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
-                  />
-                </div>
-
-                <div>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      placeholder="Password"
-                      aria-label="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={handleFieldFocus('password')}
-                      onBlur={handleFieldBlur('password')}
-                      className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+            <div className="flex-1 min-w-0">
+              {/* 3. Google Option (only for login and register) */}
+              {mode !== 'forgot' && (
+                <>
+                  <div
+                    onMouseEnter={() => setHoverTarget('google')}
+                    onMouseLeave={() => setHoverTarget((prev) => (prev === 'google' ? null : prev))}
+                  >
+                    <GoogleSignInButton
+                      text={mode === 'login' ? 'signin_with' : 'signup_with'}
+                      onSuccess={handleAuthSuccess}
+                      onError={(err) => setError(err)}
                     />
-                    {passwordVisibilityButton}
                   </div>
 
-                  {/* Forgot password button shifted below password input */}
-                  <div className="mt-1.5 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => switchMode('forgot')}
-                      className="text-xs text-ledger hover:underline font-medium cursor-pointer"
-                    >
-                      Forgot password?
-                    </button>
+                  {/* Divider */}
+                  <div className="relative my-4 sm:my-5">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-line/70" />
+                    </div>
+                    <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
+                      <span className="bg-paper px-2.5 text-ink/50 font-medium">Or continue with email</span>
+                    </div>
                   </div>
-                </div>
+                </>
+              )}
 
-                {error && <p className="text-xs text-rust font-medium">{error}</p>}
-
-                <RadialFillButton
-                  type="submit"
-                  disabled={submitting}
-                  onMouseEnter={() => setHoverTarget('submit')}
-                  onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
-                  fillClassName="bg-ledger-dark"
-                  className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
-                >
-                  {submitting ? 'Signing in…' : 'Sign in'}
-                </RadialFillButton>
-              </form>
-            ) : mode === 'register' ? (
-              <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
-                <div>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Your full name"
-                    aria-label="Your full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onFocus={handleFieldFocus('name')}
-                    onBlur={handleFieldBlur('name')}
-                    className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
-                  />
-                </div>
-
-                <div>
-                  <input
-                    type="email"
-                    required
-                    placeholder="Email address"
-                    aria-label="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={handleFieldFocus('email')}
-                    onBlur={handleFieldBlur('email')}
-                    className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
-                  />
-                </div>
-
-                <div>
-                  <div className="relative">
+              {/* 5. Forms */}
+              {mode === 'login' ? (
+                <form onSubmit={handleLoginSubmit} className="space-y-3.5">
+                  <div>
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type="email"
                       required
-                      minLength={8}
-                      placeholder="Password (min. 8 characters)"
-                      aria-label="Password (min. 8 characters)"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={handleFieldFocus('password')}
-                      onBlur={handleFieldBlur('password')}
-                      className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                      placeholder="Email address"
+                      aria-label="Email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onFocus={handleFieldFocus('email')}
+                      onBlur={handleFieldBlur('email')}
+                      className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
                     />
-                    {passwordVisibilityButton}
                   </div>
-                </div>
 
-                {error && <p className="text-xs text-rust font-medium">{error}</p>}
-
-                <RadialFillButton
-                  type="submit"
-                  disabled={submitting}
-                  onMouseEnter={() => setHoverTarget('submit')}
-                  onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
-                  fillClassName="bg-ledger-dark"
-                  className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
-                >
-                  {submitting ? 'Creating account…' : 'Create account'}
-                </RadialFillButton>
-              </form>
-            ) : (
-              /* Forgot Password Mode */
-              <div className="mt-4">
-                {forgotSuccess ? (
-                  <div className="space-y-4 text-center py-2">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-ledger">
-                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-base font-semibold text-ink">Check your email</h3>
-                      <p className="text-xs text-ink/65 leading-relaxed">
-                        {forgotMessage || `We sent a password reset link to ${email}.`}
-                      </p>
-                    </div>
-                    <p className="text-[11px] text-ink/45">
-                      Didn't receive an email? Check your spam folder or try again in a few minutes.
-                    </p>
-                    <RadialFillButton
-                      onClick={() => switchMode('login')}
-                      fillClassName="bg-ledger-light"
-                      className="w-full rounded-xl squircle bg-stone-100 py-2.5 text-xs font-semibold text-ink transition-colors duration-300 hover:text-ledger-dark cursor-pointer"
-                    >
-                      Return to Log In
-                    </RadialFillButton>
-                  </div>
-                ) : (
-                  <form onSubmit={handleForgotSubmit} className="space-y-3.5">
-                    <div>
+                  <div>
+                    <div className="relative">
                       <input
-                        type="email"
+                        type={showPassword ? 'text' : 'password'}
                         required
-                        placeholder="Enter your account email"
-                        aria-label="Enter your account email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        onFocus={handleFieldFocus('email')}
-                        onBlur={handleFieldBlur('email')}
-                        className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                        placeholder="Password"
+                        aria-label="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onFocus={handleFieldFocus('password')}
+                        onBlur={handleFieldBlur('password')}
+                        className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
                       />
+                      {passwordVisibilityButton}
                     </div>
 
-                    {error && <p className="text-xs text-rust font-medium">{error}</p>}
+                    {/* Forgot password button shifted below password input */}
+                    <div className="mt-1.5 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => switchMode('forgot')}
+                        className="text-xs text-ledger hover:underline font-medium cursor-pointer"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  </div>
 
-                    <RadialFillButton
-                      type="submit"
-                      disabled={submitting}
-                      onMouseEnter={() => setHoverTarget('submit')}
-                      onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
-                      fillClassName="bg-ledger-dark"
-                      className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
-                    >
-                      {submitting ? 'Sending link…' : 'Send reset link'}
-                    </RadialFillButton>
-                  </form>
-                )}
-              </div>
-            )}
+                  {error && <p className="text-xs text-rust font-medium">{error}</p>}
+
+                  <RadialFillButton
+                    type="submit"
+                    disabled={submitting}
+                    onMouseEnter={() => setHoverTarget('submit')}
+                    onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
+                    fillClassName="bg-ledger-dark"
+                    className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
+                  >
+                    {submitting ? 'Signing in…' : 'Sign in'}
+                  </RadialFillButton>
+                </form>
+              ) : mode === 'register' ? (
+                <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+                  <div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Your full name"
+                      aria-label="Your full name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      onFocus={handleFieldFocus('name')}
+                      onBlur={handleFieldBlur('name')}
+                      className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                    />
+                  </div>
+
+                  <div>
+                    <input
+                      type="email"
+                      required
+                      placeholder="Email address"
+                      aria-label="Email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onFocus={handleFieldFocus('email')}
+                      onBlur={handleFieldBlur('email')}
+                      className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        minLength={8}
+                        placeholder="Password (min. 8 characters)"
+                        aria-label="Password (min. 8 characters)"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onFocus={handleFieldFocus('password')}
+                        onBlur={handleFieldBlur('password')}
+                        className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                      />
+                      {passwordVisibilityButton}
+                    </div>
+                  </div>
+
+                  {error && <p className="text-xs text-rust font-medium">{error}</p>}
+
+                  <RadialFillButton
+                    type="submit"
+                    disabled={submitting}
+                    onMouseEnter={() => setHoverTarget('submit')}
+                    onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
+                    fillClassName="bg-ledger-dark"
+                    className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
+                  >
+                    {submitting ? 'Creating account…' : 'Create account'}
+                  </RadialFillButton>
+                </form>
+              ) : (
+                /* Forgot Password Mode */
+                <div className="mt-4">
+                  {forgotSuccess ? (
+                    <div className="space-y-4 text-center py-2">
+                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-ledger">
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-base font-semibold text-ink">Check your email</h3>
+                        <p className="text-xs text-ink/65 leading-relaxed">
+                          {forgotMessage || `We sent a password reset link to ${email}.`}
+                        </p>
+                      </div>
+                      <p className="text-[11px] text-ink/45">
+                        Didn't receive an email? Check your spam folder or try again in a few minutes.
+                      </p>
+                      <RadialFillButton
+                        onClick={() => switchMode('login')}
+                        fillClassName="bg-ledger-light"
+                        className="w-full rounded-xl squircle bg-stone-100 py-2.5 text-xs font-semibold text-ink transition-colors duration-300 hover:text-ledger-dark cursor-pointer"
+                      >
+                        Return to Log In
+                      </RadialFillButton>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleForgotSubmit} className="space-y-3.5">
+                      <div>
+                        <input
+                          type="email"
+                          required
+                          placeholder="Enter your account email"
+                          aria-label="Enter your account email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          onFocus={handleFieldFocus('email')}
+                          onBlur={handleFieldBlur('email')}
+                          className="w-full rounded-xl squircle border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-ledger focus:ring-1 focus:ring-ledger"
+                        />
+                      </div>
+
+                      {error && <p className="text-xs text-rust font-medium">{error}</p>}
+
+                      <RadialFillButton
+                        type="submit"
+                        disabled={submitting}
+                        onMouseEnter={() => setHoverTarget('submit')}
+                        onMouseLeave={() => setHoverTarget((prev) => (prev === 'submit' ? null : prev))}
+                        fillClassName="bg-ledger-dark"
+                        className="w-full rounded-xl squircle bg-ledger py-2.5 text-sm font-semibold text-white shadow-2xs disabled:opacity-60 cursor-pointer"
+                      >
+                        {submitting ? 'Sending link…' : 'Send reset link'}
+                      </RadialFillButton>
+                    </form>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
