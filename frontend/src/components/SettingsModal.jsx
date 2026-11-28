@@ -239,7 +239,7 @@ export default function SettingsModal({ isOpen, onClose }) {
         {/* Modal Body: Left Sidebar + Right Settings List */}
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Left Sidebar: Settings Categories List */}
-          <aside className="w-full md:w-64 shrink-0 border-b md:border-b-0 md:border-r border-line/70 bg-paper/40 p-3 sm:p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible">
+          <aside className="w-full md:w-64 shrink-0 border-b md:border-b-0 md:border-r border-line/70 bg-paper/40 p-3 sm:p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible custom-scrollbar">
             {SECTIONS.map((sec) => {
               const Icon = sec.icon;
               const isActive = activeSection === sec.id;
@@ -282,7 +282,7 @@ export default function SettingsModal({ isOpen, onClose }) {
           </aside>
 
           {/* Right Main Content Area: List of Settings Options */}
-          <main className="flex-1 p-5 sm:p-8 overflow-y-auto">
+          <main className="flex-1 p-5 sm:p-8 overflow-y-auto custom-scrollbar">
             {/* SECTION 1: ACCOUNT */}
             {activeSection === 'account' && (
               <div className="max-w-xl space-y-6">

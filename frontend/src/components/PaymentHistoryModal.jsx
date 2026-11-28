@@ -49,7 +49,7 @@ export default function PaymentHistoryModal({ subscription, onClose }) {
         {error && <p className="mt-3 text-xs text-rust">{error}</p>}
 
         {!loading && !error && (
-          <div className="mt-4 max-h-72 overflow-y-auto divide-y divide-line/60 border border-line rounded-sm">
+          <div className="mt-4 max-h-72 overflow-y-auto custom-scrollbar divide-y divide-line/60 border border-line rounded-sm">
             {payments.length === 0 && (
               <p className="py-8 text-center text-xs text-ink/50">
                 No confirmed payments recorded yet. Confirm your next renewal to log payment records.

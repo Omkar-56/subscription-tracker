@@ -219,7 +219,7 @@ export default function ReceiptParserModal({ isOpen, onClose, onParsed }) {
         </div>
 
         {/* Content Body */}
-        <div className="p-5 overflow-y-auto space-y-4">
+        <div className="p-5 overflow-y-auto custom-scrollbar space-y-4">
           {/* Success State View */}
           {successResult ? (
             <div className="space-y-4 text-center py-2">

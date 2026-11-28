@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ import CategoryBreakdown from '../components/CategoryBreakdown';
 import BrandLogo from '../components/BrandLogo';
 import PaymentConfirmModal from '../components/PaymentConfirmModal';
 import CancellationGuideModal from '../components/CancellationGuideModal';
+import { CATEGORY_LEGEND, normalizeCategory } from '../utils/brands';
 import { formatDate, formatMoney, daysUntil, addCycleToDate, formatDateIso } from '../utils/date';
 import { getGuestSubs, saveGuestSubs } from '../utils/guestSubs';
 
@@ -17,10 +18,22 @@ function computeGuestSummary(currency) {
   const subs = getGuestSubs();
 
   const activeSubs = subs.filter((s) => s.status === 'active' && !s.isFreeTrial);
+  const byCategory = {};
+
   const monthlyTotal = activeSubs.reduce((acc, s) => {
     const cycle = s.billingCycle || 'monthly';
     const factor = cycle === 'yearly' ? 1 / 12 : cycle === 'quarterly' ? 1 / 3 : cycle === 'weekly' ? 52 / 12 : 1;
-    return acc + (Number(s.amount) || 0) * factor;
+    const monthlyAmount = (Number(s.amount) || 0) * factor;
+    const cat = normalizeCategory(s.category || 'other').toLowerCase();
+
+    if (!byCategory[cat]) {
+      byCategory[cat] = { category: cat, amount: 0, monthlySpend: 0, count: 0 };
+    }
+    byCategory[cat].amount += Number(s.amount) || 0;
+    byCategory[cat].monthlySpend += monthlyAmount;
+    byCategory[cat].count += 1;
+
+    return acc + monthlyAmount;
   }, 0);
 
   const activeTrials = subs.filter((s) => s.isFreeTrial && s.status === 'active').map((t) => ({
@@ -29,15 +42,9 @@ function computeGuestSummary(currency) {
     daysLeft: daysUntil(t.cancellationDeadline || t.trialEndDate || t.nextRenewalDate),
   }));
 
-  const byCategory = {};
-  activeSubs.forEach((s) => {
-    const cat = s.category || 'other';
-    byCategory[cat] = (byCategory[cat] || 0) + (Number(s.amount) || 0);
-  });
-  const categoryBreakdown = Object.entries(byCategory).map(([category, amount]) => ({
-    category,
-    amount,
-    percentage: monthlyTotal > 0 ? Math.round((amount / monthlyTotal) * 100) : 0,
+  const categoryBreakdown = Object.values(byCategory).map((item) => ({
+    ...item,
+    percentage: monthlyTotal > 0 ? Math.round((item.monthlySpend / monthlyTotal) * 100) : 0,
   }));
 
   return {
@@ -49,7 +56,6 @@ function computeGuestSummary(currency) {
     activeCount: activeSubs.length,
     trialsCount: activeTrials.length,
     activeTrials,
-    pendingReminders: [],
     recentPriceIncreases: [],
     upcomingRenewals: activeSubs.slice(0, 3).map((s) => ({
       ...s,
@@ -101,7 +107,7 @@ export default function Dashboard() {
 
   const currentCurrency = user?.baseCurrency || ctxBaseCurrency || 'INR';
 
-  function refresh() {
+  const refresh = useCallback(() => {
     if (!user) {
       setSummary(computeGuestSummary(currentCurrency));
       setForecast(computeGuestForecast(currentCurrency));
@@ -115,40 +121,46 @@ export default function Dashboard() {
         setError('');
       })
       .catch((err) => {
-        if (err?.status === 401) {
-          setSummary(computeGuestSummary(currentCurrency));
-          setError('');
-        } else {
+        if (err?.status !== 401) {
           console.warn('Failed to load dashboard summary from server:', err);
-          setSummary(computeGuestSummary(currentCurrency));
-          setError('');
         }
+        setSummary(computeGuestSummary(currentCurrency));
+        setError('');
       });
 
     api.dashboardForecast(12, currentCurrency)
       .then((data) => {
         setForecast(data);
       })
-      .catch((err) => {
+      .catch(() => {
         setForecast(computeGuestForecast(currentCurrency));
       });
-  }
+  }, [user, currentCurrency]);
 
   useEffect(() => {
     refresh();
-  }, [user, currentCurrency]);
+  }, [refresh]);
 
   useEffect(() => {
-    function onExternalRefresh() {
-      refresh();
-    }
-    window.addEventListener('subspens:refresh', onExternalRefresh);
-    window.addEventListener('subtrack:refresh', onExternalRefresh);
+    window.addEventListener('subspens:refresh', refresh);
+    window.addEventListener('subtrack:refresh', refresh);
     return () => {
-      window.removeEventListener('subspens:refresh', onExternalRefresh);
-      window.removeEventListener('subtrack:refresh', onExternalRefresh);
+      window.removeEventListener('subspens:refresh', refresh);
+      window.removeEventListener('subtrack:refresh', refresh);
     };
-  }, [user, currentCurrency]);
+  }, [refresh]);
+
+  const activeCategoryCount = useMemo(() => {
+    if (!summary?.categoryBreakdown) return 0;
+    const activeKeys = new Set();
+    for (const c of summary.categoryBreakdown) {
+      const spend = Number(c.monthlySpend ?? c.amount ?? 0);
+      if (spend > 0 || Number(c.count ?? 0) > 0) {
+        activeKeys.add(normalizeCategory(c.category).toLowerCase());
+      }
+    }
+    return activeKeys.size;
+  }, [summary?.categoryBreakdown]);
 
   async function handleConfirmPayment(paymentData) {
     if (!payingSub) return;
@@ -174,7 +186,7 @@ export default function Dashboard() {
       await api.convertTrial(sub.id);
       refresh();
       window.dispatchEvent(new CustomEvent('subspens:reminders-refresh'));
-    } catch (err) {
+    } catch {
       const guestSubs = getGuestSubs().map((s) =>
         s.id === sub.id ? { ...s, isFreeTrial: false } : s
       );
@@ -212,21 +224,23 @@ export default function Dashboard() {
   if (!summary) {
     return (
       <div className="space-y-8 animate-pulse">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 rounded-2xl squircle bg-ink/5 border border-ink/10" />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-6 grid grid-cols-2 gap-3.5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-28 rounded-2xl squircle bg-ink/5 border border-ink/10" />
+            ))}
+          </div>
+          <div className="lg:col-span-6 h-60 rounded-2xl squircle bg-ink/5 border border-ink/10" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64 rounded-2xl squircle bg-ink/5 border border-ink/10" />
-          <div className="h-64 rounded-2xl squircle bg-ink/5 border border-ink/10" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-6 h-80 rounded-2xl squircle bg-ink/5 border border-ink/10" />
+          <div className="lg:col-span-6 h-80 rounded-2xl squircle bg-ink/5 border border-ink/10" />
         </div>
       </div>
     );
   }
 
   const baseCurrency = summary.baseCurrency || currentCurrency;
-  const pendingReminders = summary.pendingReminders || [];
   const activeTrials = summary.activeTrials || [];
   const savings = summary.savings || {
     monthlySaved: 0,
@@ -324,63 +338,18 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Actionable Due Reminders Banner */}
-      {pendingReminders.length > 0 && (
-        <div className="rounded-2xl squircle border border-ledger/30 bg-ledger-light/50 p-4 shadow-2xs">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ledger text-white text-sm">
-                🔔
-              </span>
-              <div>
-                <h3 className="font-display text-sm font-semibold text-ink">
-                  {pendingReminders.length} Renewal Reminder{pendingReminders.length === 1 ? '' : 's'} Due
-                </h3>
-                <p className="text-xs text-ink/80">
-                  Payments due shortly. Confirm once charged to advance cycles and log payment history.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {pendingReminders.slice(0, 2).map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() =>
-                    setPayingSub({
-                      id: r.subscriptionId,
-                      name: r.subscriptionName,
-                      category: r.category,
-                      amount: r.amount,
-                      currency: r.currency,
-                      billingCycle: r.billingCycle,
-                      nextRenewalDate: r.dueDate,
-                    })
-                  }
-                  className="rounded-xl squircle bg-white border border-ledger/40 px-3 py-1 text-xs font-medium text-ledger-dark hover:bg-ledger hover:text-white transition-colors shadow-2xs cursor-pointer"
-                >
-                  ✓ Confirm {r.subscriptionName} ({formatMoney(r.amount, r.currency)})
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ROW 1: Overview (left) and Spend by Category (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:items-stretch">
         {/* Left Side: Overview Header & Stat Cards */}
-        <section className="lg:col-span-6">
-          <div>
-            <div className="flex items-baseline justify-between">
-              <h1 className="font-display text-xl sm:text-2xl font-semibold">Overview</h1>
-              <span className="text-xs text-ink/80">
-                Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong>
-              </span>
-            </div>
+        <section className="lg:col-span-6 flex flex-col">
+          <div className="flex items-baseline justify-between gap-2">
+            <h1 className="font-display text-xl sm:text-2xl font-semibold">Overview</h1>
+            <span className="text-xs text-ink/80 shrink-0">
+              Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong>
+            </span>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3.5 items-stretch">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3.5 items-stretch flex-1">
             <StatCard
               label="Monthly commitment"
               value={formatMoney(summary.totalMonthly, baseCurrency)}
@@ -406,32 +375,35 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Right Side: Spend by category with Interactive Donut Chart */}
-        <section className="lg:col-span-6 pt-1 sm:pt-1.5">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-lg sm:text-xl font-semibold">Spend by category</h2>
-            <span className="text-xs text-ink/80">
-              {summary.categoryBreakdown.length} {summary.categoryBreakdown.length === 1 ? 'category' : 'categories'}
+        {/* Right Side: Spend by category (equal height to 4 summary cards on lg+) */}
+        <section className="lg:col-span-6 flex flex-col">
+          <div className="flex items-baseline justify-between gap-2">
+            <h2 className="font-display text-xl sm:text-2xl font-semibold">Spend by category</h2>
+            <span className="text-xs text-ink/80 shrink-0">
+              {activeCategoryCount} of {CATEGORY_LEGEND.length} active
             </span>
           </div>
-          <div className="mt-3">
-            <CategoryBreakdown
-              categories={summary.categoryBreakdown}
-              totalMonthly={summary.totalMonthly}
-              currency={baseCurrency}
-            />
+          <div className="mt-3 lg:relative lg:flex-1">
+            <div className="lg:absolute lg:inset-0">
+              <CategoryBreakdown
+                categories={summary.categoryBreakdown}
+                totalMonthly={summary.totalMonthly}
+                currency={baseCurrency}
+              />
+            </div>
           </div>
         </section>
       </div>
 
-      {/* ROW 2: 12-month forecast (left) and Renewing soon (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
+      {/* ROW 2: 12-month forecast (left) and Renewing soon (right, equal height & scrollable) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:items-stretch">
         {/* Left Side: 12-month forecast */}
-        <section className="lg:col-span-6">
-          <div className="flex items-baseline justify-between">
+        <section className="lg:col-span-6 flex flex-col">
+          <div className="flex items-baseline justify-between gap-2">
             <h2 className="font-display text-lg sm:text-xl font-semibold">12-month forecast</h2>
-            <span className="text-xs text-ink/80">Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong></span>
+            <span className="text-xs text-ink/80 shrink-0">
+              Normalized in <strong className="text-ink font-medium">{baseCurrency}</strong>
+            </span>
           </div>
           {forecast ? (
             <ForecastChart months={forecast.months || forecast.forecast} currency={baseCurrency} />
@@ -442,61 +414,69 @@ export default function Dashboard() {
           )}
         </section>
 
-        {/* Right Side: Renewing soon */}
-        <section className="lg:col-span-6">
-          <div className="flex items-baseline justify-between">
+        {/* Right Side: Renewing soon (equal height to 12-month forecast on lg+) */}
+        <section className="lg:col-span-6 flex flex-col">
+          <div className="flex items-baseline justify-between gap-2">
             <h2 className="font-display text-lg sm:text-xl font-semibold">Renewing soon</h2>
-            <Link href="/subscriptions" className="text-xs sm:text-sm text-ledger hover:underline font-medium">
+            <Link href="/subscriptions" className="text-xs sm:text-sm text-ledger hover:underline font-medium shrink-0">
               See all →
             </Link>
           </div>
-          <div className="mt-3 overflow-hidden rounded-2xl squircle border border-line bg-paper shadow-2xs">
-            {summary.upcomingRenewals.length === 0 && (
-              <p className="px-4 py-8 text-center text-sm text-ink/80">Nothing renewing in the next two weeks.</p>
-            )}
-            {summary.upcomingRenewals.map((s) => {
-              const isDifferentCurrency = s.currency !== baseCurrency && s.convertedAmount;
-              const days = daysUntil(s.nextRenewalDate);
-              return (
-                <div
-                  key={s.id}
-                  className="flex items-center justify-between border-b border-line px-4 py-3 last:border-b-0 hover:bg-paper/30 transition-colors gap-3"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <BrandLogo name={s.name} category={s.category} size="md" bare />
-                    <div className="min-w-0">
-                      <p className="font-medium text-xs sm:text-sm truncate">{s.name ? s.name.charAt(0).toUpperCase() + s.name.slice(1) : ''}</p>
-                      <p className="text-[11px] sm:text-xs text-ink/80">
-                        {formatDate(s.nextRenewalDate)} · in {days}d
-                      </p>
-                    </div>
+          <div className="mt-3 lg:relative lg:flex-1">
+            <div className="lg:absolute lg:inset-0 flex flex-col overflow-hidden rounded-2xl squircle border border-line bg-paper py-2 pl-2.5 pr-1.5 sm:py-2.5 sm:pl-3 sm:pr-1.5 shadow-2xs">
+              <div className="flex-1 min-h-0 max-h-80 sm:max-h-96 lg:max-h-none overflow-y-auto custom-scrollbar pl-1.5 pr-2 divide-y divide-line">
+                {summary.upcomingRenewals.length === 0 ? (
+                  <div className="flex h-full min-h-[120px] items-center justify-center px-4 py-8 text-center text-sm text-ink/80">
+                    Nothing renewing in the next two weeks.
                   </div>
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    <div className="text-right">
-                      <p className="tabular font-display font-semibold text-xs sm:text-sm">
-                        {formatMoney(s.amount, s.currency)}
-                      </p>
-                      {isDifferentCurrency && (
-                        <p className="tabular text-[10px] sm:text-[11px] text-ink/75">
-                          ≈ {formatMoney(s.convertedAmount, baseCurrency)}
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => setPayingSub(s)}
-                      className="rounded-xl squircle bg-ledger-light border border-ledger/30 px-2.5 py-1 text-[11px] font-semibold text-ledger-dark hover:bg-ledger hover:text-white transition-colors cursor-pointer"
-                      title="Confirm payment & roll over to next billing cycle"
-                    >
-                      ✓ Paid
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                ) : (
+                  summary.upcomingRenewals.map((s) => {
+                    const isDifferentCurrency = s.currency !== baseCurrency && s.convertedAmount;
+                    const days = daysUntil(s.nextRenewalDate);
+                    return (
+                      <div
+                        key={s.id}
+                        className="flex items-center justify-between px-1.5 py-2.5 hover:bg-paper/30 transition-colors gap-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <BrandLogo name={s.name} category={s.category} size="md" bare />
+                          <div className="min-w-0">
+                            <p className="font-medium text-xs sm:text-sm truncate">
+                              {s.name ? s.name.charAt(0).toUpperCase() + s.name.slice(1) : ''}
+                            </p>
+                            <p className="text-[11px] sm:text-xs text-ink/80">
+                              {formatDate(s.nextRenewalDate)} · in {days}d
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <div className="text-right">
+                            <p className="tabular font-display font-semibold text-xs sm:text-sm">
+                              {formatMoney(s.amount, s.currency)}
+                            </p>
+                            {isDifferentCurrency && (
+                              <p className="tabular text-[10px] sm:text-[11px] text-ink/75">
+                                ≈ {formatMoney(s.convertedAmount, baseCurrency)}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => setPayingSub(s)}
+                            className="rounded-xl squircle bg-ledger-light border border-ledger/30 px-2.5 py-1 text-[11px] font-semibold text-ledger-dark hover:bg-ledger hover:text-white transition-colors cursor-pointer"
+                            title="Confirm payment & roll over to next billing cycle"
+                          >
+                            ✓ Paid
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
           </div>
         </section>
       </div>
-
     </div>
 
     {payingSub && (

@@ -313,23 +313,9 @@ export const subscriptionService = {
 
     const today = new Date();
     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const hasDueSubs = rawSubs.some(
-      (s) => s.status === 'active' && !s.isFreeTrial && parseDateParts(s.nextRenewalDate) <= todayStart
-    );
-
-    // Ensure overdue subscriptions are renewed in DB BEFORE reading pendingReminders
-    if (hasDueSubs) {
-      await subscriptionService.autoRenewDueSubscriptions({ userId }).catch((err) => {
-        console.warn('[dashboard autoRenew warning]:', err?.message || err);
-      });
-    }
-
-    // Sync/resolve stale or duplicate reminders and fetch clean pending reminders
-    await reminderModel.syncStaleForUser(userId).catch(() => {});
-    const pendingReminders = await reminderModel.findPendingForUser(userId).catch(() => []);
 
     const baseCurrency = (currency && currency.length === 3 ? currency : user?.baseCurrency) || 'INR';
-    const all = syncOverdueSubscriptions(userId, rawSubs, { triggerBackground: false });
+    const all = syncOverdueSubscriptions(userId, rawSubs);
     const active = all.filter((s) => s.status === 'active');
     const cancelled = all.filter((s) => s.status === 'cancelled');
 
@@ -404,7 +390,6 @@ export const subscriptionService = {
       }),
       recentPriceIncreases,
       activeTrials,
-      pendingReminders,
       savings: {
         monthlySaved,
         yearlySaved: monthlySaved * 12,

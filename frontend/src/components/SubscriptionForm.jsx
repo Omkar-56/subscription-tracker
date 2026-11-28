@@ -107,270 +107,272 @@ export default function SubscriptionForm({ initial, defaultCurrency = 'INR', onS
   }
 
   return (
-    <div className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-xl rounded-3xl squircle border border-line bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-line pb-4">
-          <div className="flex items-center gap-3">
-            <BrandLogo name={form.name || 'New'} category={form.category} size="md" />
-            <div>
-              <h2 className="font-display text-lg font-semibold text-ink">
-                {initial ? `Edit ${form.name || 'Subscription'}` : 'Add Subscription'}
-              </h2>
-              <p className="text-xs text-ink/50">
-                {form.name ? `Configuring ${form.name}` : 'Enter details to track recurring spend or free trials'}
-              </p>
+    <div className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-xs p-4">
+      <div className="w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden rounded-3xl squircle border border-line bg-white py-2.5 pl-2.5 pr-1.5 sm:py-3 sm:pl-3 sm:pr-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pl-3.5 pr-2.5 py-2.5 sm:pl-4 sm:pr-3 sm:py-3">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-line pb-4">
+            <div className="flex items-center gap-3">
+              <BrandLogo name={form.name || 'New'} category={form.category} size="md" />
+              <div>
+                <h2 className="font-display text-lg font-semibold text-ink">
+                  {initial ? `Edit ${form.name || 'Subscription'}` : 'Add Subscription'}
+                </h2>
+                <p className="text-xs text-ink/50">
+                  {form.name ? `Configuring ${form.name}` : 'Enter details to track recurring spend or free trials'}
+                </p>
+              </div>
             </div>
-          </div>
-          <button
-            onClick={onCancel}
-            className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-stone-100 cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-          {/* Mode Switcher: Regular Paid Subscription vs Free Trial Sentinel */}
-          <div className="relative flex rounded-xl squircle border border-line/60 bg-stone-100 p-1 text-xs font-semibold">
-            {/* Sliding pill indicator */}
-            <div
-              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg squircle shadow-2xs transition-[transform,background-color] duration-300 ease-in-out ${
-                form.isFreeTrial
-                  ? 'translate-x-[calc(100%+8px)] bg-amber-light'
-                  : 'translate-x-0 bg-white'
-              }`}
-            />
             <button
-              type="button"
-              onClick={() => update('isFreeTrial', false)}
-              className={`relative z-10 flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
-                !form.isFreeTrial ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
-              }`}
+              onClick={onCancel}
+              className="text-ink/40 hover:text-ink text-xl font-light p-1 rounded-lg squircle hover:bg-stone-100 cursor-pointer"
             >
-              Paid Subscription
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                update('isFreeTrial', true);
-                if (form.amount === '') update('amount', 0);
-              }}
-              className={`relative z-10 flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer flex items-center justify-center gap-1.5 ${
-                form.isFreeTrial ? 'text-amber font-semibold' : 'text-ink/50 hover:text-ink'
-              }`}
-            >
-              <span>🛡️</span>
-              <span>Free Trial Sentinel</span>
+              ✕
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Service Name */}
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                Service / Merchant
-              </label>
-              <input
-                required
-                placeholder="e.g. Netflix, Spotify, AWS"
-                value={form.name}
-                onChange={(e) => update('name', e.target.value)}
-                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
+          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+            {/* Mode Switcher: Regular Paid Subscription vs Free Trial Sentinel */}
+            <div className="relative flex rounded-xl squircle border border-line/60 bg-stone-100 p-1 text-xs font-semibold">
+              {/* Sliding pill indicator */}
+              <div
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg squircle shadow-2xs transition-[transform,background-color] duration-300 ease-in-out ${
+                  form.isFreeTrial
+                    ? 'translate-x-[calc(100%+8px)] bg-amber-light'
+                    : 'translate-x-0 bg-white'
+                }`}
               />
-            </div>
-
-            {/* Category */}
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                Category
-              </label>
-              <select
-                value={form.category}
-                onChange={(e) => update('category', e.target.value)}
-                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
+              <button
+                type="button"
+                onClick={() => update('isFreeTrial', false)}
+                className={`relative z-10 flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer ${
+                  !form.isFreeTrial ? 'text-ink font-semibold' : 'text-ink/50 hover:text-ink'
+                }`}
               >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {formatCategoryLabel(cat)}
-                  </option>
-                ))}
-              </select>
+                Paid Subscription
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  update('isFreeTrial', true);
+                  if (form.amount === '') update('amount', 0);
+                }}
+                className={`relative z-10 flex-1 rounded-lg squircle py-1.5 transition-colors duration-300 cursor-pointer flex items-center justify-center gap-1.5 ${
+                  form.isFreeTrial ? 'text-amber font-semibold' : 'text-ink/50 hover:text-ink'
+                }`}
+              >
+                <span>🛡️</span>
+                <span>Free Trial Sentinel</span>
+              </button>
             </div>
 
-            {/* Conditional Trial Sentinel Fields */}
-            {form.isFreeTrial ? (
-              <>
-                <div className="col-span-1 sm:col-span-2 rounded-xl squircle border border-amber/30 bg-amber-light/20 p-3">
-                  <p className="text-xs font-bold text-amber flex items-center gap-1.5">
-                    <span>🛡️ Sentinel Trial Protection</span>
-                  </p>
-                  <p className="text-[11px] text-ink/70 mt-1">
-                    Track cancellation deadlines so you cancel before being charged.
-                  </p>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Service Name */}
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
+                  Service / Merchant
+                </label>
+                <input
+                  required
+                  placeholder="e.g. Netflix, Spotify, AWS"
+                  value={form.name}
+                  onChange={(e) => update('name', e.target.value)}
+                  className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
+                />
+              </div>
 
+              {/* Category */}
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
+                  Category
+                </label>
+                <select
+                  value={form.category}
+                  onChange={(e) => update('category', e.target.value)}
+                  className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {formatCategoryLabel(cat)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Conditional Trial Sentinel Fields */}
+              {form.isFreeTrial ? (
+                <>
+                  <div className="col-span-1 sm:col-span-2 rounded-xl squircle border border-amber/30 bg-amber-light/20 p-3">
+                    <p className="text-xs font-bold text-amber flex items-center gap-1.5">
+                      <span>🛡️ Sentinel Trial Protection</span>
+                    </p>
+                    <p className="text-[11px] text-ink/70 mt-1">
+                      Track cancellation deadlines so you cancel before being charged.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
+                      Trial Expiry / Cancel By
+                    </label>
+                    <input
+                      required
+                      type="date"
+                      value={form.trialEndDate}
+                      onChange={(e) => update('trialEndDate', e.target.value)}
+                      className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-amber focus:ring-1 focus:ring-amber"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
+                      Post-Trial Cost (if not cancelled)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="e.g. 19.99"
+                      value={form.postTrialAmount}
+                      onChange={(e) => update('postTrialAmount', e.target.value)}
+                      className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger font-mono"
+                    />
+                  </div>
+                </>
+              ) : null}
+
+              {/* Amount */}
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
+                  {form.isFreeTrial ? 'Initial Charge (usually 0.00)' : 'Amount'}
+                </label>
+                <input
+                  required
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  value={form.amount}
+                  onChange={(e) => update('amount', e.target.value)}
+                  className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger font-mono"
+                />
+              </div>
+
+              {/* Currency */}
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
+                  Currency
+                </label>
+                <div className="mt-1 flex gap-2">
+                  <select
+                    value={COMMON_CURRENCIES.includes(form.currency) ? form.currency : 'OTHER'}
+                    onChange={(e) => {
+                      if (e.target.value !== 'OTHER') update('currency', e.target.value);
+                    }}
+                    className="w-1/2 rounded-xl squircle border border-line px-2 py-2 text-sm outline-none focus:border-ledger cursor-pointer"
+                  >
+                    {COMMON_CURRENCIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                    <option value="OTHER">Other…</option>
+                  </select>
+                  <input
+                    required
+                    maxLength={3}
+                    placeholder="INR"
+                    value={form.currency}
+                    onChange={(e) => update('currency', e.target.value.toUpperCase())}
+                    className="w-1/2 rounded-xl squircle border border-line px-3 py-2 text-sm uppercase outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
+                  />
+                </div>
+              </div>
+
+              {/* Billing Cycle */}
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
+                  {form.isFreeTrial ? 'Post-Trial Cycle' : 'Billing Cycle'}
+                </label>
+                <select
+                  value={form.billingCycle}
+                  onChange={(e) => update('billingCycle', e.target.value)}
+                  className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer capitalize"
+                >
+                  {CYCLES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Next Renewal / Start Date */}
+              {!form.isFreeTrial && (
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                    Trial Expiry / Cancel By
+                    Next Renewal Date
                   </label>
                   <input
                     required
                     type="date"
-                    value={form.trialEndDate}
-                    onChange={(e) => update('trialEndDate', e.target.value)}
-                    className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-amber focus:ring-1 focus:ring-amber"
+                    value={form.nextRenewalDate}
+                    onChange={(e) => update('nextRenewalDate', e.target.value)}
+                    className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
                   />
                 </div>
+              )}
 
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                    Post-Trial Cost (if not cancelled)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="e.g. 19.99"
-                    value={form.postTrialAmount}
-                    onChange={(e) => update('postTrialAmount', e.target.value)}
-                    className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger font-mono"
-                  />
-                </div>
-              </>
-            ) : null}
-
-            {/* Amount */}
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                {form.isFreeTrial ? 'Initial Charge (usually 0.00)' : 'Amount'}
-              </label>
-              <input
-                required
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={form.amount}
-                onChange={(e) => update('amount', e.target.value)}
-                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger font-mono"
-              />
-            </div>
-
-            {/* Currency */}
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                Currency
-              </label>
-              <div className="mt-1 flex gap-2">
-                <select
-                  value={COMMON_CURRENCIES.includes(form.currency) ? form.currency : 'OTHER'}
-                  onChange={(e) => {
-                    if (e.target.value !== 'OTHER') update('currency', e.target.value);
-                  }}
-                  className="w-1/2 rounded-xl squircle border border-line px-2 py-2 text-sm outline-none focus:border-ledger cursor-pointer"
-                >
-                  {COMMON_CURRENCIES.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                  <option value="OTHER">Other…</option>
-                </select>
-                <input
-                  required
-                  maxLength={3}
-                  placeholder="INR"
-                  value={form.currency}
-                  onChange={(e) => update('currency', e.target.value.toUpperCase())}
-                  className="w-1/2 rounded-xl squircle border border-line px-3 py-2 text-sm uppercase outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
-                />
-              </div>
-            </div>
-
-            {/* Billing Cycle */}
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                {form.isFreeTrial ? 'Post-Trial Cycle' : 'Billing Cycle'}
-              </label>
-              <select
-                value={form.billingCycle}
-                onChange={(e) => update('billingCycle', e.target.value)}
-                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer capitalize"
-              >
-                {CYCLES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Next Renewal / Start Date */}
-            {!form.isFreeTrial && (
+              {/* Email Reminder Timing */}
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                  Next Renewal Date
+                  Email Reminder
                 </label>
-                <input
-                  required
-                  type="date"
-                  value={form.nextRenewalDate}
-                  onChange={(e) => update('nextRenewalDate', e.target.value)}
+                <select
+                  value={form.reminderDaysBefore || 2}
+                  onChange={(e) => update('reminderDaysBefore', Number(e.target.value))}
+                  className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
+                >
+                  <option value={1}>1 day before due</option>
+                  <option value={2}>2 days before due</option>
+                  <option value={3}>3 days before due (Recommended)</option>
+                  <option value={7}>7 days before due</option>
+                </select>
+              </div>
+
+              {/* Notes */}
+              <div className={form.isFreeTrial ? 'col-span-1' : 'col-span-1 sm:col-span-2'}>
+                <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
+                  Notes (optional)
+                </label>
+                <textarea
+                  value={form.notes}
+                  onChange={(e) => update('notes', e.target.value)}
+                  rows={1}
+                  placeholder="e.g. Cancel before 14-day trial ends"
                   className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
                 />
               </div>
-            )}
+            </div>
 
-            {/* Email Reminder Timing */}
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                Email Reminder
-              </label>
-              <select
-                value={form.reminderDaysBefore || 2}
-                onChange={(e) => update('reminderDaysBefore', Number(e.target.value))}
-                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger cursor-pointer"
+            {error && <p className="text-xs text-rust font-medium">{error}</p>}
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-line">
+              <RadialFillButton
+                onClick={onCancel}
+                fillClassName="bg-ledger-light"
+                className="rounded-xl squircle border border-line px-4 py-2 text-sm text-ink/70 transition-colors duration-300 hover:border-ledger/40 hover:text-ledger-dark cursor-pointer"
               >
-                <option value={1}>1 day before due</option>
-                <option value={2}>2 days before due</option>
-                <option value={3}>3 days before due (Recommended)</option>
-                <option value={7}>7 days before due</option>
-              </select>
+                Cancel
+              </RadialFillButton>
+              <RadialFillButton
+                type="submit"
+                disabled={submitting}
+                fillClassName="bg-ledger-dark"
+                className="rounded-xl squircle bg-ledger px-5 py-2 text-sm font-semibold text-white disabled:opacity-60 shadow-2xs cursor-pointer"
+              >
+                {submitting ? 'Saving…' : form.isFreeTrial ? '🛡️ Save Sentinel' : initial ? 'Save Changes' : 'Add Subscription'}
+              </RadialFillButton>
             </div>
-
-            {/* Notes */}
-            <div className={form.isFreeTrial ? 'col-span-1' : 'col-span-1 sm:col-span-2'}>
-              <label className="text-xs font-semibold uppercase tracking-wider text-ink/70">
-                Notes (optional)
-              </label>
-              <textarea
-                value={form.notes}
-                onChange={(e) => update('notes', e.target.value)}
-                rows={1}
-                placeholder="e.g. Cancel before 14-day trial ends"
-                className="mt-1 w-full rounded-xl squircle border border-line px-3 py-2 text-sm outline-none focus:border-ledger focus:ring-1 focus:ring-ledger"
-              />
-            </div>
-          </div>
-
-          {error && <p className="text-xs text-rust font-medium">{error}</p>}
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-line">
-            <RadialFillButton
-              onClick={onCancel}
-              fillClassName="bg-ledger-light"
-              className="rounded-xl squircle border border-line px-4 py-2 text-sm text-ink/70 transition-colors duration-300 hover:border-ledger/40 hover:text-ledger-dark cursor-pointer"
-            >
-              Cancel
-            </RadialFillButton>
-            <RadialFillButton
-              type="submit"
-              disabled={submitting}
-              fillClassName="bg-ledger-dark"
-              className="rounded-xl squircle bg-ledger px-5 py-2 text-sm font-semibold text-white disabled:opacity-60 shadow-2xs cursor-pointer"
-            >
-              {submitting ? 'Saving…' : form.isFreeTrial ? '🛡️ Save Sentinel' : initial ? 'Save Changes' : 'Add Subscription'}
-            </RadialFillButton>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

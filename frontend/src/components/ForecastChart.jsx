@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
@@ -14,23 +14,64 @@ const COLORS = {
 };
 
 function ForecastTooltip({ active, payload, label, currency = 'INR' }) {
-  if (!active || !payload?.length) return null;
-  const point = payload[0].payload;
-  const charges = point.charges || point.renewals || [];
+  const cardRef = useRef(null);
+  const [shiftY, setShiftY] = useState(0);
+
+  const isVisible = Boolean(active && payload?.length);
+  const point = isVisible ? payload[0].payload : null;
+  const charges = point ? (point.charges || point.renewals || []) : [];
+
+  useLayoutEffect(() => {
+    const el = cardRef.current;
+    if (!isVisible || !el) {
+      setShiftY(0);
+      return;
+    }
+
+    const wrapper = el.parentElement;
+    const chartEl = el.closest('.recharts-wrapper');
+    if (!wrapper || !chartEl) {
+      setShiftY(0);
+      return;
+    }
+
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const chartRect = chartEl.getBoundingClientRect();
+
+    // Recharts opens this tooltip upwards above the hovered point.
+    // Only shift down if it would exceed the top of the viewport, while never overflowing past chart bottom.
+    const minViewportTop = 12;
+    const maxChartBottom = chartRect.bottom + 8;
+
+    let nextShift = 0;
+    if (wrapperRect.top < minViewportTop) {
+      const neededDown = minViewportTop - wrapperRect.top;
+      const maxSafeDown = Math.max(0, maxChartBottom - wrapperRect.bottom);
+      nextShift = Math.min(neededDown, maxSafeDown);
+    }
+
+    setShiftY(Math.round(nextShift));
+  }, [isVisible, label, charges.length]);
+
+  if (!isVisible || !point) return null;
 
   return (
-    <div className="max-w-xs border border-line bg-paper px-3 py-2 shadow-sm rounded-xl squircle">
-      <p className="font-display text-sm font-semibold">{label}</p>
-      <p className="tabular mt-1 text-sm font-medium" style={{ color: COLORS.due }}>
+    <div
+      ref={cardRef}
+      style={shiftY ? { transform: `translateY(${shiftY}px)` } : undefined}
+      className="w-60 sm:w-64 max-w-xs border border-line bg-paper px-3 py-2.5 shadow-md rounded-xl squircle"
+    >
+      <p className="font-display text-sm font-semibold leading-tight">{label}</p>
+      <p className="tabular mt-1 text-xs sm:text-sm font-medium leading-snug" style={{ color: COLORS.due }}>
         Due this month: {formatMoney(point.total, currency)}
       </p>
-      <p className="tabular text-xs" style={{ color: COLORS.cumulative }}>
+      <p className="tabular text-[11px] sm:text-xs leading-snug" style={{ color: COLORS.cumulative }}>
         Cumulative: {formatMoney(point.cumulative, currency)}
       </p>
       {charges.length > 0 && (
-        <ul className="mt-2 space-y-1 border-t border-line pt-2">
+        <ul className="mt-2 space-y-0.5 border-t border-line pt-1.5 max-h-[min(60vh,420px)] overflow-y-auto custom-scrollbar pr-1">
           {charges.map((c, i) => (
-            <li key={`${c.name}-${i}`} className="flex items-center justify-between gap-4 text-xs text-ink/85">
+            <li key={`${c.name}-${i}`} className="flex items-center justify-between gap-3 text-xs leading-snug text-ink/85">
               <span className="truncate">{c.name}</span>
               <span className="tabular shrink-0 font-medium">
                 {c.nativeCurrency && c.nativeCurrency !== currency ? (
@@ -110,7 +151,15 @@ export default function ForecastChart({ months, currency = 'INR' }) {
             width={64}
             tickFormatter={(v) => formatMoney(v, currency).replace('.00', '')}
           />
-          <Tooltip content={<ForecastTooltip currency={currency} />} cursor={{ stroke: COLORS.grid }} />
+          <Tooltip
+            content={<ForecastTooltip currency={currency} />}
+            cursor={{ stroke: COLORS.grid }}
+            allowEscapeViewBox={{ x: false, y: true }}
+            reverseDirection={{ x: false, y: true }}
+            isAnimationActive={false}
+            offset={12}
+            wrapperStyle={{ zIndex: 40, pointerEvents: 'none' }}
+          />
           <Legend wrapperStyle={{ fontSize: 12 }} />
           <Line
             type="monotone"
